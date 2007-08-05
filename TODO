@@ -1,0 +1,4 @@
+
+] make heap dynamic
+] scm_env copy constructor. (note: need to aviod pointer mess.
+	maybe copy frames as lists?)
