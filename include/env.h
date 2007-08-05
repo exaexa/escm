@@ -25,8 +25,8 @@ class scm
 {
 	bool collectable;
 
-	virtual scm* get_child(int)=0;
-	
+	virtual scm* get_child (int) = 0;
+
 	friend class scm_env;
 };
 
@@ -38,27 +38,27 @@ class scm_env
 {
 	class gc_heap_entry
 	{
-		public:
-			size_t start;
-			size_t size;
-			inline bool operator< (const gc_heap_entry& a) const
-			{
-				return start < a.start;
-			}
-			inline bool operator== (const gc_heap_entry& a) const
-			{
-				return start == a.start;
-			}
-			inline gc_heap_entry()
-			{
-				start = 0;
-				size = 0;
-			}
-			inline gc_heap_entry (size_t st, size_t si)
-			{
-				start = st;
-				size = si;
-			}
+	public:
+		size_t start;
+		size_t size;
+		inline bool operator< (const gc_heap_entry& a) const
+		{
+			return start < a.start;
+		}
+		inline bool operator== (const gc_heap_entry& a) const
+		{
+			return start == a.start;
+		}
+		inline gc_heap_entry()
+		{
+			start = 0;
+			size = 0;
+		}
+		inline gc_heap_entry (size_t st, size_t si)
+		{
+			start = st;
+			size = si;
+		}
 	};
 
 	frame globals;
