@@ -23,7 +23,11 @@ class scm_env;
 
 class scm
 {
+	bool collectable;
 
+	virtual scm* get_child(int)=0;
+	
+	friend class scm_env;
 };
 
 typedef map<string, scm*> frame;

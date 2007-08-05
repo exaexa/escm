@@ -2,3 +2,17 @@
 ] make heap dynamic
 ] scm_env copy constructor. (note: need to aviod pointer mess.
 	maybe copy frames as lists?)
+
+] OK, we need some way to allocate objects derived from scm
+	probably working solution:
+	scm::new(size_t, scm_env*) 
+	question: will it work? (after inherited)
+
+	another solution:
+	macro:
+	new_scm(return,scm_env,type) expands to 
+	new(scm_env.allocate(sizeof(type)))type;
+	cons --- alloc  ------------------ cons
+
+	some other possible solutions?
+		
