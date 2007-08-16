@@ -64,7 +64,7 @@ class scm_env
 	frame globals;
 	vector<frame> stack;
 
-	// Memory nanagment (garbage collector)
+	// Memory managment (garbage collector)
 
 	void* heap;
 	size_t hs, align;

@@ -1,7 +1,7 @@
 
 ] make heap dynamic
 ] scm_env copy constructor. (note: need to aviod pointer mess.
-	maybe copy frames as lists?)
+	maybe copy frames as lists? well - it's gonna sux more.)
 
 ] OK, we need some way to allocate objects derived from scm
 	probably working solution:
@@ -16,3 +16,6 @@
 
 	some other possible solutions?
 		
+] remove recursive collection-capability flag unmarking, add some better.
+	eg. temporary index of non-collectable scms? unnecessary if we add
+	some other flags...
