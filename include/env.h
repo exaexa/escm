@@ -27,9 +27,11 @@ class scm
 
 public:
 
-	scm (scm_env*) {};
+	scm (scm_env*)
+	{};
 
 	virtual scm* get_child (int) = 0;
+	virtual ~scm() = 0;
 
 	friend class scm_env;
 };

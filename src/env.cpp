@@ -210,7 +210,7 @@ void scm_env::collect_garbage ()
 
 	for (l = unused.begin();l != unused.end();++l)
 		if (! ( (*l)->flags & V_NOFREE) ) free_var (*l);
-	
+
 
 	sort_out_free_space();
 	*/
