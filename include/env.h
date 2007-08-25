@@ -25,14 +25,21 @@ class scm
 {
 	bool collectable;
 
+	scm (scm_env*);
+
 	virtual scm* get_child (int) = 0;
 
 	friend class scm_env;
 };
 
-typedef map<string, scm*> frame;
+#include "types.h"
+#include "builtins.h"
+#include "parser.h"
 
 typedef scm* (*scm_c_handler) (scm*, scm_env*);
+
+#define new_scm(env, type) \
+	(new ((env).allocate(sizeof(type))) type (&(env)))
 
 class scm_env
 {
@@ -61,9 +68,6 @@ class scm_env
 		}
 	};
 
-	frame globals;
-	vector<frame> stack;
-
 	// Memory managment (garbage collector)
 
 	void* heap;
@@ -84,9 +88,6 @@ class scm_env
 
 	void* allocate (size_t size);
 	void deallocate (void*);
-
-	scm * new_scm (); //TODO
-	void free_scm (scm*);
 
 	void mark_collectable (scm*);
 

@@ -93,16 +93,6 @@ void scm_env::deallocate (void* p)
 	allocated_space.erase (i);
 }
 
-scm * scm_env::new_scm () //TODO
-{
-}
-
-void scm_env::free_scm (scm* p)
-{
-	//p->scm::~scm(); //destruct it (if possible)
-	//we have no destructor there^ so it's not needed. Just to be clear.
-}
-
 void scm_env::mark_collectable (scm* p)
 {
 	scm*t = NULL, *v;
@@ -170,6 +160,8 @@ void scm_env::sort_out_free_space()
 
 void scm_env::collect_garbage ()
 {
+	//FIXME
+	/*
 	set<scm*> unused, active;
 	queue<scm*> processing;
 	list<scm*>::iterator i;
@@ -208,18 +200,19 @@ void scm_env::collect_garbage ()
 
 		active.insert (v);
 
-		/* FIXME
+		FIXME 2
 		for (a = 0; t = type[v->type].get_children (v->data, a);++a) {
 			processing.push (t);
 			unused.erase (t);
 		}
-		*/
+		
 	}
 
-	/*for (l = unused.begin();l != unused.end();++l)
+	for (l = unused.begin();l != unused.end();++l)
 		if (! ( (*l)->flags & V_NOFREE) ) free_var (*l);
-	*/
+	
 
 	sort_out_free_space();
+	*/
 }
 
