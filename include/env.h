@@ -25,7 +25,9 @@ class scm
 {
 	bool collectable;
 
-	scm (scm_env*);
+public:
+
+	scm (scm_env*) {};
 
 	virtual scm* get_child (int) = 0;
 
