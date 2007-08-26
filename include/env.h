@@ -42,8 +42,8 @@ public:
 
 typedef scm* (*scm_c_handler) (scm*, scm_env*);
 
-#define new_scm(env, type) \
-	(new ((env).allocate(sizeof(type))) type (&(env)))
+#define new_scm(env, type, params...) \
+	(new ((env).allocate(sizeof(type))) type (&(env), ##params))
 
 class scm_env
 {
