@@ -21,21 +21,6 @@ using std::string;
 
 class scm_env;
 
-class scm
-{
-	bool collectable;
-
-public:
-
-	scm (scm_env*)
-	{};
-
-	virtual scm* get_child (int) = 0;
-	virtual ~scm() = 0;
-
-	friend class scm_env;
-};
-
 #include "types.h"
 #include "builtins.h"
 #include "parser.h"
@@ -47,6 +32,10 @@ typedef scm* (*scm_c_handler) (scm*, scm_env*);
 
 class scm_env
 {
+	/*
+	 * memory allocator
+	 */
+
 	class gc_heap_entry
 	{
 	public:
@@ -72,8 +61,6 @@ class scm_env
 		}
 	};
 
-	// Memory managment (garbage collector)
-
 	void* heap;
 	size_t hs, align;
 
@@ -97,7 +84,24 @@ class scm_env
 
 	void sort_out_free_space();
 
+	/*
+	 * scheme machine
+	 *
+	 * see this:
+	 * http://www.mazama.net/scheme/devlog/2006/11/14
+	 */
+
+	pair *cv,*ip;
+	scm *val;
+	frame *env;
+	continuation *cont;
+
 public:
+
+	/*
+	 * "general-purpose" frontends
+	 */
+
 	scm_env (size_t heap_size = 65536, size_t alignment = 4);
 
 	~scm_env();
@@ -107,6 +111,43 @@ public:
 	scm* eval (scm*);
 
 	void collect_garbage ();
+
+	/*
+	 * scheme internal handlers
+	 *
+	 * NOTE: I don't think returning scm* is really necessary
+	 * (well we have val and others..) so go check it out.
+	 */
+
+	scm* push_frame(size_t size);
+	scm* frame_set(scm* symbol);
+
+	scm* call();
+	scm* call_tail();
+	scm* ret(); // consider forced frame recycling, it would save mem ;)
+	scm* push_env(); // frame magic (let)
+	scm* pop_env(); //same recycling problem asi with ret()
+
+	scm* jump(scm* ip);
+	scm* jump_false(scm*ip);
+
+	scm* make_closure(scm* args); //possibly take args from frame?
+	/*
+	 * TODO, think about -arity of closures - it would be really nice
+	 * if it was defined at make_closure, but, well, how?
+	 * would it be possible to avoid any *arity prechecking?
+	 */
+
+	scm* literal(scm* dat);
+	
+	scm* globdef(scm* sym);
+	scm* globset(scm* sym);
+	scm* globget(scm* sym);
+
+	scm* lexset(scm* sym);
+	scm* lexget(scm* sym);
+	
+	
 };
 
 #endif
