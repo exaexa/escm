@@ -91,7 +91,7 @@ class scm_env
 	 * http://www.mazama.net/scheme/devlog/2006/11/14
 	 */
 
-	pair *cv,*ip;
+	pair *cv, *ip;
 	scm *val;
 	frame *env;
 	continuation *cont;
@@ -119,8 +119,8 @@ public:
 	 * (well we have val and others..) so go check it out.
 	 */
 
-	scm* push_frame(size_t size);
-	scm* frame_set(scm* symbol);
+	scm* push_frame (size_t size);
+	scm* frame_set (scm* symbol);
 
 	scm* call();
 	scm* call_tail();
@@ -128,26 +128,26 @@ public:
 	scm* push_env(); // frame magic (let)
 	scm* pop_env(); //same recycling problem asi with ret()
 
-	scm* jump(scm* ip);
-	scm* jump_false(scm*ip);
+	scm* jump (scm* ip);
+	scm* jump_false (scm*ip);
 
-	scm* make_closure(scm* args); //possibly take args from frame?
+	scm* make_closure (scm* args); //possibly take args from frame?
 	/*
 	 * TODO, think about -arity of closures - it would be really nice
 	 * if it was defined at make_closure, but, well, how?
 	 * would it be possible to avoid any *arity prechecking?
 	 */
 
-	scm* literal(scm* dat);
-	
-	scm* globdef(scm* sym);
-	scm* globset(scm* sym);
-	scm* globget(scm* sym);
+	scm* literal (scm* dat);
 
-	scm* lexset(scm* sym);
-	scm* lexget(scm* sym);
-	
-	
+	scm* globdef (scm* sym);
+	scm* globset (scm* sym);
+	scm* globget (scm* sym);
+
+	scm* lexset (scm* sym);
+	scm* lexget (scm* sym);
+
+
 };
 
 #endif

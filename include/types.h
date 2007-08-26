@@ -20,31 +20,24 @@ public:
 };
 
 class continuation : scm
-{
-};
+	{};
 
 class frame : scm
-{
-};
+	{};
 
 class number : scm
-{
-};
+	{};
 
 class text : scm
-{
-};
+	{};
 
 class symbol : scm
-{
-};
+	{};
 
 class pair : scm
-{
-};
+	{};
 
 class closure : scm
-{
-};
+	{};
 
 #endif
