@@ -16,16 +16,12 @@ using std::vector;
 using std::set;
 #include <list>
 using std::list;
-#include <string>
-using std::string;
 
 class scm_env;
 
 #include "types.h"
 #include "builtins.h"
 #include "parser.h"
-
-typedef scm* (*scm_c_handler) (scm*, scm_env*);
 
 #define new_scm(env, type, params...) \
 	(new ((env).allocate(sizeof(type))) type (&(env), ##params))
@@ -85,7 +81,7 @@ class scm_env
 	void sort_out_free_space();
 
 	/*
-	 * scheme machine
+	 * scheme machine registers
 	 *
 	 * see this:
 	 * http://www.mazama.net/scheme/devlog/2006/11/14
@@ -105,8 +101,6 @@ public:
 	scm_env (size_t heap_size = 65536, size_t alignment = 4);
 
 	~scm_env();
-
-	int register_c_func (const string& name, scm_c_handler);
 
 	scm* eval (scm*);
 
@@ -132,6 +126,7 @@ public:
 	scm* jump_false (scm*ip);
 
 	scm* make_closure (scm* args); //possibly take args from frame?
+
 	/*
 	 * TODO, think about -arity of closures - it would be really nice
 	 * if it was defined at make_closure, but, well, how?
@@ -146,8 +141,6 @@ public:
 
 	scm* lexset (scm* sym);
 	scm* lexget (scm* sym);
-
-
 };
 
 #endif

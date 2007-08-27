@@ -22,12 +22,6 @@ scm_env::~scm_env()
 	if (heap) free (heap);
 }
 
-int scm_env::register_c_func (const string& name, scm_c_handler func)
-{
-
-	return 0;
-}
-
 scm* scm_env::eval (scm* expression)
 {
 
