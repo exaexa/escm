@@ -4,3 +4,7 @@
 ] remove recursive collection-capability flag unmarking, add some better.
 	eg. temporary index of non-collectable scms? unnecessary if we add
 	some other flags...
+
+] NULL is internally used as 'nil' but what we do when returning NULL children?
+	(yeah, i mean frames and lists)
+	--> return something else!

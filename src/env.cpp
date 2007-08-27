@@ -89,7 +89,7 @@ void scm_env::deallocate (void* p)
 
 void scm_env::mark_collectable (scm* p)
 {
-	scm*t = NULL, *v;
+	scm*t = 0, *v;
 	queue<scm*>q;
 	int i;
 
@@ -99,13 +99,10 @@ void scm_env::mark_collectable (scm* p)
 		v = q.front();
 		q.pop();
 
-		/* FIXME
-		v->flags &= (~V_NOFREE);
-
-		//recursively mark all children collectable.
-		for (i = 0;t = type[v->type].get_children (v->data, i);++i)
-			q.push (t);
-		*/
+		if (v->flags & scmf_nocollect) { //avoids looping in loops :D
+			v->flags &= (~scmf_nocollect);
+			for (i = 0; (t = v->get_child (i++) );) q.push (t);
+		}
 	}
 }
 
@@ -144,7 +141,7 @@ void scm_env::sort_out_free_space()
 			free_space.erase (j);
 			i = free_space.insert (eh).first; //insert the new one
 			j = i;
-			++j;  //^^ oh das iterator stinx!
+			++j;  //^^ oh das stinx!
 		} else {
 			i = j;
 			++j;
@@ -154,14 +151,10 @@ void scm_env::sort_out_free_space()
 
 void scm_env::collect_garbage ()
 {
-	//FIXME
-	/*
-	set<scm*> unused, active;
+	set<scm*> active, unused;
 	queue<scm*> processing;
 	list<scm*>::iterator i;
-	frame::iterator j;
-	vector<frame>::iterator k;
-	set<scm*>::iterator l;
+	set<scm*>::iterator k, l;
 	scm *v, *t;
 	int a;
 
@@ -172,18 +165,11 @@ void scm_env::collect_garbage ()
 
 	collector_queue.clear();
 
-	unused = collector;
-
-	for (j = globals.begin();j != globals.end();++j) {
-		processing.push (j->second);
-		unused.erase (j->second);
-	}
-
-	for (k = stack.begin();k < stack.end();++k)
-		for (j = k->begin();j != k->end();++j) {
-			processing.push (j->second);
-			unused.erase (j->second);
-		}
+	processing.push (cv);
+	processing.push (ip);
+	processing.push (val);
+	processing.push (env);
+	processing.push (cont);
 
 	//end of critical section, program flow can continue
 
@@ -194,19 +180,23 @@ void scm_env::collect_garbage ()
 
 		active.insert (v);
 
-		FIXME 2
-		for (a = 0; t = type[v->type].get_children (v->data, a);++a) {
+		for (a = 0; (t = v->get_child (a++) );) {
 			processing.push (t);
-			unused.erase (t);
 		}
-		
 	}
 
-	for (l = unused.begin();l != unused.end();++l)
-		if (! ( (*l)->flags & V_NOFREE) ) free_var (*l);
-
+	k = active.begin();
+	l = collector.begin();
+	while (l != collector.end() ) {
+		while ( (*k) > (*l) ) {
+			if ( (*l)->flags & scmf_nocollect);
+			else deallocate (*l);
+			++l;
+		}
+		++k;
+		++l;
+	}
 
 	sort_out_free_space();
-	*/
 }
 

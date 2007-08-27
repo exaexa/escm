@@ -77,6 +77,7 @@ class scm_env
 	void deallocate (void*);
 
 	void mark_collectable (scm*);
+	//TODO, move mark_collectable to class scm
 
 	void sort_out_free_space();
 
