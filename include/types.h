@@ -99,26 +99,40 @@ public:
 class frame : public scm
 {
 public:
-	data_placeholder* table;
 	frame* parent;
-	size_t size;
 
-	frame (scm_env*, int size);
-	void sort(); //do the sort, so da lookup is fasta!
-	void load_symbols (pair* list); //or somehow...
-	scm* lookup (symbol*); //!!! - don't do the lookup recursively
+	virtual scm* lookup (symbol*) = 0;
+	virtual scm* set (symbol*, scm*) = 0;
+	virtual scm* define (symbol*, scm*) = 0;
+};
 
-	inline scm* get_child (int i)
-	{
-		switch (i) {
-		case 0:
-			return table;
-		case 1:
-			return parent;
-		default:
-			return 0;
-		}
-	}
+class hashed_frame : public frame
+{
+public:
+	data_placeholder* table;
+
+	hashed_frame (scm_env*);
+
+	virtual scm* lookup (symbol*);
+	virtual scm* set (symbol*, scm*);
+	virtual scm* define (symbol*, scm*);
+};
+
+class local_frame : public frame
+{
+public:
+	data_placeholder* table; //binary lookup in the small table
+	size_t size, used;
+
+	hashed_frame (scm_env*, size_t);
+
+	virtual scm* lookup (symbol*);
+	virtual scm* set (symbol*, scm*);
+	virtual scm* define (symbol*, scm*);
+	/*
+	 * TODO, decide, whether define should make a new size-1 frame, or
+	 * try to modify the table somehow.
+	 */
 };
 
 class number : public scm
@@ -130,17 +144,20 @@ class text : public scm
 {
 public:
 	data_placeholder*d;
+
 	inline scm* get_child (int i)
 	{
 		if (i) return 0 ;
 		else return d;
 	}
+
 	text (scm_env*, const char*); //TODO
 };
 
 class closure : public scm
 {
 	pair *code, *arglist;
+
 	inline scm* get_child (int i)
 	{
 		switch (i) {
@@ -165,8 +182,14 @@ public:
 	scm*ip;
 	frame*env;
 	continuation*parent;
-	inline continuation(scm_env*e,scm*i,frame*en,continuation*p):scm(e)
-	{ip=i;env=en;parent=p;}
+
+	inline continuation (scm_env*e, scm*i, frame*en, continuation*p) : scm (e)
+	{
+		ip = i;
+		env = en;
+		parent = p;
+	}
+
 	inline scm* get_child (int i)
 	{
 		switch (i) {
