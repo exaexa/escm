@@ -8,3 +8,17 @@
 ] NULL is internally used as 'nil' but what we do when returning NULL children?
 	(yeah, i mean frames and lists)
 	--> return something else!
+
+] make two frame classes:
+	* one for global vars, hashed, allows real symbol addition
+	* one for locals, where hash table is not the thing we ooh really want,
+	  because the stacks would grow terribly. adding of bindings to this
+	  won't be really supported, but bypassed by adding another smaller
+	  child frame.
+	
+	Oh god! if someone would implement rb-trees on this!
+
+	note: other implementations don't even solve fast lookups in local
+	frames, so it would also be nice just to make a slist of it.
+	(it would also behave similarly logical)
+

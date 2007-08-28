@@ -106,7 +106,7 @@ public:
 	frame (scm_env*, int size);
 	void sort(); //do the sort, so da lookup is fasta!
 	void load_symbols (pair* list); //or somehow...
-	scm* lookup (symbol*); //TODO  (!!! - don't do the lookup recursively!)
+	scm* lookup (symbol*); //!!! - don't do the lookup recursively
 
 	inline scm* get_child (int i)
 	{
@@ -123,7 +123,7 @@ public:
 
 class number : public scm
 {
-	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE!
+	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE WE WANT!
 };
 
 class text : public scm
@@ -152,6 +152,11 @@ class closure : public scm
 			return 0;
 		}
 	}
+	/*
+	 * NOTE. it would be really nice to save some information about
+	 * how many args should be allocated in frame for the procedure,
+	 * we would't need to count them everytime. think about it.
+	 */
 };
 
 class continuation : public scm
@@ -159,7 +164,9 @@ class continuation : public scm
 public:
 	scm*ip;
 	frame*env;
-	continuation*next;
+	continuation*parent;
+	inline continuation(scm_env*e,scm*i,frame*en,continuation*p):scm(e)
+	{ip=i;env=en;parent=p;}
 	inline scm* get_child (int i)
 	{
 		switch (i) {
@@ -168,7 +175,7 @@ public:
 		case 1:
 			return env;
 		case 2:
-			return next;
+			return parent;
 		default:
 			return 0;
 		}
