@@ -99,9 +99,10 @@ void scm_env::mark_collectable (scm* p)
 		v = q.front();
 		q.pop();
 
-		if (v->flags & scmf_nocollect) { //avoids looping in loops :D
+		if (v) 	if (v->flags & scmf_nocollect) {
 			v->flags &= (~scmf_nocollect);
-			for (i = 0; (t = v->get_child (i++) );) q.push (t);
+			for (i = 0; (t = v->get_child (i++) );)
+				if (t) q.push (t);
 		}
 	}
 }
@@ -173,17 +174,20 @@ void scm_env::collect_garbage ()
 	processing.push (cont);
 
 	for (k = collector.begin();k != collector.end();++k)
-		if ((*k)->flags & scmf_nocollect) processing.push (*k);
+		if ( (*k)->flags & scmf_nocollect) processing.push (*k);
 
 	while (!processing.empty() ) {
 
 		v = processing.front();
 		processing.pop();
 
+		if (!v) continue;
+
 		active.insert (v);
 
-		for (a = 0; (t = v->get_child (a++) );) {
-			processing.push (t);
+		for (a = 0;
+		        (t = v->get_child (a++) ) != scm_no_more_children ;) {
+			if (t) processing.push (t);
 		}
 	}
 

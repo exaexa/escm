@@ -1,13 +1,10 @@
 
-] make collector heap dynamic
+] make collector heap dynamic 
+	(at least growable to some defined extent, maybe non-continuous)
 
 ] remove recursive collection-capability flag unmarking, add some better.
 	eg. temporary index of non-collectable scms? unnecessary if we add
 	some other flags...
-
-] NULL is internally used as 'nil' but what we do when returning NULL children?
-	(yeah, i mean frames and lists)
-	--> return something else!
 
 ] come up with some reasonable hash function for hashed_frame.
 	(and then code it)

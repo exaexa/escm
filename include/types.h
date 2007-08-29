@@ -6,6 +6,24 @@
 
 class scm_env;
 
+/*
+ * here we need multiplatform last-addressable-byte pointer (0xfff...fff)
+ * TODO is: get it somewhere from library headers, or compute it somehow,
+ * if it can be done. anyhow. whatever. plz.
+ */
+
+#ifdef __i386__
+# define scm_no_more_children (scm*)0xFfffFfff
+#endif
+
+#ifdef __x86_64__
+# define scm_no_more_children (scm*)0xFfffFfffFfffFfff
+#endif
+
+#ifndef scm_no_more_children //last chance, compute it haxor-way!
+# define scm_no_more_children (scm*)(~(unsigned long)0)
+#endif
+
 #define scmf_nocollect 0x01
 
 class scm
@@ -21,7 +39,7 @@ public:
 
 	virtual scm* get_child (int)
 	{
-		return 0;
+		return scm_no_more_children;
 	}
 
 	virtual ~scm()
@@ -38,7 +56,7 @@ public:
 	scm *get_child (int i)
 	{
 		if (!i) return a ;
-		if (i > 1) return 0;
+		if (i > 1) return scm_no_more_children;
 		return d;
 	}
 
@@ -87,12 +105,19 @@ class symbol : public scm
 {
 public:
 	data_placeholder * d;
+
 	inline scm* get_child (int i)
 	{
-		if (i) return 0 ;
+		if (i) return scm_no_more_children ;
 		else return d;
 	}
-	symbol (scm_env*, const char*); //TODO
+
+	symbol (scm_env*, const char*);
+
+	inline operator const char* ()
+	{
+		return (const char*) dataof (d);
+	}
 
 	//(note: symbols are case-insensitive, so downcase them on init.)
 };
@@ -105,6 +130,7 @@ public:
 	virtual scm* lookup (symbol*) = 0;
 	virtual scm* set (symbol*, scm*) = 0;
 	virtual scm* define (symbol*, scm*) = 0;
+	virtual scm* get_child (int) = 0;
 };
 
 class hashed_frame : public frame
@@ -117,6 +143,7 @@ public:
 	virtual scm* lookup (symbol*);
 	virtual scm* set (symbol*, scm*);
 	virtual scm* define (symbol*, scm*);
+	virtual scm* get_child (int);
 };
 
 class local_frame : public frame
@@ -130,6 +157,7 @@ public:
 	virtual scm* lookup (symbol*);
 	virtual scm* set (symbol*, scm*);
 	virtual scm* define (symbol*, scm*);
+	virtual scm* get_child (int);
 	/*
 	 * TODO, decide, whether define should make a new size-1 frame, or
 	 * try to modify the table somehow.
@@ -148,7 +176,7 @@ public:
 
 	inline scm* get_child (int i)
 	{
-		if (i) return 0 ;
+		if (i) return scm_no_more_children ;
 		else return d;
 	}
 
@@ -167,7 +195,7 @@ class closure : public scm
 		case 1:
 			return arglist;
 		default:
-			return 0;
+			return scm_no_more_children;
 		}
 	}
 	/*
@@ -201,7 +229,7 @@ public:
 		case 2:
 			return parent;
 		default:
-			return 0;
+			return scm_no_more_children;
 		}
 	}
 };
