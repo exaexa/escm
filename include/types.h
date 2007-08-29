@@ -26,6 +26,17 @@ class scm_env;
 
 #define scmf_nocollect 0x01
 
+#define mark_scm_collectable(s) (s)->flags&=~scmf_nocollect
+#define is_scm_protected(s) ((s)->flags&scmf_nocollect)
+
+
+/*
+ * scm
+ *
+ * the generic class for storing any scheme object.
+ * This is the only thing that will appear in garbage collector.
+ */
+
 class scm
 {
 protected:
@@ -93,13 +104,23 @@ public:
 class data_placeholder : public scm
 {
 public:
+	data_placeholder(scm_env*e):scm(e) {}
 	//nothing? ooh! really? (make up something!)
 };
 
 #define dataof(p) ((p)+1) //+ sizeof(p). hackish. TODO solve the type of this.
 #define new_data_scm(env, size) \
 	(new ((env).allocate(sizeof(data_placeholder)+(size)))\
-		data_placeholder)
+		data_placeholder(&(env)))
+
+
+/*
+ * ATOMS
+ */
+
+/*
+ * symbols are case insensitive, so we store them in upper case.
+ */
 
 class symbol : public scm
 {
@@ -119,8 +140,37 @@ public:
 		return (const char*) dataof (d);
 	}
 
-	//(note: symbols are case-insensitive, so downcase them on init.)
+	int cmp (symbol*);
 };
+
+class number : public scm
+{
+	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE WE WANT!
+};
+
+class text : public scm
+{
+public:
+	data_placeholder*d;
+
+	inline scm* get_child (int i)
+	{
+		if (i) return scm_no_more_children ;
+		else return d;
+	}
+
+	text (scm_env*, const char*); //TODO
+
+	inline operator const char* ()
+	{
+		return (const char*) dataof (d);
+	}
+};
+
+
+/*
+ * FRAMES
+ */
 
 class frame : public scm
 {
@@ -159,29 +209,17 @@ public:
 	virtual scm* define (symbol*, scm*);
 	virtual scm* get_child (int);
 	/*
-	 * TODO, decide, whether define should make a new size-1 frame, or
-	 * try to modify the table somehow.
+	 * TODO, decide, whether define should make a new size-1 frame 
+	 * (which would result in slower lookups), or try to modify the
+	 * actual table somehow (which might result in reallocs and possibly
+	 * eat all our base (memory))
 	 */
 };
 
-class number : public scm
-{
-	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE WE WANT!
-};
 
-class text : public scm
-{
-public:
-	data_placeholder*d;
-
-	inline scm* get_child (int i)
-	{
-		if (i) return scm_no_more_children ;
-		else return d;
-	}
-
-	text (scm_env*, const char*); //TODO
-};
+/*
+ * INTERNAL STRUCTURES
+ */
 
 class closure : public scm
 {

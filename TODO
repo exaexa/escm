@@ -8,3 +8,11 @@
 
 ] come up with some reasonable hash function for hashed_frame.
 	(and then code it)
+
+] What the hell should happen, when we run out of memory?!
+	should THAT be allowed? sould we free some memory and run an exception?
+
+] oooh that^ reminds me - someone should think about exceptions. :D
+
+] possibly - symbol and text are just fucking similar, what if they had
+	a common ancestor;)

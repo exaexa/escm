@@ -73,6 +73,8 @@ class scm_env
 
 	void* new_heap_object (size_t size);
 
+public:
+
 	void* allocate (size_t size);
 	void deallocate (void*);
 
@@ -92,8 +94,6 @@ class scm_env
 	scm *val;
 	frame *env;
 	continuation *cont;
-
-public:
 
 	/*
 	 * "general-purpose" frontends

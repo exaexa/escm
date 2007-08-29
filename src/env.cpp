@@ -99,8 +99,8 @@ void scm_env::mark_collectable (scm* p)
 		v = q.front();
 		q.pop();
 
-		if (v) 	if (v->flags & scmf_nocollect) {
-			v->flags &= (~scmf_nocollect);
+		if (v) 	if (is_scm_protected (v) ) {
+			mark_scm_collectable (v);
 			for (i = 0; (t = v->get_child (i++) );)
 				if (t) q.push (t);
 		}
@@ -174,7 +174,7 @@ void scm_env::collect_garbage ()
 	processing.push (cont);
 
 	for (k = collector.begin();k != collector.end();++k)
-		if ( (*k)->flags & scmf_nocollect) processing.push (*k);
+		if ( is_scm_protected (*k) ) processing.push (*k);
 
 	while (!processing.empty() ) {
 
@@ -195,7 +195,7 @@ void scm_env::collect_garbage ()
 	l = collector.begin();
 	while (l != collector.end() ) {
 		while ( (*k) > (*l) ) {
-			if ( (*l)->flags & scmf_nocollect);
+			if ( is_scm_protected (*l) );
 			else deallocate (*l);
 			++l;
 		}
