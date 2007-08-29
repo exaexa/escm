@@ -158,7 +158,8 @@ void scm_env::collect_garbage ()
 	scm *v, *t;
 	int a;
 
-	//for multitasking: The critical section begins here.
+	//TODO, IMPROVE THE COLLECTOR! OOH PLZ SOMEONE!
+	//TODO2, find out how?!
 
 	for (i = collector_queue.begin();i != collector_queue.end();++i)
 		collector.insert (*i);
@@ -171,7 +172,8 @@ void scm_env::collect_garbage ()
 	processing.push (env);
 	processing.push (cont);
 
-	//end of critical section, program flow can continue
+	for (k = collector.begin();k != collector.end();++k)
+		if ((*k)->flags & scmf_nocollect) processing.push (*k);
 
 	while (!processing.empty() ) {
 

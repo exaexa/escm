@@ -23,6 +23,7 @@ public:
 	{
 		return 0;
 	}
+
 	virtual ~scm()
 	{}
 
@@ -124,7 +125,7 @@ public:
 	data_placeholder* table; //binary lookup in the small table
 	size_t size, used;
 
-	hashed_frame (scm_env*, size_t);
+	local_frame (scm_env*, size_t);
 
 	virtual scm* lookup (symbol*);
 	virtual scm* set (symbol*, scm*);
