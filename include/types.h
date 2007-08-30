@@ -104,7 +104,8 @@ public:
 class data_placeholder : public scm
 {
 public:
-	data_placeholder(scm_env*e):scm(e) {}
+	data_placeholder (scm_env*e) : scm (e)
+	{}
 	//nothing? ooh! really? (make up something!)
 };
 
@@ -117,6 +118,27 @@ public:
 /*
  * ATOMS
  */
+
+class boolean: public scm
+{
+public:
+	bool b;
+	inline boolean (scm_env*e, bool a) : scm (e)
+	{
+		b = a;
+	}
+};
+
+class character: public scm
+{
+public:
+	char c;
+	inline character (scm_env*e, char a) : scm (e)
+	{
+		c = a;
+	}
+};
+
 
 /*
  * symbols are case insensitive, so we store them in upper case.
