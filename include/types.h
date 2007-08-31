@@ -59,6 +59,10 @@ public:
 	friend class scm_env;
 };
 
+/*
+ * BASIC TYPES
+ */
+
 class pair : public scm
 {
 public:
@@ -90,6 +94,45 @@ public:
 		handler = h;
 	}
 };
+
+#define type_quote 0
+#define type_backquote 1
+#define type_comma 2
+#define type_splice 3
+
+class quote : public scm
+{
+public:
+	char type;
+	scm* child;
+
+	inline quote (scm_env*e, scm*chld, char t) : scm (e)
+	{
+		child = chld;
+		type = t;
+	}
+
+	inline bool is_quote()
+	{
+		return type == type_quote;
+	}
+
+	inline bool is_backquote()
+	{
+		return type == type_backquote;
+	}
+
+	inline bool is_comma()
+	{
+		return type == type_comma;
+	}
+
+	inline bool is_splice()
+	{
+		return type == type_splice;
+	}
+};
+
 
 /*
  * Data placeholder is here for data:D
