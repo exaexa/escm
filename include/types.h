@@ -24,24 +24,11 @@ class scm_env;
 # define scm_no_more_children (scm*)(~(unsigned long)0)
 #endif
 
-#define scmf_nocollect 	0x01
-#define scmf_quote 	0x02
-#define scmf_backquote  0x04
-#define scmf_comma	0x08
-#define scmf_splice	0x10
+#define scmf_nocollect 0x01
 
-#define mark_scm_collectable(s)	(s)->flags&=~scmf_nocollect
-#define is_scm_protected(s)	((s)->flags&scmf_nocollect)
+#define mark_scm_collectable(s) (s)->flags&=~scmf_nocollect
+#define is_scm_protected(s) ((s)->flags&scmf_nocollect)
 
-#define is_scm_quote(s) 	((s)->flags&scmf_quote)
-#define is_scm_backquote(s) 	((s)->flags&scmf_backquote)
-#define is_scm_comma(s) 	((s)->flags&scmf_comma)
-#define is_scm_splice(s) 	((s)->flags&scmf_splice)
-
-#define mark_scm_quote(s) 	(s)->flags&=~scmf_quote
-#define mark_scm_backquote(s) 	(s)->flags&=~scmf_backquote
-#define mark_scm_comma(s) 	(s)->flags&=~scmf_comma
-#define mark_scm_splice(s) 	(s)->flags&=~scmf_splice
 
 /*
  * scm
