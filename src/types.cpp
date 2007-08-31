@@ -8,21 +8,15 @@
  * (and someone code it)
  */
 
-symbol::symbol (scm_env* e, const char* c) : scm (e)
+symbol::symbol (scm_env* e, const char* c) : text (e, c)
 {
 	char*p;
-	d = new_data_scm (*e, strlen (c) + 1);
-
 	if (!d) return;
-
 	p = (char*) dataof (d);
-	while (*c) {
-		*p = *c;
+	while (*p) {
 		if ( (*p >= 'a') && (*p <= 'z') ) *p -= 0x20;
 		++p;
-		++c;
 	}
-	*p = 0; //terminate da string
 }
 
 int symbol::cmp (symbol* s)

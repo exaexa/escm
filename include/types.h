@@ -95,10 +95,10 @@ public:
 	}
 };
 
-#define type_quote 0
-#define type_backquote 1
-#define type_comma 2
-#define type_splice 3
+#define quote_type_quote 0
+#define quote_type_backquote 1
+#define quote_type_comma 2
+#define quote_type_splice 3
 
 class quote : public scm
 {
@@ -114,22 +114,22 @@ public:
 
 	inline bool is_quote()
 	{
-		return type == type_quote;
+		return type == quote_type_quote;
 	}
 
 	inline bool is_backquote()
 	{
-		return type == type_backquote;
+		return type == quote_type_backquote;
 	}
 
 	inline bool is_comma()
 	{
-		return type == type_comma;
+		return type == quote_type_comma;
 	}
 
 	inline bool is_splice()
 	{
-		return type == type_splice;
+		return type == quote_type_splice;
 	}
 };
 
@@ -187,27 +187,6 @@ public:
  * symbols are case insensitive, so we store them in upper case.
  */
 
-class symbol : public scm
-{
-public:
-	data_placeholder * d;
-
-	inline scm* get_child (int i)
-	{
-		if (i) return scm_no_more_children ;
-		else return d;
-	}
-
-	symbol (scm_env*, const char*);
-
-	inline operator const char* ()
-	{
-		return (const char*) dataof (d);
-	}
-
-	int cmp (symbol*);
-};
-
 class number : public scm
 {
 	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE WE WANT!
@@ -224,12 +203,20 @@ public:
 		else return d;
 	}
 
-	text (scm_env*, const char*); //TODO
+	text (scm_env*, const char*);
 
 	inline operator const char* ()
 	{
 		return (const char*) dataof (d);
 	}
+};
+
+class symbol : public text
+{
+public:
+	symbol (scm_env*, const char*);
+
+	int cmp (symbol*);
 };
 
 
