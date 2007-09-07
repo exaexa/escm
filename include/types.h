@@ -232,11 +232,17 @@ public:
 	inline frame (scm_env*e) : scm (e)
 	{}
 
-	virtual scm* lookup (symbol*) = 0;
-	virtual scm* set (symbol*, scm*) = 0;
+	virtual bool lookup (symbol*, scm**) = 0;
+	virtual bool set (symbol*, scm*) = 0;
 	virtual scm* unset (symbol*) = 0;
 	virtual scm* define (symbol*, scm*) = 0;
+
 	virtual scm* get_child (int) = 0;
+
+	/*
+	 * think about: what if we also created a recursive
+	 * lookup function just here?
+	 */
 };
 
 //normal binding pair
@@ -245,10 +251,23 @@ class frame_entry : public scm
 public:
 	symbol*name;
 	scm*content;
+
 	inline frame_entry (scm_env*e, symbol*s, scm*c) : scm (e)
 	{
 		name = s;
 		content = c;
+	}
+
+	virtual scm* get_child (int i)
+	{
+		switch (i) {
+		case 0:
+			return name;
+		case 1:
+			return content;
+		default:
+			return scm_no_more_children;
+		}
 	}
 };
 
@@ -257,11 +276,26 @@ class chained_frame_entry : public frame_entry
 {
 public:
 	chained_frame_entry*next;
+
 	inline chained_frame_entry (scm_env*e,
 	                            symbol*s, scm*c, chained_frame_entry*n)
 			: frame_entry (e, s, c)
 	{
 		next = n;
+	}
+
+	virtual scm* get_child (int i)
+	{
+		switch (i) {
+		case 0:
+			return name;
+		case 1:
+			return content;
+		case 2:
+			return next;
+		default:
+			return scm_no_more_children;
+		}
 	}
 };
 
@@ -272,10 +306,12 @@ public:
 
 	hashed_frame (scm_env*);
 
-	virtual scm* lookup (symbol*);
-	virtual scm* set (symbol*, scm*);
+	virtual bool lookup (symbol*, scm**);
+	virtual bool lookup_frame (symbol*, chained_frame_entry**);
+	virtual bool set (symbol*, scm*);
 	virtual scm* unset (symbol*);
 	virtual scm* define (symbol*, scm*);
+
 	virtual scm* get_child (int);
 };
 
@@ -287,10 +323,11 @@ public:
 
 	local_frame (scm_env*, size_t);
 
-	virtual scm* lookup (symbol*);
-	virtual scm* set (symbol*, scm*);
+	virtual bool lookup (symbol*, scm**);
+	virtual bool set (symbol*, scm*);
 	virtual scm* unset (symbol*);
 	virtual scm* define (symbol*, scm*);
+
 	virtual scm* get_child (int);
 	/*
 	 * TODO, decide, whether define should make a new size-1 frame 

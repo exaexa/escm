@@ -82,3 +82,50 @@ hashed_frame::hashed_frame (scm_env*e) : frame (e)
 
 	for (i = 0;i < hash_table_size;++i) t[i] = 0;
 }
+
+bool hashed_frame::lookup_frame (symbol*s, chained_frame_entry**result)
+{
+	chained_frame_entry*p =
+	    ( (chained_frame_entry**) dataof (table) )
+	    [hash_string ( (const char*) dataof (s->d) ) ];
+	while (p) {
+		if (!s->cmp (p->name) ) {
+			*result = p;
+			return true;
+		}
+		p = p->next;
+	}
+	return false;
+}
+
+bool hashed_frame::lookup (symbol*s, scm**result)
+{
+	chained_frame_entry*f;
+	if (lookup_frame (s, &f) ) {
+		*result = f->content;
+		return true;
+	}
+	return false;
+}
+
+bool hashed_frame::set (symbol*s, scm*d)
+{
+	chained_frame_entry*f;
+	if (lookup_frame (s, &f) ) {
+		f->content = d;
+		return true;
+	}
+	return false;
+}
+
+scm* hashed_frame::define (symbol*s, scm*d)
+{
+
+	return 0;
+}
+
+scm* hashed_frame::unset (symbol*s)
+{
+
+	return 0;
+}
