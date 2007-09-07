@@ -47,3 +47,38 @@ text::text (scm_env*e, const char*c) : scm (e)
 	*p = 0;
 }
 
+/*
+ * TODO
+ * just create some better hash function. This one most probably sux.
+ */
+
+#define hash_table_size 256
+
+static char hash_string (const char*s)
+{
+	char t = 0;
+	while (*s) {
+		t += *s;
+		t = (t << 1) + (t & 0x80);
+		++s;
+	}
+	return t;
+}
+
+/*
+ * HASHED FRAMES
+ */
+
+hashed_frame::hashed_frame (scm_env*e) : frame (e)
+{
+	int i;
+	chained_frame_entry**t;
+
+	table = new_data_scm (*e,
+	                      sizeof (chained_frame_entry*) * hash_table_size);
+	if (!table) return;
+
+	t = (chained_frame_entry**) dataof (table);
+
+	for (i = 0;i < hash_table_size;++i) t[i] = 0;
+}

@@ -33,8 +33,8 @@ class scm_env;
 /*
  * scm
  *
- * the generic class for storing any scheme object.
- * This is the only thing that will appear in garbage collector.
+ * the generic class for storing any scheme object. This (and derivees) is
+ * the only thing that will ever appear in garbage collector.
  */
 
 class scm
@@ -229,10 +229,40 @@ class frame : public scm
 public:
 	frame* parent;
 
+	inline frame (scm_env*e) : scm (e)
+	{}
+
 	virtual scm* lookup (symbol*) = 0;
 	virtual scm* set (symbol*, scm*) = 0;
+	virtual scm* unset (symbol*) = 0;
 	virtual scm* define (symbol*, scm*) = 0;
 	virtual scm* get_child (int) = 0;
+};
+
+//normal binding pair
+class frame_entry : public scm
+{
+public:
+	symbol*name;
+	scm*content;
+	inline frame_entry (scm_env*e, symbol*s, scm*c) : scm (e)
+	{
+		name = s;
+		content = c;
+	}
+};
+
+//for hash tables, with a pointer to
+class chained_frame_entry : public frame_entry
+{
+public:
+	chained_frame_entry*next;
+	inline chained_frame_entry (scm_env*e,
+	                            symbol*s, scm*c, chained_frame_entry*n)
+			: frame_entry (e, s, c)
+	{
+		next = n;
+	}
 };
 
 class hashed_frame : public frame
@@ -244,6 +274,7 @@ public:
 
 	virtual scm* lookup (symbol*);
 	virtual scm* set (symbol*, scm*);
+	virtual scm* unset (symbol*);
 	virtual scm* define (symbol*, scm*);
 	virtual scm* get_child (int);
 };
@@ -251,13 +282,14 @@ public:
 class local_frame : public frame
 {
 public:
-	data_placeholder* table; //binary lookup in the small table
+	data_placeholder* table; //binary lookup in a small table
 	size_t size, used;
 
 	local_frame (scm_env*, size_t);
 
 	virtual scm* lookup (symbol*);
 	virtual scm* set (symbol*, scm*);
+	virtual scm* unset (symbol*);
 	virtual scm* define (symbol*, scm*);
 	virtual scm* get_child (int);
 	/*
