@@ -234,8 +234,7 @@ public:
 
 	virtual bool lookup (symbol*, scm**) = 0;
 	virtual bool set (symbol*, scm*) = 0;
-	virtual scm* unset (symbol*) = 0;
-	virtual scm* define (symbol*, scm*) = 0;
+	virtual scm* define (scm_env*e, symbol*, scm*) = 0;
 
 	virtual scm* get_child (int) = 0;
 
@@ -307,10 +306,9 @@ public:
 	hashed_frame (scm_env*);
 
 	virtual bool lookup (symbol*, scm**);
-	virtual bool lookup_frame (symbol*, chained_frame_entry**);
+	virtual bool lookup_frame (symbol*, chained_frame_entry**, int hash = -1);
 	virtual bool set (symbol*, scm*);
-	virtual scm* unset (symbol*);
-	virtual scm* define (symbol*, scm*);
+	virtual scm* define (scm_env*e, symbol*, scm*);
 
 	virtual scm* get_child (int);
 };
@@ -325,8 +323,7 @@ public:
 
 	virtual bool lookup (symbol*, scm**);
 	virtual bool set (symbol*, scm*);
-	virtual scm* unset (symbol*);
-	virtual scm* define (symbol*, scm*);
+	virtual scm* define (scm_env*e, symbol*, scm*);
 
 	virtual scm* get_child (int);
 	/*

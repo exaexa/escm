@@ -1,4 +1,7 @@
 
+] check and add mark_collectable to new_scm's 
+	(and probably move it to scm class)
+
 ] come up with some reasonable hash function for hashed_frame.
 	(and then code it)
 

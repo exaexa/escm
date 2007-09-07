@@ -83,11 +83,12 @@ hashed_frame::hashed_frame (scm_env*e) : frame (e)
 	for (i = 0;i < hash_table_size;++i) t[i] = 0;
 }
 
-bool hashed_frame::lookup_frame (symbol*s, chained_frame_entry**result)
+bool hashed_frame::lookup_frame (symbol*s, chained_frame_entry**result,
+                                 int hash)
 {
 	chained_frame_entry*p =
 	    ( (chained_frame_entry**) dataof (table) )
-	    [hash_string ( (const char*) dataof (s->d) ) ];
+	    [ (hash>=0) ?hash:hash_string ( (const char*) dataof (s->d) ) ];
 	while (p) {
 		if (!s->cmp (p->name) ) {
 			*result = p;
@@ -118,14 +119,23 @@ bool hashed_frame::set (symbol*s, scm*d)
 	return false;
 }
 
-scm* hashed_frame::define (symbol*s, scm*d)
+scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
 {
+	int hash = hash_string ( (const char*) dataof (s->d) );
+	chained_frame_entry*f;
+	
+	if (lookup_frame (s, &f) ) {
+		f->content = d;
+		return s;
+	}
+	
+	f = new_scm (*e, chained_frame_entry, s, d,
+	             ( (chained_frame_entry**) dataof (table) ) [hash]);
+	if (!f) return 0;
 
-	return 0;
+	( (chained_frame_entry**) dataof (table) ) [hash] = f;
+	
+	return s;
 }
 
-scm* hashed_frame::unset (symbol*s)
-{
 
-	return 0;
-}
