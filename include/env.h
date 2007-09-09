@@ -4,14 +4,10 @@
 #define _ESCM_ENV_
 
 /*
- * This class contains all the things needed to run lisp. One scm_env is equal
+ * This class contains all the things needed to run scheme. One scm_env is equal
  * to one execution environment with separate memory/procs/data/everything.
  */
 
-#include <map>
-using std::map;
-#include <vector>
-using std::vector;
 #include <set>
 using std::set;
 #include <list>
