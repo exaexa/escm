@@ -160,23 +160,44 @@ local_frame::local_frame (scm_env*e, size_t s) : frame (e)
 	used = 0;
 }
 
-bool local_frame::lookup (symbol*name, scm**result)
+int local_frame::get_index (symbol*name)
 {
-	int s = 0, e = size, t, i;
+	int s = 0, e = size, i, t;
 	scm**p = (scm**) dataof (table);
-
 	while (s <= e) {
 		i = (s + e) / 2;
 		t = name->cmp ( (symbol*) p[i*2]);
-		if (!t) {
-			*result = p[i*2];
-			return true;
-		} else 	if (t < 0) {
-			e = i - 1;
-		} else {
-			s = i + 1;
-		}
+		if (!t) return i;
+		else if (t < 0) e = i - 1;
+		else s = i + 1;
 	}
+	return -1;
+}
 
-	return false;
+bool local_frame::lookup (symbol*name, scm**result)
+{
+	int t = get_index (name);
+	if (t < 0) return false;
+	*result = ( (scm**) dataof (table) ) [ (t*2) +1];
+	return true;
+}
+
+bool local_frame::set (symbol* name, scm*data)
+{
+	int t = get_index (name);
+	if (t < 0) return false;
+	( (scm**) dataof (table) ) [ (t*2) +1] = data;
+	return true;
+}
+
+scm* local_frame::get_child (int i)
+{
+	if ( (unsigned int) i >= size*2) return scm_no_more_children;
+	return ( (scm**) dataof (table) ) [i];
+}
+
+scm* local_frame::define (scm_env*e, symbol*name, scm*content)
+{
+
+	return 0;
 }

@@ -332,6 +332,8 @@ public:
 	 * actual table somehow (which might result in reallocs and possibly
 	 * eat all our base (memory))
 	 */
+private:
+	int get_index (symbol*);
 };
 
 
