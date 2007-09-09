@@ -147,7 +147,7 @@ scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
  * If we decide the frame is full, we'll chain it to parent to
  * add another binding. Good thing is that we can preallocate some
  * memory (so it runs better later), bad thing is that we should know how
- * much of it shall we use. Maybe add some destructor-triggered statistic
+ * much of it we shall use. Maybe add some destructor-triggered statistic
  * collector of "ooh how many free positions/overflows we had this time"
  * and compute the value after it. Algorithmization is unknown yet:D
  */
@@ -168,9 +168,18 @@ int local_frame::get_index (symbol*name)
 		i = (s + e) / 2;
 		t = name->cmp ( (symbol*) p[i*2]);
 		if (!t) return i;
-		else if (t < 0) e = i - 1;
+		else if (s == e) return - (s + 1);
+		else if (t < 0) e = i;
 		else s = i + 1;
 	}
+
+	/*
+	 * program should never come here, if it does it's
+	 * seriously broken. returning 'failsafe' value.
+	 */
+
+	printf ("!!! bad lookup in local_frame at %p, data at %p\n",
+	        this, table);
 	return -1;
 }
 
@@ -198,6 +207,53 @@ scm* local_frame::get_child (int i)
 
 scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 {
+	int t = get_index (name);
+	if (t > 0) {
+		( (scm**) dataof (table) ) [ (t*2) +1] = content;
+		return name;
+	}
 
-	return 0;
+	t = (-t) - 1;
+
+	if (used < size) { //insert into vector
+
+		scm**p = (scm**) dataof (table);
+		int i;
+
+		for (i = size - 1;i > t;--i) {
+			p[2*i] = p[2* (i-1) ];
+			p[1+2*i] = p[1+2* (i-1) ];
+		}
+
+		p[2*i] = name;
+		p[2*i+1] = content;
+
+	} else { //chain the frames
+
+		size_t new_size = size; //compute new frame size
+
+		local_frame* f = new_scm (*e, local_frame, new_size);
+		if (!f) return 0;
+
+		/*
+		 * because we can't push the newly allocated frame on top
+		 * of frame stack, we'll push it below the top and then switch
+		 * data, so the empty frame stays on top
+		 */
+
+		data_placeholder*new_table = f->table;
+
+		f->used = used;
+		f->size = size;
+		f->table = table;
+
+		f->parent = parent;
+		parent = f;
+
+		table = new_table;
+		used = 0;
+		size = new_size;
+	}
+
+	return name;
 }
