@@ -16,9 +16,8 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	hs = heap_size;
 	align = alignment;
 
-	/*
-	 * TODO, add default register values
-	 */
+	ip = val = cont = 0;
+	global_frame = env = new_scm (*this, hashed_frame);
 }
 
 scm_env::~scm_env()
@@ -265,4 +264,88 @@ scm* scm_env::pop_env()
 	return NULL;
 }
 
+scm* scm_env::jump (scm*new_ip)
+{
+	ip = new_ip;
+	return ip;
+}
+
+scm* scm_env::jump_false (scm*new_ip)
+{
+	if (is_type (*val, boolean) )
+		if (! ( ( (boolean*) val) -> b) )
+			ip = new_ip;
+	return ip;
+}
+
+scm* scm_env::make_closure (scm*cl_ip)
+{
+	closure*c = new_scm (*this, closure);
+	if (c) {
+		c->arglist = (pair*) val;
+		c->ip = cl_ip;
+		c->env = env;
+	}
+	val = c;
+	return val;
+}
+
+scm* scm_env::globdef (symbol*sym)
+{
+	return val = global_frame->define (this, sym, val);
+}
+
+bool scm_env::globset (symbol*sym)
+{
+	return global_frame->set (sym, val);
+}
+
+bool scm_env::globget (symbol*sym)
+{
+	if (global_frame->lookup (sym, &val) ) return true;
+	val = 0;
+	return false;
+}
+
+scm* scm_env::lexdef (symbol*scm, int d)
+{
+	frame*i = env;
+	while (i && d) {
+		i = i->parent;
+		--d;
+	}
+	return val = env->define (this, scm, val);
+}
+
+bool scm_env::lexset (symbol*scm, int d)
+{
+	frame*i = env;
+	while (i && d) {
+		i = i->parent;
+		--d;
+	}
+	while (i) {
+		if (i->set (scm, val) ) return true;
+		i = i->parent;
+	}
+	return false;
+}
+
+bool scm_env::lexget (symbol*sym, int d)
+{
+	frame*i = env;
+	scm*r;
+	while (i && d) {
+		i = i->parent;
+		--d;
+	}
+	while (i) {
+		if (i->lookup (sym, &r) ) {
+			val = r;
+			return true;
+		}
+		i = i->parent;
+	}
+	return false;
+}
 

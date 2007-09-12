@@ -87,7 +87,7 @@ public:
 	 */
 
 	scm *ip, *val;
-	frame *env;
+	frame *env, *global_frame;
 	continuation *cont;
 
 	/*
@@ -121,7 +121,7 @@ public:
 	scm* jump (scm* ip);
 	scm* jump_false (scm*ip);
 
-	scm* make_closure (scm* args); //possibly take args from frame?
+	scm* make_closure (scm* ip); //args are in val, code on ip
 
 	/*
 	 * TODO, think about -arity of closures - it would be really nice
@@ -129,14 +129,13 @@ public:
 	 * would it be possible to avoid any *arity prechecking?
 	 */
 
-	scm* literal (scm* dat);
+	scm* globdef (symbol* sym);
+	bool globset (symbol* sym);
+	bool globget (symbol* sym);
 
-	scm* globdef (scm* sym);
-	scm* globset (scm* sym);
-	scm* globget (scm* sym);
-
-	scm* lexset (scm* sym);
-	scm* lexget (scm* sym);
+	scm* lexdef (symbol* sym, int d = 0);
+	bool lexset (symbol* sym, int d = 0);
+	bool lexget (symbol* sym, int d = 0);
 };
 
 #endif

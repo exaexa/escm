@@ -29,6 +29,8 @@ class scm_env;
 #define mark_scm_collectable(s) (s)->flags&=~scmf_nocollect
 #define is_scm_protected(s) ((s)->flags&scmf_nocollect)
 
+#include <typeinfo>
+#define is_type(a,b) (typeid(a)==typeid(b))
 
 /*
  * scm
@@ -343,15 +345,23 @@ private:
 
 class closure : public scm
 {
-	pair *code, *arglist;
+public:
+	pair *arglist;
+	scm *ip;
+	frame *env;
+
+	inline closure (scm_env*e) : scm (e)
+	{}
 
 	inline scm* get_child (int i)
 	{
 		switch (i) {
 		case 0:
-			return code;
+			return ip;
 		case 1:
 			return arglist;
+		case 2:
+			return env;
 		default:
 			return scm_no_more_children;
 		}
