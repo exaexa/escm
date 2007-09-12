@@ -86,8 +86,7 @@ public:
 	 * http://www.mazama.net/scheme/devlog/2006/11/14
 	 */
 
-	pair *cv, *ip;
-	scm *val;
+	scm *cv, *ip, *val;
 	frame *env;
 	continuation *cont;
 
@@ -111,7 +110,7 @@ public:
 	 */
 
 	scm* push_frame (size_t size);
-	scm* frame_set (scm* symbol);
+	scm* frame_set (symbol*s);
 
 	scm* call();
 	scm* call_tail();

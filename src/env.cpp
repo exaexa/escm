@@ -15,6 +15,10 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	heap = malloc (heap_size);
 	hs = heap_size;
 	align = alignment;
+
+	/*
+	 * TODO, add default register values
+	 */
 }
 
 scm_env::~scm_env()
@@ -204,5 +208,60 @@ void scm_env::collect_garbage ()
 	}
 
 	sort_out_free_space();
+}
+
+
+/*
+ * SCHEME MACHINE
+ */
+
+scm* scm_env::push_frame (size_t s)
+{
+	frame*new_frame = new_scm (*this, local_frame, s);
+	if (!new_frame) return NULL;
+	new_frame->parent = env;
+	env = new_frame;
+	return env;
+}
+
+scm* scm_env::frame_set (symbol*sym)
+{
+	return env->define (this, sym, val);
+}
+
+scm* scm_env::call()
+{
+	push_env();
+
+	return NULL;
+}
+
+scm* scm_env::call_tail()
+{
+	push_env();
+
+	return NULL;
+}
+
+scm* scm_env::ret()
+{
+	pop_env();
+	return NULL;
+}
+
+scm* scm_env::push_env()
+{
+	continuation*c = new_scm (*this, continuation, ip, env, cont);
+	if (!c) return NULL;
+	return cont = c;
+}
+
+scm* scm_env::pop_env()
+{
+	ip = cont->ip;
+	env = cont->env;
+	cont = cont->parent;
+
+	return NULL;
 }
 
