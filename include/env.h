@@ -86,7 +86,7 @@ public:
 	 * http://www.mazama.net/scheme/devlog/2006/11/14
 	 */
 
-	scm *cv, *ip, *val;
+	scm *ip, *val;
 	frame *env;
 	continuation *cont;
 

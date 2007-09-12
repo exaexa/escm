@@ -171,7 +171,6 @@ void scm_env::collect_garbage ()
 
 	collector_queue.clear();
 
-	processing.push (cv);
 	processing.push (ip);
 	processing.push (val);
 	processing.push (env);
@@ -232,20 +231,21 @@ scm* scm_env::frame_set (symbol*sym)
 scm* scm_env::call()
 {
 	push_env();
-
+	//TODO
 	return NULL;
 }
 
 scm* scm_env::call_tail()
 {
 	push_env();
-
+	//TODO
 	return NULL;
 }
 
 scm* scm_env::ret()
 {
 	pop_env();
+	//TODO
 	return NULL;
 }
 
@@ -264,4 +264,5 @@ scm* scm_env::pop_env()
 
 	return NULL;
 }
+
 
