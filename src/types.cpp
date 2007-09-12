@@ -138,6 +138,14 @@ scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
 	return s;
 }
 
+scm* hashed_frame::get_child (int i)
+{
+	if (i < hash_table_size)
+		return ( (chained_frame_entry**) dataof (table) ) [i];
+	if (i == hash_table_size) return table;
+	return scm_no_more_children;
+}
+
 /*
  * LOCAL FRAMES
  */
@@ -201,8 +209,10 @@ bool local_frame::set (symbol* name, scm*data)
 
 scm* local_frame::get_child (int i)
 {
-	if ( (unsigned int) i >= size*2) return scm_no_more_children;
-	return ( (scm**) dataof (table) ) [i];
+	if ( (unsigned int) i < size*2)
+		return ( (scm**) dataof (table) ) [i];
+	if ( (unsigned int) i == size*2) return table;
+	return scm_no_more_children;
 }
 
 scm* local_frame::define (scm_env*e, symbol*name, scm*content)
