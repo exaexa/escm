@@ -84,19 +84,6 @@ public:
 	}
 };
 
-typedef scm* (*scm_c_func) (scm*, scm_env*);
-
-class extern_func : public scm
-{
-public:
-	scm_c_func handler;
-
-	extern_func (scm_env*e, scm_c_func h = 0) : scm (e)
-	{
-		handler = h;
-	}
-};
-
 #define quote_type_quote 0
 #define quote_type_backquote 1
 #define quote_type_comma 2
@@ -340,18 +327,45 @@ private:
 
 
 /*
- * INTERNAL STRUCTURES
+ * LAMBDAS
  */
 
-class closure : public scm
+class lambda : public scm
+{
+public:
+	inline lambda (scm_env* e) : scm (e)
+	{}
+
+	virtual scm* call(scm_env* e);
+};
+
+
+typedef scm* (*scm_c_func) (scm*, scm_env*);
+
+class extern_func : public lambda
+{
+public:
+	scm_c_func handler;
+
+	inline extern_func (scm_env*e, scm_c_func h = 0) : lambda (e)
+	{
+		handler = h;
+	}
+
+	virtual scm* call(scm_env* e);
+};
+
+class closure : public lambda
 {
 public:
 	pair *arglist;
 	scm *ip;
 	frame *env;
 
-	inline closure (scm_env*e) : scm (e)
+	inline closure (scm_env*e) : lambda (e)
 	{}
+
+	virtual scm* call(scm_env* e);
 
 	inline scm* get_child (int i)
 	{
@@ -372,6 +386,11 @@ public:
 	 * we would't need to count them everytime. think about it.
 	 */
 };
+
+
+/*
+ * CONTINUATION
+ */
 
 class continuation : public scm
 {
