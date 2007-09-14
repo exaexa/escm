@@ -398,12 +398,15 @@ public:
 	scm*ip;
 	frame*env;
 	continuation*parent;
+	scm**var_save;
 
-	inline continuation (scm_env*e, scm*i, frame*en, continuation*p) : scm (e)
+	inline continuation (scm_env*e, scm*i, frame*en,
+		continuation*p,scm**var_s) : scm (e)
 	{
 		ip = i;
 		env = en;
 		parent = p;
+		var_save=var_s;
 	}
 
 	inline scm* get_child (int i)

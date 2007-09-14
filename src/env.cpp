@@ -248,15 +248,17 @@ scm* scm_env::ret()
 	return NULL;
 }
 
-scm* scm_env::push_env()
+scm* scm_env::push_env(scm**result_save)
 {
-	continuation*c = new_scm (*this, continuation, ip, env, cont);
+	continuation*c = new_scm (*this, continuation, ip, env, cont,
+		result_save);
 	if (!c) return NULL;
 	return cont = c;
 }
 
 scm* scm_env::pop_env()
 {
+	if(cont->var_save) *(cont->var_save)=var;
 	ip = cont->ip;
 	env = cont->env;
 	cont = cont->parent;
