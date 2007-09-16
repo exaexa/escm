@@ -336,11 +336,18 @@ public:
 	inline lambda (scm_env* e) : scm (e)
 	{}
 
-	virtual scm* call(scm_env* e);
+	virtual void call (scm_env* e);
+	/*
+	 * about calls.
+	 * This function here should
+	 * a] external functions are called normally, receive scm_env*
+	 * b] closures come with arglist in var, so the
+	 * 	frame with arguments mapped to correct names
+	 * 	is pushed to env. ip has to be set.
+	 */
 };
 
-
-typedef scm* (*scm_c_func) (scm*, scm_env*);
+typedef scm* (*scm_c_func) (scm_env*);
 
 class extern_func : public lambda
 {
@@ -352,7 +359,10 @@ public:
 		handler = h;
 	}
 
-	virtual scm* call(scm_env* e);
+	inline virtual void call (scm_env* e)
+	{
+		handler (e);
+	}
 };
 
 class closure : public lambda
@@ -361,11 +371,11 @@ public:
 	pair *arglist;
 	scm *ip;
 	frame *env;
+	size_t paramcount;
 
-	inline closure (scm_env*e) : lambda (e)
-	{}
+	closure (scm_env*e, pair*arglist, scm*ip, frame*env);
 
-	virtual scm* call(scm_env* e);
+	virtual void call (scm_env* e);
 
 	inline scm* get_child (int i)
 	{
@@ -398,15 +408,15 @@ public:
 	scm*ip;
 	frame*env;
 	continuation*parent;
-	scm**var_save;
+	scm**val_save;
 
 	inline continuation (scm_env*e, scm*i, frame*en,
-		continuation*p,scm**var_s) : scm (e)
+	                     continuation*p, scm**val_s) : scm (e)
 	{
 		ip = i;
 		env = en;
 		parent = p;
-		var_save=var_s;
+		val_save = val_s;
 	}
 
 	inline scm* get_child (int i)

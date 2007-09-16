@@ -25,12 +25,6 @@ scm_env::~scm_env()
 	if (heap) free (heap);
 }
 
-scm* scm_env::eval (scm* expression)
-{
-
-	return NULL;
-}
-
 void * scm_env::new_heap_object (size_t size)
 {
 	set<gc_heap_entry>::iterator i;
@@ -229,8 +223,20 @@ scm* scm_env::frame_set (symbol*sym)
 
 scm* scm_env::call()
 {
-	push_env();
-	//TODO
+	/*
+	 * 'call' the list in val
+	 */
+	if (val) {
+		pair*l = dynamic_cast<pair*> (val);
+		if (!l) return NULL;
+		lambda*p = dynamic_cast<lambda*> (l);
+		if (!p) {
+			//exception, bad type!
+			return NULL;
+		}
+		push_env();
+		p->call (this);
+	}
 	return NULL;
 }
 
@@ -241,24 +247,23 @@ scm* scm_env::call_tail()
 	return NULL;
 }
 
-scm* scm_env::ret()
+scm* scm_env::ret() //seems more like alias, maybe we can get rid of it?
 {
 	pop_env();
-	//TODO
 	return NULL;
 }
 
-scm* scm_env::push_env(scm**result_save)
+scm* scm_env::push_env (scm**result_save)
 {
 	continuation*c = new_scm (*this, continuation, ip, env, cont,
-		result_save);
+	                          result_save);
 	if (!c) return NULL;
 	return cont = c;
 }
 
 scm* scm_env::pop_env()
 {
-	if(cont->var_save) *(cont->var_save)=var;
+	if (cont->val_save) * (cont->val_save) = val;
 	ip = cont->ip;
 	env = cont->env;
 	cont = cont->parent;
@@ -282,12 +287,7 @@ scm* scm_env::jump_false (scm*new_ip)
 
 scm* scm_env::make_closure (scm*cl_ip)
 {
-	closure*c = new_scm (*this, closure);
-	if (c) {
-		c->arglist = (pair*) val;
-		c->ip = cl_ip;
-		c->env = env;
-	}
+	closure*c = new_scm (*this, closure, (pair*) val, cl_ip, env);
 	val = c;
 	return val;
 }

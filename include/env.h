@@ -98,7 +98,11 @@ public:
 
 	~scm_env();
 
-	scm* eval (scm*);
+	void eval (scm*);
+	void eval_string (const char* str);
+
+	void run_eval_loop();
+	void eval_step();
 
 	void collect_garbage ();
 
@@ -115,7 +119,7 @@ public:
 	scm* call();
 	scm* call_tail();
 	scm* ret(); // consider forced frame recycling, it would save mem ;)
-	scm* push_env(scm**result_save=NULL); // frame magic (let)
+	scm* push_env (scm**result_save = NULL); // frame magic (let)
 	scm* pop_env(); //same recycling problem asi with ret()
 
 	scm* jump (scm* ip);

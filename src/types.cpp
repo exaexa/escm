@@ -240,7 +240,7 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 
 	} else { //chain the frames
 
-		size_t new_size = size; //compute new frame size
+		size_t new_size = size + 1; //compute new frame size
 
 		local_frame* f = new_scm (*e, local_frame, new_size);
 		if (!f) return 0;
@@ -267,3 +267,59 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 
 	return name;
 }
+
+
+/*
+ * FUNCTIONS
+ */
+
+#define pair_p(x) (typeid(x)==typeid(pair))
+
+closure::closure (scm_env*e, pair*Arglist,
+                  scm*Ip, frame*Env) : lambda (e)
+{
+	int i;
+	arglist = Arglist;
+	ip = Ip;
+	env = Env;
+
+	i = 0;
+	while (Arglist) {
+		++i;
+		if (!pair_p (Arglist) ) break;
+	}
+	paramcount = i;
+}
+
+void closure::call (scm_env*e)
+{
+	pair*argdata, *argname = arglist;
+	frame*f;
+	f = new_scm (*e, local_frame, paramcount);
+	if (!f) return;
+	while (argdata && argname && pair_p (argdata) ) {
+		if (pair_p (argname) ) {
+			f->define (e, (symbol*) (argname->a), argdata->a);
+			argname = (pair*) (argname->d);
+			argdata = (pair*) (argdata->d);
+		} else {
+			f->define (e, (symbol*) argname, argdata);
+			argname = argdata = 0;
+			break;
+		}
+	}
+
+	if (argname) if (pair_p (argname) ) {
+			//exception, not'nuff arguments
+		}
+
+	if (argdata) if (pair_p (argdata) ) {
+			//exception, too many args passed
+		}
+
+	//create new environment
+	e->ip = ip;
+	f->parent = env;
+	e->env = f;
+}
+
