@@ -221,33 +221,50 @@ scm* scm_env::frame_set (symbol*sym)
 	return env->define (this, sym, val);
 }
 
-scm* scm_env::call()
+void scm_env::call()
 {
 	/*
 	 * 'call' the list in val
 	 */
 	if (val) {
 		pair*l = dynamic_cast<pair*> (val);
-		if (!l) return NULL;
+		if (!l) return;
 		lambda*p = dynamic_cast<lambda*> (l);
 		if (!p) {
 			//exception, bad type!
-			return NULL;
+			return;
 		}
 		push_env();
 		p->call (this);
 	}
-	return NULL;
 }
 
-scm* scm_env::call_tail()
+/*
+ * about tailcalls. Please note that we can't use them for evaluating things
+ * like function arguments and such, it's just one-purpose optimization.
+ * use with caution. ;)
+ */
+
+void scm_env::call_tail()
 {
-	push_env();
-	//TODO
-	return NULL;
+	call();
+	/*
+	 * what we need now is to get rid of the continuation of function that
+	 * already finished (processing it's tail)
+	 */
+	if(!cont) {
+		//internal error, call failed.
+		return;
+	}
+	if(!cont->parent){
+		//internal error, tailcall invoked on global scope
+		return;
+	}
+	cont->val_save=cont->parent->val_save;
+	cont->parent=cont->parent->parent;
 }
 
-scm* scm_env::ret() //seems more like alias, maybe we can get rid of it?
+scm* scm_env::ret() //seems more like an alias, maybe we could get rid of it?
 {
 	pop_env();
 	return NULL;

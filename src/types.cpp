@@ -293,7 +293,7 @@ closure::closure (scm_env*e, pair*Arglist,
 
 void closure::call (scm_env*e)
 {
-	pair*argdata, *argname = arglist;
+	pair *argdata =(pair*)(e->val), *argname = arglist;
 	frame*f;
 	f = new_scm (*e, local_frame, paramcount);
 	if (!f) return;

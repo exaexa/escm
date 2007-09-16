@@ -116,8 +116,8 @@ public:
 	scm* push_frame (size_t size);
 	scm* frame_set (symbol*s);
 
-	scm* call();
-	scm* call_tail();
+	void call();
+	void call_tail();
 	scm* ret(); // consider forced frame recycling, it would save mem ;)
 	scm* push_env (scm**result_save = NULL); // frame magic (let)
 	scm* pop_env(); //same recycling problem asi with ret()
