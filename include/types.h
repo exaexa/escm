@@ -370,11 +370,11 @@ class closure : public lambda
 {
 public:
 	pair *arglist;
-	scm *ip;
+	pair *ip;
 	frame *env;
 	size_t paramcount;
 
-	closure (scm_env*e, pair*arglist, scm*ip, frame*env);
+	closure (scm_env*e, pair*arglist, pair*ip, frame*env);
 
 	virtual void call (scm_env* e);
 
@@ -406,15 +406,16 @@ public:
 class continuation : public scm
 {
 public:
-	scm*ip;
+	pair *ip,*cv;
 	frame*env;
 	continuation*parent;
 	scm**val_save;
 
-	inline continuation (scm_env*e, scm*i, frame*en,
+	inline continuation (scm_env*e, pair*i, pair*c, frame*en,
 	                     continuation*p, scm**val_s) : scm (e)
 	{
 		ip = i;
+		cv=c;
 		env = en;
 		parent = p;
 		val_save = val_s;
@@ -429,6 +430,8 @@ public:
 			return env;
 		case 2:
 			return parent;
+		case 3: 
+			return cv;
 		default:
 			return scm_no_more_children;
 		}

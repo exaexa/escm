@@ -83,7 +83,8 @@ public:
 	 * http://www.mazama.net/scheme/devlog/2006/11/14
 	 */
 
-	scm *ip, *val;
+	pair *ip, *cv;
+	scm *val;
 	frame *env, *global_frame;
 	continuation *cont;
 
@@ -98,7 +99,9 @@ public:
 	void eval (scm*);
 	void eval_string (const char* str);
 
-	void run_eval_loop();
+	inline void run_eval_loop() {while(ip)eval_step();}
+	inline bool evaluating(){return ip?true:false;}
+
 	void eval_step();
 
 	void collect_garbage ();
@@ -119,10 +122,7 @@ public:
 	scm* push_env (scm**result_save = NULL); // frame magic (let)
 	scm* pop_env(); //same recycling problem asi with ret()
 
-	scm* jump (scm* ip);
-	scm* jump_false (scm*ip);
-
-	scm* make_closure (scm* ip); //args are in val, code on ip
+	scm* make_closure (pair* ip); //args are in val, code on ip
 
 	/*
 	 * TODO, think about -arity of closures - it would be really nice

@@ -299,7 +299,7 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 #define pair_p(x) (typeid(x)==typeid(pair))
 
 closure::closure (scm_env*e, pair*Arglist,
-                  scm*Ip, frame*Env) : lambda (e)
+                  pair*Ip, frame*Env) : lambda (e)
 {
 	int i;
 	arglist = Arglist;
@@ -341,7 +341,7 @@ void closure::call (scm_env*e)
 		}
 
 	//create new environment
-	e->ip = ip;
+	e->cv = e->ip = ip;
 	f->parent = env;
 	e->env = f;
 }

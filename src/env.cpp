@@ -16,7 +16,9 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	hs = heap_size;
 	align = alignment;
 
-	ip = val = cont = 0;
+	ip = cv = 0;
+	val = 0;
+	cont = 0;
 	global_frame = env = new_scm (*this, hashed_frame);
 }
 
@@ -145,6 +147,7 @@ void scm_env::collect_garbage ()
 	collector_queue.clear();
 
 	processing.push (ip);
+	processing.push (cv);
 	processing.push (val);
 	processing.push (env);
 	processing.push (cont);
@@ -237,7 +240,11 @@ void scm_env::call_tail()
 		return;
 	}
 	if (!cont->parent) {
-		//internal error, tailcall invoked on global scope
+		/*
+		 * internal error, tailcall invoked on global scope...
+		 * well, as long as it will surely work OK, we don't need to
+		 * trigger any errors. leads to simplicity. ;)
+		 */
 		return;
 	}
 	cont->val_save = cont->parent->val_save;
@@ -252,7 +259,7 @@ scm* scm_env::ret() //seems more like an alias, maybe we could get rid of it?
 
 scm* scm_env::push_env (scm**result_save)
 {
-	continuation*c = new_scm (*this, continuation, ip, env, cont,
+	continuation*c = new_scm (*this, continuation, ip, cv, env, cont,
 	                          result_save);
 	if (!c) return NULL;
 	return cont = c;
@@ -262,27 +269,14 @@ scm* scm_env::pop_env()
 {
 	if (cont->val_save) * (cont->val_save) = val;
 	ip = cont->ip;
+	cv = cont->cv;
 	env = cont->env;
 	cont = cont->parent;
 
 	return NULL;
 }
 
-scm* scm_env::jump (scm*new_ip)
-{
-	ip = new_ip;
-	return ip;
-}
-
-scm* scm_env::jump_false (scm*new_ip)
-{
-	if (is_type (*val, boolean) )
-		if (! ( ( (boolean*) val) -> b) )
-			ip = new_ip;
-	return ip;
-}
-
-scm* scm_env::make_closure (scm*cl_ip)
+scm* scm_env::make_closure (pair*cl_ip)
 {
 	closure*c = new_scm (*this, closure, (pair*) val, cl_ip, env);
 	val = c;
@@ -348,3 +342,11 @@ bool scm_env::lexget (symbol*sym, int d)
 	return false;
 }
 
+
+/*
+ * EVAL
+ */
+
+void scm_env::eval_step()
+{
+}
