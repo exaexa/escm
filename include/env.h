@@ -74,9 +74,6 @@ public:
 	void* allocate (size_t size);
 	void deallocate (void*);
 
-	void mark_collectable (scm*);
-	//TODO, move mark_collectable to class scm
-
 	void sort_out_free_space();
 
 	/*

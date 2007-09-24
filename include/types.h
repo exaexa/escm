@@ -59,6 +59,7 @@ public:
 	{}
 
 	friend class scm_env;
+	void mark_collectable();
 };
 
 /*

@@ -1,11 +1,34 @@
 
 #include "env.h"
+#include <queue>
+using std::queue;
 
 /*
  * note. because of compatibility with embedded systems, we'll later
- * try to replace as much library functions as we'll be able to;)
+ * try not to use as much library functions as we'll be able to;)
  *
  * (and someone code it)
+ */
+
+void scm::mark_collectable()
+{
+	scm*t = 0, *v;
+	queue<scm*>q;
+	int i;
+	q.push (this);
+	while (!q.empty() ) {
+		v = q.front();
+		q.pop();
+		if (v) if (is_scm_protected (v) ) {
+				mark_scm_collectable (v);
+				for (i = 0; (t = v->get_child (i++) ) != scm_no_more_children;)
+					if (t) q.push (t);
+			}
+	}
+}
+
+/*
+ * STRINGS AND SYMBOLS
  */
 
 symbol::symbol (scm_env* e, const char* c) : text (e, c)
@@ -293,7 +316,7 @@ closure::closure (scm_env*e, pair*Arglist,
 
 void closure::call (scm_env*e)
 {
-	pair *argdata =(pair*)(e->val), *argname = arglist;
+	pair *argdata = (pair*) (e->val), *argname = arglist;
 	frame*f;
 	f = new_scm (*e, local_frame, paramcount);
 	if (!f) return;

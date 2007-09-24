@@ -84,26 +84,6 @@ void scm_env::deallocate (void* p)
 	allocated_space.erase (i);
 }
 
-void scm_env::mark_collectable (scm* p)
-{
-	scm*t = 0, *v;
-	queue<scm*>q;
-	int i;
-
-	q.push (p);
-
-	while (! (q.empty() ) ) {
-		v = q.front();
-		q.pop();
-
-		if (v) 	if (is_scm_protected (v) ) {
-			mark_scm_collectable (v);
-			for (i = 0; (t = v->get_child (i++) );)
-				if (t) q.push (t);
-		}
-	}
-}
-
 void scm_env::sort_out_free_space()
 {
 	/*
@@ -252,16 +232,16 @@ void scm_env::call_tail()
 	 * what we need now is to get rid of the continuation of function that
 	 * already finished (processing it's tail)
 	 */
-	if(!cont) {
+	if (!cont) {
 		//internal error, call failed.
 		return;
 	}
-	if(!cont->parent){
+	if (!cont->parent) {
 		//internal error, tailcall invoked on global scope
 		return;
 	}
-	cont->val_save=cont->parent->val_save;
-	cont->parent=cont->parent->parent;
+	cont->val_save = cont->parent->val_save;
+	cont->parent = cont->parent->parent;
 }
 
 scm* scm_env::ret() //seems more like an alias, maybe we could get rid of it?
