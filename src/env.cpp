@@ -363,15 +363,15 @@ bool scm_env::eval_step()
 
 	case et_eval:
 		if(dynamic_cast<pair*>(ip)){
-			et=et_closure_rest;
+			et=et_closure;
 			push_env();
-			ip=ip->a;
+			ip=(pair*)(ip->a);
 			et=et_eval;
 		//} else if(dynamic_cast<q
 		}
 		return true;
 
-	case et_closure_rest:
+	case et_closure:
 		return true;
 
 	default:
