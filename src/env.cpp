@@ -349,5 +349,32 @@ bool scm_env::lexget (symbol*sym, int d)
 
 bool scm_env::eval_step()
 {
-	return false;
+	switch(et){
+	case et_vector:
+		if(!dynamic_cast<pair*>(ip)){
+			//return the ip, code vector is terminated by value
+			//not null
+		} else if(ip->d){
+			//call a list in ip->a
+		} else {
+			//replace env with evaluation of ip->a
+		}
+		return true;
+
+	case et_eval:
+		if(dynamic_cast<pair*>(ip)){
+			et=et_closure_rest;
+			push_env();
+			ip=ip->a;
+			et=et_eval;
+		//} else if(dynamic_cast<q
+		}
+		return true;
+
+	case et_closure_rest:
+		return true;
+
+	default:
+		return false;
+	}
 }

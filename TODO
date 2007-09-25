@@ -1,4 +1,6 @@
 
+] add type ATOM, inherit to self-evaluables.
+
 ] check and add mark_collectable to new_scm's 
 	(and probably move it to scm class)
 

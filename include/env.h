@@ -25,8 +25,8 @@ class scm_env;
 //evaluation types
 #define et_none 0
 #define et_vector 1
-#define et_closure 2
-#define et_closure_rest 3
+#define et_eval 2
+#define et_closure 3
 
 class scm_env
 {
