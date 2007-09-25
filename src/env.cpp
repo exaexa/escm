@@ -16,7 +16,8 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	hs = heap_size;
 	align = alignment;
 
-	ip = cv = 0;
+	ip = 0;
+	et = et_none;
 	val = 0;
 	cont = 0;
 	global_frame = env = new_scm (*this, hashed_frame);
@@ -147,7 +148,6 @@ void scm_env::collect_garbage ()
 	collector_queue.clear();
 
 	processing.push (ip);
-	processing.push (cv);
 	processing.push (val);
 	processing.push (env);
 	processing.push (cont);
@@ -259,7 +259,7 @@ scm* scm_env::ret() //seems more like an alias, maybe we could get rid of it?
 
 scm* scm_env::push_env (scm**result_save)
 {
-	continuation*c = new_scm (*this, continuation, ip, cv, env, cont,
+	continuation*c = new_scm (*this, continuation, ip, et, env, cont,
 	                          result_save);
 	if (!c) return NULL;
 	return cont = c;
@@ -269,7 +269,7 @@ scm* scm_env::pop_env()
 {
 	if (cont->val_save) * (cont->val_save) = val;
 	ip = cont->ip;
-	cv = cont->cv;
+	et = cont->et;
 	env = cont->env;
 	cont = cont->parent;
 
@@ -347,6 +347,7 @@ bool scm_env::lexget (symbol*sym, int d)
  * EVAL
  */
 
-void scm_env::eval_step()
+bool scm_env::eval_step()
 {
+	return false;
 }

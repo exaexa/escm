@@ -22,6 +22,12 @@ class scm_env;
 #define new_scm(env, type, params...) \
 	(new ((env).allocate(sizeof(type))) type (&(env), ##params))
 
+//evaluation types
+#define et_none 0
+#define et_vector 1
+#define et_closure 2
+#define et_closure_rest 3
+
 class scm_env
 {
 	/*
@@ -83,7 +89,8 @@ public:
 	 * http://www.mazama.net/scheme/devlog/2006/11/14
 	 */
 
-	pair *ip, *cv;
+	pair *ip;
+	int et;
 	scm *val;
 	frame *env, *global_frame;
 	continuation *cont;
@@ -102,7 +109,7 @@ public:
 	inline void run_eval_loop() {while(ip)eval_step();}
 	inline bool evaluating(){return ip?true:false;}
 
-	void eval_step();
+	bool eval_step();
 
 	void collect_garbage ();
 

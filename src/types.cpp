@@ -341,7 +341,8 @@ void closure::call (scm_env*e)
 		}
 
 	//create new environment
-	e->cv = e->ip = ip;
+	e->ip = ip;
+	e->et = et_closure;
 	f->parent = env;
 	e->env = f;
 }

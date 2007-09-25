@@ -406,16 +406,17 @@ public:
 class continuation : public scm
 {
 public:
-	pair *ip,*cv;
+	pair *ip;
+	int et;
 	frame*env;
 	continuation*parent;
 	scm**val_save;
 
-	inline continuation (scm_env*e, pair*i, pair*c, frame*en,
+	inline continuation (scm_env*e, pair*i, int e_t, frame*en,
 	                     continuation*p, scm**val_s) : scm (e)
 	{
 		ip = i;
-		cv=c;
+		et=e_t;
 		env = en;
 		parent = p;
 		val_save = val_s;
@@ -430,8 +431,6 @@ public:
 			return env;
 		case 2:
 			return parent;
-		case 3: 
-			return cv;
 		default:
 			return scm_no_more_children;
 		}
