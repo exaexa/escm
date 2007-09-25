@@ -90,6 +90,12 @@ public:
 #define quote_type_comma 2
 #define quote_type_splice 3
 
+class atom:public scm
+{
+public:
+	atom(scm_env*e):scm(e){}
+};
+
 class quote : public scm
 {
 public:
@@ -152,21 +158,21 @@ public:
  * ATOMS
  */
 
-class boolean: public scm
+class boolean: public atom
 {
 public:
 	bool b;
-	inline boolean (scm_env*e, bool a) : scm (e)
+	inline boolean (scm_env*e, bool a) : atom (e)
 	{
 		b = a;
 	}
 };
 
-class character: public scm
+class character: public atom
 {
 public:
 	char c;
-	inline character (scm_env*e, char a) : scm (e)
+	inline character (scm_env*e, char a) : atom (e)
 	{
 		c = a;
 	}
@@ -177,7 +183,7 @@ public:
  * symbols are case insensitive, so we store them in upper case.
  */
 
-class number : public scm
+class number : public atom
 {
 	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE WE WANT!
 };
@@ -199,6 +205,12 @@ public:
 	{
 		return (const char*) dataof (d);
 	}
+};
+
+class string : public text, atom
+{
+public:
+	string(scm_env*e, const char*c):text(e,c),atom(e) {}
 };
 
 class symbol : public text
