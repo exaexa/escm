@@ -85,50 +85,11 @@ public:
 	}
 };
 
-#define quote_type_quote 0
-#define quote_type_backquote 1
-#define quote_type_comma 2
-#define quote_type_splice 3
-
 class atom:public scm
 {
 public:
 	atom(scm_env*e):scm(e){}
 };
-
-class quote : public scm
-{
-public:
-	char type;
-	scm* child;
-
-	inline quote (scm_env*e, scm*chld, char t) : scm (e)
-	{
-		child = chld;
-		type = t;
-	}
-
-	inline bool is_quote()
-	{
-		return type == quote_type_quote;
-	}
-
-	inline bool is_backquote()
-	{
-		return type == quote_type_backquote;
-	}
-
-	inline bool is_comma()
-	{
-		return type == quote_type_comma;
-	}
-
-	inline bool is_splice()
-	{
-		return type == quote_type_splice;
-	}
-};
-
 
 /*
  * Data placeholder is here for data:D
@@ -410,6 +371,42 @@ public:
 	 */
 };
 
+/*
+ * MACROS
+ */
+
+class syntax : public scm
+{
+public:
+	syntax(scm_env*e):scm(e){}
+	virtual void apply(scm_env*e)=0;
+};
+
+typedef scm* (*scm_c_macro) (scm_env*);
+
+class extern_syntax : public syntax
+{
+public:
+	scm_c_macro handler;
+
+	inline extern_syntax(scm_env*e,scm_c_macro h=0):syntax(e){handler=h;}
+
+	inline virtual void apply(scm_env*e){handler(e);}
+};
+
+class macro : public syntax
+{
+public:
+	pair*argnames;
+	pair*code;
+	frame*env;
+
+	inline macro(scm_env*e,pair*c=0,pair*argn=0,frame*environ=0):syntax(e){
+		code=c;argnames=argn;env=environ;
+		}
+
+	virtual void apply(scm_env*e); //TODO
+};
 
 /*
  * CONTINUATION
