@@ -320,6 +320,7 @@ void closure::call (scm_env*e)
 	frame*f;
 	f = new_scm (*e, local_frame, paramcount);
 	if (!f) return;
+	//FIXME. improve this so it really supports "rest" arguments
 	while (argdata && argname && pair_p (argdata) ) {
 		if (pair_p (argname) ) {
 			f->define (e, (symbol*) (argname->a), argdata->a);
@@ -342,7 +343,6 @@ void closure::call (scm_env*e)
 
 	//create new environment
 	e->ip = ip;
-	e->et = et_closure;
 	f->parent = env;
 	e->env = f;
 }

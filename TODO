@@ -1,6 +1,4 @@
 
-] add type ATOM, inherit to self-evaluables.
-
 ] check and add mark_collectable to new_scm's 
 	(and probably move it to scm class)
 
@@ -15,4 +13,8 @@
 	Guess that allocating nil is really not the best idea we have.
 
 ] oooh that^ reminds me - someone should think about exceptions. :D
+
+] What if... in scm_env we didn't save "registers", but whole continuation,
+	which could resolve that "evaluation method" and register lack and
+	similar fuckups.
 

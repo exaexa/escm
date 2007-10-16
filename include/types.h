@@ -85,10 +85,11 @@ public:
 	}
 };
 
-class atom:public scm
+class atom: public scm
 {
 public:
-	atom(scm_env*e):scm(e){}
+	atom (scm_env*e) : scm (e)
+	{}
 };
 
 /*
@@ -171,7 +172,8 @@ public:
 class string : public text, atom
 {
 public:
-	string(scm_env*e, const char*c):text(e,c),atom(e) {}
+	string (scm_env*e, const char*c) : text (e, c), atom (e)
+	{}
 };
 
 class symbol : public text
@@ -378,9 +380,11 @@ public:
 class syntax : public scm
 {
 public:
-	syntax(scm_env*e):scm(e){}
-	virtual void apply(scm_env*e)=0;
+	syntax (scm_env*e) : scm (e)
+	{}
+	virtual void apply (scm_env*e) = 0;
 };
+
 
 typedef scm* (*scm_c_macro) (scm_env*);
 
@@ -389,9 +393,15 @@ class extern_syntax : public syntax
 public:
 	scm_c_macro handler;
 
-	inline extern_syntax(scm_env*e,scm_c_macro h=0):syntax(e){handler=h;}
+	inline extern_syntax (scm_env*e, scm_c_macro h = 0) : syntax (e)
+	{
+		handler = h;
+	}
 
-	inline virtual void apply(scm_env*e){handler(e);}
+	inline virtual void apply (scm_env*e)
+	{
+		handler (e);
+	}
 };
 
 class macro : public syntax
@@ -401,11 +411,16 @@ public:
 	pair*code;
 	frame*env;
 
-	inline macro(scm_env*e,pair*c=0,pair*argn=0,frame*environ=0):syntax(e){
-		code=c;argnames=argn;env=environ;
-		}
+	inline macro (scm_env*e, pair*c = 0,
+	              pair*argn = 0, frame*environ = 0)
+			: syntax (e)
+	{
+		code = c;
+		argnames = argn;
+		env = environ;
+	}
 
-	virtual void apply(scm_env*e); //TODO
+	virtual void apply (scm_env*e); //TODO
 };
 
 /*
@@ -416,16 +431,14 @@ class continuation : public scm
 {
 public:
 	pair *ip;
-	int et;
 	frame*env;
 	continuation*parent;
 	scm**val_save;
 
-	inline continuation (scm_env*e, pair*i, int e_t, frame*en,
+	inline continuation (scm_env*e, pair*i, frame*en,
 	                     continuation*p, scm**val_s) : scm (e)
 	{
 		ip = i;
-		et=e_t;
 		env = en;
 		parent = p;
 		val_save = val_s;

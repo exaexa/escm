@@ -22,12 +22,6 @@ class scm_env;
 #define new_scm(env, type, params...) \
 	(new ((env).allocate(sizeof(type))) type (&(env), ##params))
 
-//evaluation types
-#define et_none 0
-#define et_vector 1
-#define et_eval 2
-#define et_closure 3
-
 class scm_env
 {
 	/*
@@ -90,7 +84,6 @@ public:
 	 */
 
 	pair *ip;
-	int et;
 	scm *val;
 	frame *env, *global_frame;
 	continuation *cont;
@@ -106,8 +99,14 @@ public:
 	void eval (scm*);
 	void eval_string (const char* str);
 
-	inline void run_eval_loop() {while(ip)eval_step();}
-	inline bool evaluating(){return ip?true:false;}
+	inline void run_eval_loop()
+	{
+		while (ip) eval_step();
+	}
+	inline bool evaluating()
+	{
+		return ip ? true : false;
+	}
 
 	bool eval_step();
 

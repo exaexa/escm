@@ -17,7 +17,6 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	align = alignment;
 
 	ip = 0;
-	et = et_none;
 	val = 0;
 	cont = 0;
 	global_frame = env = new_scm (*this, hashed_frame);
@@ -259,7 +258,7 @@ scm* scm_env::ret() //seems more like an alias, maybe we could get rid of it?
 
 scm* scm_env::push_env (scm**result_save)
 {
-	continuation*c = new_scm (*this, continuation, ip, et, env, cont,
+	continuation*c = new_scm (*this, continuation, ip, env, cont,
 	                          result_save);
 	if (!c) return NULL;
 	return cont = c;
@@ -269,7 +268,6 @@ scm* scm_env::pop_env()
 {
 	if (cont->val_save) * (cont->val_save) = val;
 	ip = cont->ip;
-	et = cont->et;
 	env = cont->env;
 	cont = cont->parent;
 
@@ -349,32 +347,5 @@ bool scm_env::lexget (symbol*sym, int d)
 
 bool scm_env::eval_step()
 {
-	switch(et){
-	case et_vector:
-		if(!dynamic_cast<pair*>(ip)){
-			//return the ip, code vector is terminated by value
-			//not null
-		} else if(ip->d){
-			//call a list in ip->a
-		} else {
-			//replace env with evaluation of ip->a
-		}
-		return true;
-
-	case et_eval:
-		if(dynamic_cast<pair*>(ip)){
-			et=et_closure;
-			push_env();
-			ip=(pair*)(ip->a);
-			et=et_eval;
-		//} else if(dynamic_cast<q
-		}
-		return true;
-
-	case et_closure:
-		return true;
-
-	default:
-		return false;
-	}
+	return true;
 }
