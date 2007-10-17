@@ -424,7 +424,7 @@ public:
 };
 
 /*
- * CONTINUATION
+ * CONTINUATIONS
  */
 
 class continuation : public scm
@@ -452,11 +452,37 @@ public:
 class eval_continuation : public continuation
 {
 public:
-
+	scm* object;
 };
 
 //evaluates a list as a function call/syntax. Evaluates params.
 class pair_continuation : public continuation
+{
+public:
+	pair* list;
+};
+
+//for syntax. evaluates the syntax, then is replaced with standart eval.
+class syntax_continuation : public continuation
+{
+public:
+	syntax*syn;
+	pair*args;
+	scm*result;
+};
+
+//for function calls, evaluates all arguments, then replaces itself with a call
+class lambda_continuation : public continuation
+{
+public:
+	lambda *l;
+	pair *argcode, *argresult, *argtailp;
+};
+
+//quasiquote. Evaluates through the list, unquote and unquote-splice symbols
+//detected in child lists are treatened specifically, (eval) otherwise
+//the child list is pushed and evaluated the same way.
+class quasiquote_continuation : public continuation
 {
 public:
 
