@@ -16,7 +16,6 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	hs = heap_size;
 	align = alignment;
 
-	ip = 0;
 	val = 0;
 	cont = 0;
 	global_frame = env = new_scm (*this, hashed_frame);
@@ -60,7 +59,7 @@ void * scm_env::new_heap_object (size_t size)
 			return t; //finish searching
 		}
 
-	return NULL;  //too bad, none found. we shall collect.
+	return 0;  //too bad, none found. we shall collect.
 }
 
 void * scm_env::allocate (size_t size)
@@ -72,7 +71,7 @@ void * scm_env::allocate (size_t size)
 	collect_garbage();
 	d = new_heap_object (size);
 	if (d) return d;
-	else return NULL;
+	else return 0;
 }
 
 void scm_env::deallocate (void* p)
@@ -146,7 +145,6 @@ void scm_env::collect_garbage ()
 
 	collector_queue.clear();
 
-	processing.push (ip);
 	processing.push (val);
 	processing.push (env);
 	processing.push (cont);
@@ -192,7 +190,7 @@ void scm_env::collect_garbage ()
 scm* scm_env::push_frame (size_t s)
 {
 	frame*new_frame = new_scm (*this, local_frame, s);
-	if (!new_frame) return NULL;
+	if (!new_frame) return 0;
 	new_frame->parent = env;
 	env = new_frame;
 	return env;
@@ -208,17 +206,6 @@ void scm_env::call()
 	/*
 	 * 'call' the list in val
 	 */
-	if (val) {
-		pair*l = dynamic_cast<pair*> (val);
-		if (!l) return;
-		lambda*p = dynamic_cast<lambda*> (l);
-		if (!p) {
-			//exception, bad type!
-			return;
-		}
-		push_env();
-		p->call (this);
-	}
 }
 
 /*
@@ -246,32 +233,37 @@ void scm_env::call_tail()
 		 */
 		return;
 	}
-	cont->val_save = cont->parent->val_save;
 	cont->parent = cont->parent->parent;
 }
 
 scm* scm_env::ret() //seems more like an alias, maybe we could get rid of it?
 {
 	pop_env();
-	return NULL;
+	return 0;
 }
 
-scm* scm_env::push_env (scm**result_save)
+scm* scm_env::push_env ()
 {
+	/*
 	continuation*c = new_scm (*this, continuation, ip, env, cont,
 	                          result_save);
-	if (!c) return NULL;
+	if (!c) return 0;
 	return cont = c;
+	*/
+
+	return 0;
 }
 
 scm* scm_env::pop_env()
 {
+	/*
 	if (cont->val_save) * (cont->val_save) = val;
 	ip = cont->ip;
 	env = cont->env;
 	cont = cont->parent;
+	*/
 
-	return NULL;
+	return 0;
 }
 
 scm* scm_env::make_closure (pair*cl_ip)

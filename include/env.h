@@ -83,7 +83,6 @@ public:
 	 * http://www.mazama.net/scheme/devlog/2006/11/14
 	 */
 
-	pair *ip;
 	scm *val;
 	frame *env, *global_frame;
 	continuation *cont;
@@ -101,11 +100,12 @@ public:
 
 	inline void run_eval_loop()
 	{
-		while (ip) eval_step();
+		while (cont) eval_step();
 	}
+
 	inline bool evaluating()
 	{
-		return ip ? true : false;
+		return cont ? true : false;
 	}
 
 	bool eval_step();
@@ -125,7 +125,7 @@ public:
 	void call();
 	void call_tail();
 	scm* ret(); // consider forced frame recycling, it would save mem ;)
-	scm* push_env (scm**result_save = NULL); // frame magic (let)
+	scm* push_env (); // frame magic (let)
 	scm* pop_env(); //same recycling problem asi with ret()
 
 	scm* make_closure (pair* ip); //args are in val, code on ip

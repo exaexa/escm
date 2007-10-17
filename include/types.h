@@ -430,33 +430,36 @@ public:
 class continuation : public scm
 {
 public:
-	pair *ip;
-	frame*env;
 	continuation*parent;
-	scm**val_save;
 
-	inline continuation (scm_env*e, pair*i, frame*en,
-	                     continuation*p, scm**val_s) : scm (e)
+	inline continuation (scm_env*e, continuation*p) : scm (e)
 	{
-		ip = i;
-		env = en;
 		parent = p;
-		val_save = val_s;
 	}
 
-	inline scm* get_child (int i)
-	{
-		switch (i) {
-		case 0:
-			return ip;
-		case 1:
-			return env;
-		case 2:
-			return parent;
-		default:
-			return scm_no_more_children;
-		}
-	}
+	virtual scm* get_child (int) = 0;
+	virtual void eval_step (scm_env*) = 0;
+};
+
+//evaluates list of expressions
+class codevector_continuation : public continuation
+{
+public:
+	pair* ip;
+};
+
+//evaluates a non-pair (very simple), or transforms itself into pair_cont
+class eval_continuation : public continuation
+{
+public:
+
+};
+
+//evaluates a list as a function call/syntax. Evaluates params.
+class pair_continuation : public continuation
+{
+public:
+
 };
 
 #endif

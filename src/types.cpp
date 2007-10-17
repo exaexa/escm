@@ -342,8 +342,10 @@ void closure::call (scm_env*e)
 		}
 
 	//create new environment
+	/*
 	e->ip = ip;
 	f->parent = env;
 	e->env = f;
+	TODO*/
 }
 
