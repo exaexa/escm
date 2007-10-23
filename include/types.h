@@ -567,13 +567,13 @@ public:
 	pair *arglist;
 	pair *evaluated_args, *evaluated_args_tail;
 
-	inline lambda_continuation(scm_env*e, continuation*p,
-		lambda*lam, pair*code)
-	:continuation(e,p)
+	inline lambda_continuation (scm_env*e, continuation*p,
+	                            lambda*lam, pair*code)
+			: continuation (e, p)
 	{
-		l=lam;
-		evaluated_args=evaluated_args_tail=0;
-		arglist=(pair*)(code->d); 
+		l = lam;
+		evaluated_args = evaluated_args_tail = 0;
+		arglist = (pair*) (code->d);
 		//we should examine real type of arglist later
 	}
 
