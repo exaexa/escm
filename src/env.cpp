@@ -196,83 +196,6 @@ scm* scm_env::push_frame (size_t s)
 	return env;
 }
 
-scm* scm_env::frame_set (symbol*sym)
-{
-	return env->define (this, sym, val);
-}
-
-void scm_env::call()
-{
-	/*
-	 * 'call' the list in val
-	 */
-}
-
-/*
- * about tailcalls. Please note that we can't use them for evaluating things
- * like function arguments and such, it's just one-purpose optimization.
- * use with caution. ;)
- */
-
-void scm_env::call_tail()
-{
-	call();
-	/*
-	 * what we need now is to get rid of the continuation of function that
-	 * already finished (processing it's tail)
-	 */
-	if (!cont) {
-		//internal error, call failed.
-		return;
-	}
-	if (!cont->parent) {
-		/*
-		 * internal error, tailcall invoked on global scope...
-		 * well, as long as it will surely work OK, we don't need to
-		 * trigger any errors. leads to simplicity. ;)
-		 */
-		return;
-	}
-	cont->parent = cont->parent->parent;
-}
-
-scm* scm_env::ret() //seems more like an alias, maybe we could get rid of it?
-{
-	pop_env();
-	return 0;
-}
-
-scm* scm_env::push_env ()
-{
-	/*
-	continuation*c = new_scm (*this, continuation, ip, env, cont,
-	                          result_save);
-	if (!c) return 0;
-	return cont = c;
-	*/
-
-	return 0;
-}
-
-scm* scm_env::pop_env()
-{
-	/*
-	if (cont->val_save) * (cont->val_save) = val;
-	ip = cont->ip;
-	env = cont->env;
-	cont = cont->parent;
-	*/
-
-	return 0;
-}
-
-scm* scm_env::make_closure (pair*cl_ip)
-{
-	closure*c = new_scm (*this, closure, (pair*) val, cl_ip, env);
-	val = c;
-	return val;
-}
-
 scm* scm_env::globdef (symbol*sym)
 {
 	return val = global_frame->define (this, sym, val);
@@ -339,5 +262,9 @@ bool scm_env::lexget (symbol*sym, int d)
 
 bool scm_env::eval_step()
 {
-	return true;
+	if(cont)
+	{
+		cont->eval_step(this); 
+		return true;
+	} else return false;
 }

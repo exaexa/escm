@@ -469,6 +469,8 @@ public:
 			return scm_no_more_children;
 		}
 	}
+
+	virtual void eval_step (scm_env*);
 };
 
 //evaluates a non-pair (very simple), or transforms itself into pair_cont
@@ -493,6 +495,8 @@ public:
 			return scm_no_more_children;
 		}
 	}
+
+	virtual void eval_step (scm_env*);
 };
 
 //evaluates a list as a function call/syntax. Evaluates params.
@@ -525,6 +529,8 @@ public:
 			return scm_no_more_children;
 		}
 	}
+
+	virtual void eval_step (scm_env*);
 };
 
 //for syntax. evaluates the syntax, replaces itself with standart eval.
@@ -547,6 +553,8 @@ public:
 			return scm_no_more_children;
 		}
 	}
+
+	virtual void eval_step (scm_env*);
 };
 
 //for function calls, evaluates all arguments, then replaces itself with a call
@@ -582,6 +590,8 @@ public:
 			return scm_no_more_children;
 		}
 	}
+
+	virtual void eval_step (scm_env*);
 };
 
 /*

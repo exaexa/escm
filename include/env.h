@@ -100,7 +100,7 @@ public:
 
 	inline void run_eval_loop()
 	{
-		while (cont) eval_step();
+		while (eval_step());
 	}
 
 	inline bool evaluating()
@@ -117,24 +117,12 @@ public:
 	 *
 	 * NOTE: I don't think returning scm* is really necessary
 	 * (well we have val and others..) so go check it out.
+	 *
+	 * TODO, check if continuations need some common operations
+	 * (stack push/pop/replace) and possibly code it.
 	 */
 
 	scm* push_frame (size_t size);
-	scm* frame_set (symbol*s);
-
-	void call();
-	void call_tail();
-	scm* ret(); // consider forced frame recycling, it would save mem ;)
-	scm* push_env (); // frame magic (let)
-	scm* pop_env(); //same recycling problem asi with ret()
-
-	scm* make_closure (pair* ip); //args are in val, code on ip
-
-	/*
-	 * TODO, think about -arity of closures - it would be really nice
-	 * if it was defined at make_closure, but, well, how?
-	 * would it be possible to avoid any *arity prechecking?
-	 */
 
 	scm* globdef (symbol* sym);
 	bool globset (symbol* sym);
