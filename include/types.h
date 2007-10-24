@@ -85,15 +85,6 @@ public:
 	}
 };
 
-class atom: public scm //atom == everything which evaluates to itself
-//TODO. we might just get rid of it.
-//(define atom? (lambda (x) (not (pair? x))))
-{
-public:
-	inline atom (scm_env*e) : scm (e)
-	{}
-};
-
 /*
  * Data placeholder is here for data:D
  * we need structure which is somehow scalable (by the means of size)
@@ -122,21 +113,21 @@ public:
  * ATOMS
  */
 
-class boolean: public atom
+class boolean: public scm
 {
 public:
 	bool b;
-	inline boolean (scm_env*e, bool a) : atom (e)
+	inline boolean (scm_env*e, bool a) : scm (e)
 	{
 		b = a;
 	}
 };
 
-class character: public atom
+class character: public scm
 {
 public:
 	char c;
-	inline character (scm_env*e, char a) : atom (e)
+	inline character (scm_env*e, char a) : scm (e)
 	{
 		c = a;
 	}
@@ -147,7 +138,7 @@ public:
  * symbols are case insensitive, so we store them in upper case.
  */
 
-class number : public atom
+class number : public scm
 {
 	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE WE WANT!
 };
@@ -157,7 +148,7 @@ class text : public scm
 public:
 	data_placeholder*d;
 
-	inline scm* get_child (int i)
+	virtual inline scm* get_child (int i)
 	{
 		if (i) return scm_no_more_children ;
 		else return d;
@@ -171,11 +162,10 @@ public:
 	}
 };
 
-class string : public text, atom
+class string : public text
 {
 public:
-	string (scm_env*e, const char*c) : text (e, c), atom (e)
-	{}
+	string (scm_env*e, const char*c) : text (e, c) {}
 };
 
 class symbol : public text
