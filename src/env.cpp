@@ -184,7 +184,7 @@ void scm_env::collect_garbage ()
 
 
 /*
- * SCHEME MACHINE
+ * SCHEME HELPERS
  */
 
 scm* scm_env::push_frame (size_t s)
@@ -255,16 +255,3 @@ bool scm_env::lexget (symbol*sym, int d)
 	return false;
 }
 
-
-/*
- * EVAL
- */
-
-bool scm_env::eval_step()
-{
-	if(cont)
-	{
-		cont->eval_step(this); 
-		return true;
-	} else return false;
-}

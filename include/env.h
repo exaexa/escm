@@ -108,7 +108,12 @@ public:
 		return cont ? true : false;
 	}
 
-	bool eval_step();
+	inline bool eval_step()
+	{
+		if(cont)
+			cont->eval_step(this); 
+		return cont?true:false;
+	}
 
 	void collect_garbage ();
 
