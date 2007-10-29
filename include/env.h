@@ -100,7 +100,7 @@ public:
 
 	inline void run_eval_loop()
 	{
-		while (eval_step());
+		while (eval_step() );
 	}
 
 	inline bool evaluating()
@@ -110,9 +110,9 @@ public:
 
 	inline bool eval_step()
 	{
-		if(cont)
-			cont->eval_step(this); 
-		return cont?true:false;
+		if (cont)
+			cont->eval_step (this);
+		return cont ? true : false;
 	}
 
 	void collect_garbage ();
@@ -128,6 +128,25 @@ public:
 	 */
 
 	scm* push_frame (size_t size);
+
+	inline void push_cont (continuation*c)
+	{
+		c->parent = cont;
+		cont = c;
+	}
+
+	inline void replace_cont (continuation*c)
+	{
+		if (cont) {
+			c->parent = cont->parent;
+			cont = c;
+		} else printf ("!!! replace_cont misused, tried to replace with %p\n", c);
+	}
+
+	inline void pop_cont()
+	{
+		if (cont) cont = cont->parent;
+	}
 
 	scm* globdef (symbol* sym);
 	bool globset (symbol* sym);
