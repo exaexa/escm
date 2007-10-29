@@ -296,8 +296,6 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
  * FUNCTIONS
  */
 
-#define pair_p(x) (typeid(x)==typeid(pair))
-
 closure::closure (scm_env*e, pair*Arglist,
                   pair*Ip, frame*Env) : lambda (e)
 {
