@@ -85,6 +85,9 @@ public:
 	}
 };
 
+#define pair_p(a) (dynamic_cast<pair*>(a))
+#define atom_p(a) (!dynamic_cast<pair*>(a))
+
 /*
  * Data placeholder is here for data:D
  * we need structure which is somehow scalable (by the means of size)
