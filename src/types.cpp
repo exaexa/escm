@@ -314,6 +314,7 @@ closure::closure (scm_env*e, pair*Arglist,
 
 void closure::call (scm_env*e)
 {
+	//TODO this should move to lambda_continuation
 	pair *argdata = (pair*) (e->val), *argname = arglist;
 	frame*f;
 	f = new_scm (*e, local_frame, paramcount);

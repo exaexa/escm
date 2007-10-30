@@ -168,7 +168,8 @@ public:
 class string : public text
 {
 public:
-	string (scm_env*e, const char*c) : text (e, c) {}
+	string (scm_env*e, const char*c) : text (e, c)
+	{}
 };
 
 class symbol : public text
@@ -178,6 +179,8 @@ public:
 
 	int cmp (symbol*);
 };
+
+#define symbol_p(a) (dynamic_cast<symbol*>(a))
 
 
 /*
