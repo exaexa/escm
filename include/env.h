@@ -95,7 +95,8 @@ public:
 
 	~scm_env();
 
-	void eval (scm*);
+	void eval_code (scm*);
+	void eval_expr (scm*);
 	void eval_string (const char* str);
 
 	inline void run_eval_loop()
@@ -114,6 +115,8 @@ public:
 			cont->eval_step (this);
 		return cont ? true : false;
 	}
+
+	inline scm* get_last_result() {return val;}
 
 	void collect_garbage ();
 
