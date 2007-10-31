@@ -1,20 +1,32 @@
 
-] check and add mark_collectable to new_scm's 
-	(and probably move it to scm class)
+	 _______         _____        
+	|_     _|.-----.|     \.-----.
+	  |   |  |  _  ||  --  |  _  |
+	  |___|  |_____||_____/|_____|
+
+
+	general escm todo
+
+
+] check and add mark_collectable to evary new_scm usage
 
 ] come up with some reasonable hash function for hashed_frame.
-	(and then code it)
 
 ] make collector heap dynamic 
-	(at least growable to some defined extent, maybe non-continuous)
+	(at least growable to some defined extent, possibly non-continuous)
 
 ] What the hell should happen, when we run out of memory?!
 	should THAT be allowed? should we free some memory and run an exception?
 	Guess that allocating nil is really not the best idea we have.
 
 ] oooh that^ reminds me - someone should think about exceptions. :D
+	we should have *error-hook*, which is lambda and (error) which
+	calls it a little. Default *error-hook* lambda is internal and causes
+	some kind of continuation crash;)
 
-] What if... in scm_env we didn't save "registers", but whole continuation,
-	which could resolve that "evaluation method" and register lack and
-	similar fuckups.
+] that fucking lambda-continuation problem. Adding another combination
+	of register seems a bit unnecessary, so solve it better way.
+	problem: no one can really pop the lambda-cont before it finishes
+	(garbage collector), and no one is able to tell what does it do
+	with cont. stack. Solve it mathematically. ;)
 
