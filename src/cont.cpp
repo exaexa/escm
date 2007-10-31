@@ -1,5 +1,6 @@
 
 #include "cont.h"
+#include "env.h"
 
 void codevector_continuation::eval_step (scm_env*e)
 {
@@ -34,3 +35,22 @@ void eval_continuation::eval_step (scm_env*e)
 		e->val=object;
 }
 
+void pair_continuation::eval_step(scm_env*e)
+{
+	if(selector_evaluated){
+		//replace with lambda or syntax, or cause a bad-selector error
+	} else {
+		//push eval of first frame
+	}
+}
+
+void syntax_continuation::eval_step(scm_env*e)
+{
+	syn->apply(e,code);
+	//replace continuation with eval of val
+}
+
+void lambda_continuation::eval_step(scm_env*e)
+{
+
+}

@@ -310,7 +310,7 @@ public:
 	inline lambda (scm_env* e) : scm (e)
 	{}
 
-	virtual void call (scm_env* e);
+	virtual void apply (scm_env* e, scm* evaluated_args)=0;
 	/*
 	 * about calls.
 	 * This function here should
@@ -333,7 +333,7 @@ public:
 		handler = h;
 	}
 
-	inline virtual void call (scm_env* e)
+	inline virtual void apply (scm_env* e, scm* args)
 	{
 		handler (e);
 	}
@@ -349,7 +349,7 @@ public:
 
 	closure (scm_env*e, pair*arglist, pair*ip, frame*env);
 
-	virtual void call (scm_env* e);
+	virtual void apply (scm_env* e, scm* args);
 
 	inline scm* get_child (int i)
 	{
@@ -380,59 +380,62 @@ class syntax : public scm
 public:
 	syntax (scm_env*e) : scm (e)
 	{}
-	virtual scm* apply (scm_env*e) = 0;
+	virtual scm* apply (scm_env*e, pair*code) = 0;
 };
 
 
-typedef scm* (*scm_c_macro) (scm_env*);
+typedef scm* (*scm_c_macro) (scm_env*,pair*);
 
 class extern_syntax : public syntax
 {
 public:
 	scm_c_macro handler;
 
-	inline extern_syntax (scm_env*e, scm_c_macro h = 0) : syntax (e)
+	inline extern_syntax (scm_env*e, scm_c_macro h) : syntax (e)
 	{
 		handler = h;
 	}
 
-	inline virtual scm* apply (scm_env*e)
+	inline virtual scm* apply (scm_env*e,pair*code)
 	{
-		return handler (e);
+		return handler (e,code);
 	}
 };
+
+/*
+ * code macros are implemented just like in tinyscheme
+ *
+ * we have a code which gets a list (of name argname) which 
+ * it should transform. Evaluation proceeds with replacing syntax
+ * continuation with eval continuation that evaluates produced code.
+ */
 
 class macro : public syntax
 {
 public:
-	pair*argnames;
 	pair*code;
-	frame*env;
+	symbol*argname;
 
-	inline macro (scm_env*e, pair*c = 0,
-	              pair*argn = 0, frame*environ = 0)
+	inline macro (scm_env*e, pair*c, symbol*a)
 			: syntax (e)
 	{
 		code = c;
-		argnames = argn;
-		env = environ;
+		argname = a;
 	}
 
 	virtual scm* get_child (int i)
 	{
 		switch (i) {
 		case 0:
-			return argnames;
+			return argname;
 		case 1:
 			return code;
-		case 2:
-			return env;
 		default:
 			return scm_no_more_children;
 		}
 	}
 
-	virtual scm* apply (scm_env*e); //TODO
+	virtual scm* apply (scm_env*e,pair*code); //TODO
 };
 
 /*

@@ -73,6 +73,8 @@ text::text (scm_env*e, const char*c) : scm (e)
 /*
  * TODO
  * just create some better hash function. This one most probably sux.
+ * 
+ * (or prove that it doesn't sux)
  */
 
 #define hash_table_size 256
@@ -312,7 +314,8 @@ closure::closure (scm_env*e, pair*Arglist,
 	paramcount = i;
 }
 
-void closure::call (scm_env*e)
+/* FIXME FIXME FIXME
+void closure::apply (scm_env*e)
 {
 	//TODO this should move to lambda_continuation
 	pair *argdata = (pair*) (e->val), *argname = arglist;
@@ -340,11 +343,6 @@ void closure::call (scm_env*e)
 			//exception, too many args passed
 		}
 
-	//create new environment
-	/*
-	e->ip = ip;
-	f->parent = env;
-	e->env = f;
-	TODO*/
-}
+	//TODO create new environment
+} FIXME FIXME FIXME*/
 
