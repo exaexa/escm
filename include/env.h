@@ -84,7 +84,7 @@ public:
 	 */
 
 	scm *val;
-	frame *env, *global_frame;
+	frame *global_frame;
 	continuation *cont;
 
 	/*
@@ -127,7 +127,7 @@ public:
 	 * (stack push/pop/replace) and possibly code it.
 	 */
 
-	scm* push_frame (size_t size);
+	frame* push_frame (size_t size);
 
 	inline void push_cont (continuation*c)
 	{

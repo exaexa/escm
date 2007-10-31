@@ -46,11 +46,26 @@ void pair_continuation::eval_step(scm_env*e)
 
 void syntax_continuation::eval_step(scm_env*e)
 {
-	syn->apply(e,code);
-	//replace continuation with eval of val
+	if(code) {
+		//push evaluation of code
+		syn->apply(e,code);
+		code=0;
+	} else {
+		//replace with eval of val
+	}
 }
 
 void lambda_continuation::eval_step(scm_env*e)
 {
+	if(arglist) {
+		//eval next argument
+	} else {
+		//here we need to do a dirty trick involving replacing
+		//this continuation with anything pushed by lambda
+		//application. trick is that to prevent deleting *this
+		//before this function ends, and is still unknown. FIXME
 
+		//apply a lambda
+	}
 }
+

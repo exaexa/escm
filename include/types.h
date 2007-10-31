@@ -311,17 +311,9 @@ public:
 	{}
 
 	virtual void apply (scm_env* e, scm* evaluated_args)=0;
-	/*
-	 * about calls.
-	 * This function here should
-	 * a] external functions are called normally, receive scm_env*
-	 * b] closures come with arglist in var, so the
-	 * 	frame with arguments mapped to correct names
-	 * 	is pushed to env. ip has to be set.
-	 */
 };
 
-typedef scm* (*scm_c_func) (scm_env*);
+typedef scm* (*scm_c_func) (scm_env*, scm* args);
 
 class extern_func : public lambda
 {
@@ -335,7 +327,7 @@ public:
 
 	inline virtual void apply (scm_env* e, scm* args)
 	{
-		handler (e);
+		handler (e,args);
 	}
 };
 
@@ -364,11 +356,6 @@ public:
 			return scm_no_more_children;
 		}
 	}
-	/*
-	 * NOTE. it would be really nice to save some information about
-	 * how many args should be allocated in frame for the procedure,
-	 * we would't need to count them everytime. think about it.
-	 */
 };
 
 /*
@@ -408,6 +395,8 @@ public:
  * we have a code which gets a list (of name argname) which 
  * it should transform. Evaluation proceeds with replacing syntax
  * continuation with eval continuation that evaluates produced code.
+ *
+ * (note: apply PUSHES a continuation)
  */
 
 class macro : public syntax
@@ -446,6 +435,7 @@ class continuation : public scm
 {
 public:
 	continuation*parent;
+	frame*env;
 
 	inline continuation (scm_env*e, continuation*p) : scm (e)
 	{

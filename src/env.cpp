@@ -18,7 +18,7 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 
 	val = 0;
 	cont = 0;
-	global_frame = env = new_scm (*this, hashed_frame);
+	global_frame = new_scm (*this, hashed_frame);
 }
 
 scm_env::~scm_env()
@@ -146,7 +146,7 @@ void scm_env::collect_garbage ()
 	collector_queue.clear();
 
 	processing.push (val);
-	processing.push (env);
+	processing.push (global_frame);
 	processing.push (cont);
 
 	for (k = collector.begin();k != collector.end();++k)
@@ -187,13 +187,15 @@ void scm_env::collect_garbage ()
  * SCHEME HELPERS
  */
 
-scm* scm_env::push_frame (size_t s)
+frame* scm_env::push_frame (size_t s)
 {
+	if(!cont)return global_frame; //global frame is infinately extensible
+
 	frame*new_frame = new_scm (*this, local_frame, s);
 	if (!new_frame) return 0;
-	new_frame->parent = env;
-	env = new_frame;
-	return env;
+	new_frame->parent = cont->env;
+	cont->env = new_frame;
+	return new_frame;
 }
 
 scm* scm_env::globdef (symbol*sym)
@@ -215,17 +217,17 @@ bool scm_env::globget (symbol*sym)
 
 scm* scm_env::lexdef (symbol*scm, int d)
 {
-	frame*i = env;
+	frame*i = cont?cont->env:global_frame;
 	while (i && d) {
 		i = i->parent;
 		--d;
 	}
-	return val = env->define (this, scm, val);
+	return val = (i?i:global_frame)->define (this, scm, val);
 }
 
 bool scm_env::lexset (symbol*scm, int d)
 {
-	frame*i = env;
+	frame*i = cont?cont->env:global_frame;
 	while (i && d) {
 		i = i->parent;
 		--d;
@@ -234,12 +236,12 @@ bool scm_env::lexset (symbol*scm, int d)
 		if (i->set (scm, val) ) return true;
 		i = i->parent;
 	}
-	return false;
+	return global_frame->set(scm,val);
 }
 
 bool scm_env::lexget (symbol*sym, int d)
 {
-	frame*i = env;
+	frame*i = cont?cont->env:global_frame;
 	scm*r;
 	while (i && d) {
 		i = i->parent;
