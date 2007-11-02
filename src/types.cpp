@@ -154,7 +154,7 @@ scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
 		return s;
 	}
 
-	f = new_scm (*e, chained_frame_entry, s, d,
+	f = new_scm (e, chained_frame_entry, s, d,
 	             ( (chained_frame_entry**) dataof (table) ) [hash]);
 	if (!f) return 0;
 
@@ -267,7 +267,7 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 
 		size_t new_size = size + 1; //compute new frame size
 
-		local_frame* f = new_scm (*e, local_frame, new_size);
+		local_frame* f = new_scm (e, local_frame, new_size);
 		if (!f) return 0;
 
 		/*
@@ -320,7 +320,7 @@ void closure::apply (scm_env*e)
 	//TODO this should move to lambda_continuation
 	pair *argdata = (pair*) (e->val), *argname = arglist;
 	frame*f;
-	f = new_scm (*e, local_frame, paramcount);
+	f = new_scm (e, local_frame, paramcount);
 	if (!f) return;
 	//FIXME. improve this so it really supports "rest" arguments
 	while (argdata && argname && pair_p (argdata) ) {

@@ -20,7 +20,7 @@ class scm_env;
 #include "parser.h"
 
 #define new_scm(env, type, params...) \
-	(new ((env).allocate(sizeof(type))) type (&(env), ##params))
+	(new ((env)->allocate(sizeof(type))) type ((env), ##params))
 
 class scm_env
 {

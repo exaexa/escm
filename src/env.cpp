@@ -18,7 +18,7 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 
 	val = 0;
 	cont = 0;
-	global_frame = new_scm (*this, hashed_frame);
+	global_frame = new_scm (this, hashed_frame);
 }
 
 scm_env::~scm_env()
@@ -191,7 +191,7 @@ frame* scm_env::push_frame (size_t s)
 {
 	if(!cont)return global_frame; //global frame is infinately extensible
 
-	frame*new_frame = new_scm (*this, local_frame, s);
+	frame*new_frame = new_scm (this, local_frame, s);
 	if (!new_frame) return 0;
 	new_frame->parent = cont->env;
 	cont->env = new_frame;
