@@ -57,7 +57,7 @@ int symbol::cmp (symbol* s)
 text::text (scm_env*e, const char*c) : scm (e)
 {
 	char*p;
-	d = new_data_scm (*e, strlen (c) + 1);
+	d = new_data_scm (e, strlen (c) + 1);
 
 	if (!d) return;
 
@@ -99,7 +99,7 @@ hashed_frame::hashed_frame (scm_env*e) : frame (e)
 	int i;
 	chained_frame_entry**t;
 
-	table = new_data_scm (*e,
+	table = new_data_scm (e,
 	                      sizeof (chained_frame_entry*) * hash_table_size);
 	if (!table) return;
 
@@ -187,7 +187,7 @@ scm* hashed_frame::get_child (int i)
 
 local_frame::local_frame (scm_env*e, size_t s) : frame (e)
 {
-	table = new_data_scm (*e, 2 * sizeof (scm*) * s);
+	table = new_data_scm (e, 2 * sizeof (scm*) * s);
 	if (!table) return;
 	size = s;
 	used = 0;

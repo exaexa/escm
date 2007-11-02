@@ -108,8 +108,8 @@ public:
 
 #define dataof(p) ((p)+1) //+ sizeof(p). hackish. TODO solve the type of this.
 #define new_data_scm(env, size) \
-	(new ((env).allocate(sizeof(data_placeholder)+(size)))\
-		data_placeholder(&(env)))
+	(new ((env)->allocate(sizeof(data_placeholder)+(size)))\
+		data_placeholder(env))
 
 
 /*
