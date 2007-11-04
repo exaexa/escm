@@ -59,7 +59,7 @@ public:
 	{}
 
 	friend class scm_env;
-	void mark_collectable();
+	scm* mark_collectable();
 };
 
 /*
@@ -310,8 +310,10 @@ public:
 	inline lambda (scm_env* e) : scm (e)
 	{}
 
-	virtual void apply (scm_env* e, scm* evaluated_args)=0;
+	virtual void apply (scm_env* e, scm* evaluated_args) = 0;
 };
+
+#define lambda_p(a) (dynamic_cast<lambda*>(a))
 
 typedef scm* (*scm_c_func) (scm_env*, scm* args);
 
@@ -327,7 +329,7 @@ public:
 
 	inline virtual void apply (scm_env* e, scm* args)
 	{
-		handler (e,args);
+		handler (e, args);
 	}
 };
 
@@ -370,8 +372,10 @@ public:
 	virtual scm* apply (scm_env*e, pair*code) = 0;
 };
 
+#define syntax_p(a) (dynamic_cast<syntax*>(a))
 
-typedef scm* (*scm_c_macro) (scm_env*,pair*);
+
+typedef scm* (*scm_c_macro) (scm_env*, pair*);
 
 class extern_syntax : public syntax
 {
@@ -383,16 +387,16 @@ public:
 		handler = h;
 	}
 
-	inline virtual scm* apply (scm_env*e,pair*code)
+	inline virtual scm* apply (scm_env*e, pair*code)
 	{
-		return handler (e,code);
+		return handler (e, code);
 	}
 };
 
 /*
  * code macros are implemented just like in tinyscheme
  *
- * we have a code which gets a list (of name argname) which 
+ * we have a code which gets a list (of name argname) which
  * it should transform. Evaluation proceeds with replacing syntax
  * continuation with eval continuation that evaluates produced code.
  *
@@ -424,7 +428,7 @@ public:
 		}
 	}
 
-	virtual scm* apply (scm_env*e,pair*code); //TODO
+	virtual scm* apply (scm_env*e, pair*code); //TODO
 };
 
 /*
@@ -437,7 +441,7 @@ public:
 	continuation*parent;
 	frame*env;
 
-	inline continuation (scm_env*e, continuation*p) : scm (e)
+	inline continuation (scm_env*e, continuation*p = NULL) : scm (e)
 	{
 		parent = p;
 	}
@@ -445,6 +449,9 @@ public:
 	virtual scm* get_child (int) = 0;
 	virtual void eval_step (scm_env*) = 0;
 };
+
+#define continuation_p(a) (dynamic_cast<continuation*>(a))
+#define cont_p continuation_p
 
 #include "cont.h"
 

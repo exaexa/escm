@@ -24,9 +24,13 @@
 	calls it a little. Default *error-hook* lambda is internal and causes
 	some kind of continuation crash;)
 
-] that fucking lambda-continuation problem. Adding another combination
-	of register seems a bit unnecessary, so solve it better way.
-	problem: no one can really pop the lambda-cont before it finishes
-	(garbage collector), and no one is able to tell what does it do
-	with cont. stack. Solve it mathematically. ;)
+] As we replace continuations, we come to problem that they might be still
+	running when are already garbage collected. No need to say what would
+	happen when we wrote in the corresponding class instance after that.
+	We could add some optical solution which solves it (e.g. returning
+	some kind of functor which pushes the thing when it's safe)
 
+] Support for call/cc needs the continuation objects to be "somehow callable".
+	for example this way - save a parameter to val (so it seems to be
+	returned by the computation) and just switch the scm_env->cont?
+	(maybe some stack pops would possibly need to occur)

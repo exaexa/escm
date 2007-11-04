@@ -10,8 +10,8 @@ class codevector_continuation : public continuation
 {
 public:
 	pair* ip;
-	inline codevector_continuation (scm_env*e, continuation*p, pair*code)
-			: continuation (e, p)
+	inline codevector_continuation (scm_env*e, pair*code)
+			: continuation (e)
 	{
 		ip = code;
 	}
@@ -36,8 +36,8 @@ class eval_continuation : public continuation
 {
 public:
 	scm* object;
-	inline eval_continuation (scm_env*e, continuation*p, scm*o)
-			: continuation (e, p)
+	inline eval_continuation (scm_env*e, scm*o)
+			: continuation (e)
 	{
 		object = o;
 	}
@@ -66,8 +66,8 @@ public:
 
 	bool selector_evaluated;
 
-	inline pair_continuation (scm_env*e, continuation*p, pair*l)
-			: continuation (e, p)
+	inline pair_continuation (scm_env*e, pair*l)
+			: continuation (e)
 	{
 		list = l;
 		selector_evaluated = false;
@@ -98,6 +98,13 @@ public:
 	syntax*syn; //pre-evaluated syntax pointer
 	pair*code; //code to transform
 
+	inline syntax_continuation (scm_env*e, syntax*s, pair*c)
+			: continuation (e)
+	{
+		syn = s;
+		code = c;
+	}
+
 	virtual scm* get_child (int i)
 	{
 		switch (i) {
@@ -123,14 +130,15 @@ public:
 	pair *arglist;
 	pair *evaluated_args, *evaluated_args_tail;
 
-	inline lambda_continuation (scm_env*e, continuation*p,
+	inline lambda_continuation (scm_env*e,
 	                            lambda*lam, pair*code)
-			: continuation (e, p)
+			: continuation (e)
 	{
 		l = lam;
 		evaluated_args = evaluated_args_tail = 0;
 		arglist = (pair*) (code->d);
-		//we should examine real type of arglist later
+		//we should examine real type of arglist later,
+		//but we can be sure that pair_p(code)
 	}
 
 	virtual scm* get_child (int i)

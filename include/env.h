@@ -116,7 +116,10 @@ public:
 		return cont ? true : false;
 	}
 
-	inline scm* get_last_result() {return val;}
+	inline scm* get_last_result()
+	{
+		return val;
+	}
 
 	void collect_garbage ();
 

@@ -189,7 +189,7 @@ void scm_env::collect_garbage ()
 
 frame* scm_env::push_frame (size_t s)
 {
-	if(!cont)return global_frame; //global frame is infinately extensible
+	if (!cont) return global_frame; //global frame is infinately extensible
 
 	frame*new_frame = new_scm (this, local_frame, s);
 	if (!new_frame) return 0;
@@ -217,17 +217,17 @@ bool scm_env::globget (symbol*sym)
 
 scm* scm_env::lexdef (symbol*scm, int d)
 {
-	frame*i = cont?cont->env:global_frame;
+	frame*i = cont ? cont->env : global_frame;
 	while (i && d) {
 		i = i->parent;
 		--d;
 	}
-	return val = (i?i:global_frame)->define (this, scm, val);
+	return val = (i ? i : global_frame)->define (this, scm, val);
 }
 
 bool scm_env::lexset (symbol*scm, int d)
 {
-	frame*i = cont?cont->env:global_frame;
+	frame*i = cont ? cont->env : global_frame;
 	while (i && d) {
 		i = i->parent;
 		--d;
@@ -236,12 +236,12 @@ bool scm_env::lexset (symbol*scm, int d)
 		if (i->set (scm, val) ) return true;
 		i = i->parent;
 	}
-	return global_frame->set(scm,val);
+	return global_frame->set (scm, val);
 }
 
 bool scm_env::lexget (symbol*sym, int d)
 {
-	frame*i = cont?cont->env:global_frame;
+	frame*i = cont ? cont->env : global_frame;
 	scm*r;
 	while (i && d) {
 		i = i->parent;
@@ -261,24 +261,24 @@ bool scm_env::lexget (symbol*sym, int d)
  * EVAL helpers
  */
 
-void scm_env::eval_code(scm*s)
+void scm_env::eval_code (scm*s)
 {
 	//TODO
 	//push an codevector continuation.
 	//We might add some support for default cv continuation type setting
 }
 
-void scm_env::eval_expr(scm*s)
+void scm_env::eval_expr (scm*s)
 {
 	//nearly the same as eval_code, but pushes eval_cont instead of cv
 }
 
 #include "parser.h"
 
-void scm_env::eval_string(const char*s)
+void scm_env::eval_string (const char*s)
 {
-	scm*code=scm_parse_string(this,s);
-	eval_code(code);
+	scm*code = scm_parse_string (this, s);
+	eval_code (code);
 	code->mark_collectable();
 }
 

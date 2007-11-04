@@ -10,7 +10,7 @@ using std::queue;
  * (and someone code it)
  */
 
-void scm::mark_collectable()
+scm* scm::mark_collectable()
 {
 	scm*t = 0, *v;
 	queue<scm*>q;
@@ -25,6 +25,7 @@ void scm::mark_collectable()
 					if (t) q.push (t);
 			}
 	}
+	return this; //because we are SOOO lazy
 }
 
 /*
@@ -73,7 +74,7 @@ text::text (scm_env*e, const char*c) : scm (e)
 /*
  * TODO
  * just create some better hash function. This one most probably sux.
- * 
+ *
  * (or prove that it doesn't sux)
  */
 
