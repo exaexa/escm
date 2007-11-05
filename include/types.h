@@ -59,7 +59,14 @@ public:
 	{}
 
 	friend class scm_env;
-	scm* mark_collectable();
+	void mark_collectable();
+
+	template<class ret_scm> inline ret_scm collectable()
+	{
+		mark_collectable();
+		return (ret_scm*) this;
+	}
+
 };
 
 /*

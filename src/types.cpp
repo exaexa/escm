@@ -10,7 +10,7 @@ using std::queue;
  * (and someone code it)
  */
 
-scm* scm::mark_collectable()
+void scm::mark_collectable()
 {
 	scm*t = 0, *v;
 	queue<scm*>q;
@@ -25,7 +25,6 @@ scm* scm::mark_collectable()
 					if (t) q.push (t);
 			}
 	}
-	return this; //because we are SOOO lazy
 }
 
 /*
