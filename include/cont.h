@@ -122,21 +122,37 @@ public:
 	virtual void eval_step (scm_env*);
 };
 
-//for function calls, evaluates all arguments, then replaces itself with a call
+/*
+ * for function calls, evaluates all arguments,
+ * then replaces itself with a call
+ *
+ * Problem is the whole argument list evaluation thing,
+ * solved by the arglist_pos flag
+ * 0] beginning, don't save val
+ * 1] middle, save val to the next list element
+ * 2] end, save val to cdr(tail)
+ *
+ * if arglist is empty after this, we can call.
+ */
 class lambda_continuation : public continuation
 {
 public:
 	lambda *l;
 	pair *arglist;
-	pair *evaluated_args, *evaluated_args_tail;
+	int arglist_pos;
+	pair *evaluated_args;
+	pair **evaluated_args_d;
 
 	inline lambda_continuation (scm_env*e,
 	                            lambda*lam, pair*code)
 			: continuation (e)
 	{
 		l = lam;
-		evaluated_args = evaluated_args_tail = 0;
+		evaluated_args = 0;
+		evaluated_args_d = &evaluated_args;
+
 		arglist = (pair*) (code->d);
+		arglist_pos = 0;
 		//we should examine real type of arglist later,
 		//but we can be sure that pair_p(code)
 	}
@@ -150,8 +166,9 @@ public:
 			return arglist;
 		case 2:
 			return evaluated_args;
-		case 3:
-			return evaluated_args_tail;
+
+			/*NOTE - no need to mark *evaluated_args_d */
+
 		default:
 			return scm_no_more_children;
 		}

@@ -89,7 +89,8 @@ void pair_continuation::eval_step (scm_env*e)
 				e->val = ( (pair*) (list->d) )->a; //cadr list
 			/*
 			 * ^^^TODO, how should the other
-			 * elemets of list be treated?
+			 * elemets of list be treated? correct implementation
+			 * should trigger an error.
 			 */
 			else
 				e->val = list->d; //just rest of list
@@ -123,10 +124,29 @@ void syntax_continuation::eval_step (scm_env*e)
 
 void lambda_continuation::eval_step (scm_env*e)
 {
-	if (arglist) {
-		//eval next argument
-	} else {
-		//apply a lambda
+	switch (arglist_pos) {
+	case 1: //we have evaluated list arg
+		arglist = (pair*) (arglist->d);
+		* (pair**) evaluated_args_d = new_scm (e, pair, e->val, 0);
+		{
+			scm**temp = & ( (*evaluated_args_d)->d);
+			evaluated_args_d = (pair**) temp;
+		}
+	case 0: //initial
+		if (pair_p (arglist) ) {
+			arglist_pos = 1;
+			e->push_cont (new_scm (e, eval_continuation, arglist->a)
+			              ->collectable<continuation>() );
+		} else if (arglist) {
+			arglist_pos = 2;
+			e->push_cont (new_scm (e, eval_continuation, arglist)
+			              ->collectable<continuation>() );
+		} else {
+			l->apply (e, evaluated_args);
+		}
+		break;
+	default: //we have evaluated a non-null list-termination
+		* (pair**) evaluated_args_d = (pair*) (e->val);
 		l->apply (e, evaluated_args);
 	}
 }
