@@ -8,8 +8,6 @@
 	general escm todo
 
 
-] check and add mark_collectable to evary new_scm usage
-
 ] come up with some reasonable hash function for hashed_frame.
 
 ] make collector heap dynamic 

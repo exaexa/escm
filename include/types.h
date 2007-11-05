@@ -63,7 +63,8 @@ public:
 
 	template<class ret_scm> inline ret_scm* collectable()
 	{
-		mark_collectable();
+		if (this) //now we can "mark" nulls, which leads to simplicity.
+			mark_collectable();
 		return (ret_scm*) this;
 	}
 

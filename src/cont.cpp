@@ -33,8 +33,8 @@ void codevector_continuation::eval_step (scm_env*e)
 	eval_continuation*c;
 
 	if (pair_p (ip) ) {
-		c = new_scm (e, eval_continuation, ip->a);
-		c->mark_collectable();
+		c = new_scm (e, eval_continuation, ip->a)
+		    ->collectable<eval_continuation>();
 		if (ip->d) {
 			//push eval of car, move ip
 			e->push_cont (c);
@@ -46,8 +46,8 @@ void codevector_continuation::eval_step (scm_env*e)
 	} else {
 		//list seems to be terminated by something else
 		//than null sentinel -> return it!
-		c = new_scm (e, eval_continuation, ip);
-		c->mark_collectable();
+		c = new_scm (e, eval_continuation, ip)
+		    ->collectable<eval_continuation>();
 		e->replace_cont (c);
 	}
 }
@@ -56,12 +56,13 @@ void eval_continuation::eval_step (scm_env*e)
 {
 	if (pair_p (object) ) {
 		e->replace_cont (new_scm
-		                 (e, pair_continuation, (pair*) object) );
+		                 (e, pair_continuation, (pair*) object)
+		                 ->collectable<continuation>() );
 	}
 	if (symbol_p (object) ) {
 		e->lexget ( (symbol*) object);
 		e->pop_cont();
-	} else //is just an atom.
+	} else //tis just an atom.
 		e->val = object;
 }
 
@@ -75,11 +76,13 @@ void pair_continuation::eval_step (scm_env*e)
 		if (lambda_p (selector) ) {
 			e->replace_cont (new_scm
 			                 (e, lambda_continuation,
-			                  (lambda*) selector, list) );
+			                  (lambda*) selector, list)
+			                 ->collectable<continuation>() );
 		} else if (syntax_p (selector) ) {
 			e->replace_cont (new_scm
 			                 (e, syntax_continuation,
-			                  (syntax*) selector, list) );
+			                  (syntax*) selector, list)
+			                 ->collectable<continuation>() );
 		} else if (cont_p (selector) ) {
 			e->cont = (continuation*) selector;
 			if (pair_p (list->d) )
@@ -97,7 +100,8 @@ void pair_continuation::eval_step (scm_env*e)
 			e->pop_cont();
 		}
 	} else {
-		e->push_cont (new_scm (e, eval_continuation, list->a) );
+		e->push_cont (new_scm (e, eval_continuation, list->a)
+		              ->collectable<continuation>() );
 		selector_evaluated = true;
 	}
 }
@@ -112,7 +116,8 @@ void syntax_continuation::eval_step (scm_env*e)
 	} else {
 		//replace with eval of val
 		e->replace_cont (new_scm
-		                 (e, eval_continuation, e->val) );
+		                 (e, eval_continuation, e->val)
+		                 ->collectable<continuation>() );
 	}
 }
 
