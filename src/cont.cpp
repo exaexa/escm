@@ -105,11 +105,14 @@ void pair_continuation::eval_step (scm_env*e)
 void syntax_continuation::eval_step (scm_env*e)
 {
 	if (code) {
-		//push evaluation of code
+		//this should push evaluation of code
+		//some syntaxes may replace this continuation
 		syn->apply (e, code);
 		code = 0;
 	} else {
 		//replace with eval of val
+		e->push_replace(new_scm
+			(e,eval_continuation,val))
 	}
 }
 
