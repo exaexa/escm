@@ -75,11 +75,11 @@ void pair_continuation::eval_step (scm_env*e)
 		if (lambda_p (selector) ) {
 			e->replace_cont (new_scm
 			                 (e, lambda_continuation,
-					 (lambda*) selector, list) );
+			                  (lambda*) selector, list) );
 		} else if (syntax_p (selector) ) {
 			e->replace_cont (new_scm
 			                 (e, syntax_continuation,
-					 (syntax*) selector, list) );
+			                  (syntax*) selector, list) );
 		} else if (cont_p (selector) ) {
 			e->cont = (continuation*) selector;
 			if (pair_p (list->d) )
@@ -111,8 +111,8 @@ void syntax_continuation::eval_step (scm_env*e)
 		code = 0;
 	} else {
 		//replace with eval of val
-		e->push_replace(new_scm
-			(e,eval_continuation,val))
+		e->replace_cont (new_scm
+		                 (e, eval_continuation, e->val) );
 	}
 }
 
