@@ -6,7 +6,6 @@
  * gonna shit bricks when we use C++ exception catching. kthxbai.
  */
 
-
 enum { //token type
 	tok_paren_open,
 	tok_paren_open_vector,
