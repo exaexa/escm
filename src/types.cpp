@@ -21,7 +21,10 @@ void scm::mark_collectable()
 		q.pop();
 		if (v) if (is_scm_protected (v) ) {
 				mark_scm_collectable (v);
-				for (i = 0; (t = v->get_child (i++) ) != scm_no_more_children;)
+				for (i = 0;
+				        (t = v->get_child (i++) )
+				        != scm_no_more_children
+				        ;)
 					if (t) q.push (t);
 			}
 	}
@@ -31,7 +34,7 @@ void scm::mark_collectable()
  * STRINGS AND SYMBOLS
  */
 
-symbol::symbol (scm_env* e, const char* c) : text (e, c)
+symbol::symbol (scm_env* e, const char* c, int len) : text (e, c, len)
 {
 	char*p;
 	if (!d) return;
@@ -54,15 +57,19 @@ int symbol::cmp (symbol* s)
 	return (int) *b - (int) *a;
 }
 
-text::text (scm_env*e, const char*c) : scm (e)
+text::text (scm_env*e, const char*c, int len) : scm (e)
 {
 	char*p;
-	d = new_data_scm (e, strlen (c) + 1);
+	int datasize = (len < 0) ? (strlen (c) + 1) : (len + 1);
+	d = new_data_scm (e, datasize);
 
 	if (!d) return;
 
 	p = (char*) dataof (d);
-	while (*c) {
+
+	datasize--; //we don't copy the finishing zero
+
+	while (--datasize) {
 		*p = *c;
 		++p;
 		++c;

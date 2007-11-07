@@ -165,7 +165,7 @@ public:
 		else return d;
 	}
 
-	text (scm_env*, const char*);
+	text (scm_env*, const char*, int len = -1);
 
 	inline operator const char* ()
 	{
@@ -176,14 +176,14 @@ public:
 class string : public text
 {
 public:
-	string (scm_env*e, const char*c) : text (e, c)
+	string (scm_env*e, const char*c, int length = -1) : text (e, c, length)
 	{}
 };
 
 class symbol : public text
 {
 public:
-	symbol (scm_env*, const char*);
+	symbol (scm_env*, const char*, int length = -1);
 
 	int cmp (symbol*);
 };
