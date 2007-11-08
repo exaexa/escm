@@ -259,25 +259,27 @@ bool scm_env::lexget (symbol*sym, int d)
 
 /*
  * EVAL helpers
+ *
+ * TODO, add default codevector and eval continuation setting support
  */
 
 void scm_env::eval_code (pair*s)
 {
-	//TODO
-	//push an codevector continuation.
-	//We might add some support for default cv continuation type setting
+	push_cont(new_scm(this,codevector_continuation,s)
+		->collectable<codevector_continuation>());
 }
 
 void scm_env::eval_expr (scm*s)
 {
-	//nearly the same as eval_code, but pushes eval_cont instead of cv
+	push_cont(new_scm(this,eval_continuation,s)
+		->collectable<eval_continuation>());
 }
 
 #include "parser.h"
 
 void scm_env::eval_string (const char*s)
 {
-	pair*code = scm_parse_string (this, s);
-	eval_code (code->collectable<pair>() );
+	eval_code (scm_parse_string (this, s)
+		->collectable<pair>() );
 }
 
