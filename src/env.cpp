@@ -261,7 +261,7 @@ bool scm_env::lexget (symbol*sym, int d)
  * EVAL helpers
  */
 
-void scm_env::eval_code (scm*s)
+void scm_env::eval_code (pair*s)
 {
 	//TODO
 	//push an codevector continuation.
@@ -277,7 +277,7 @@ void scm_env::eval_expr (scm*s)
 
 void scm_env::eval_string (const char*s)
 {
-	scm*code = scm_parse_string (this, s);
-	eval_code (code->collectable<scm>() );
+	pair*code = scm_parse_string (this, s);
+	eval_code (code->collectable<pair>() );
 }
 

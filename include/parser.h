@@ -4,7 +4,7 @@
 
 #include "env.h"
 
-scm* scm_parse_string (scm_env*e, const char*string);
+pair* scm_parse_string (scm_env*e, const char*string);
 
 
 #endif

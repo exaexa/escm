@@ -95,7 +95,7 @@ public:
 
 	~scm_env();
 
-	void eval_code (scm*);
+	void eval_code (pair*);
 	void eval_expr (scm*);
 	void eval_string (const char* str);
 
