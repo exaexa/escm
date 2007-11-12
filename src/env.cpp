@@ -266,12 +266,12 @@ bool scm_env::lexget (symbol*sym, int d)
 
 void scm_env::eval_code (pair*s)
 {
-	push_cont (codevector_cont_factory (this) );
+	push_cont (codevector_cont_factory (this ,s) );
 }
 
 void scm_env::eval_expr (scm*s)
 {
-	push_cont (eval_cont_factory (this) );
+	push_cont (eval_cont_factory (this, s) );
 }
 
 #include "parser.h"

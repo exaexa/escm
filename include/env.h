@@ -22,7 +22,8 @@ class scm_env;
 #define new_scm(env, type, params...) \
 	(new ((env)->allocate(sizeof(type))) type ((env), ##params))
 
-typedef continuation* (*scm_cont_factory) (scm_env*);
+typedef continuation* (*scm_eval_cont_factory) (scm_env*, scm*);
+typedef continuation* (*scm_code_cont_factory) (scm_env*, pair*);
 typedef pair* (*scm_parser_func) (scm_env*, const char*);
 
 class scm_env
@@ -104,8 +105,8 @@ public:
 	 */
 
 	scm_parser_func parser;
-	scm_cont_factory eval_cont_factory;
-	scm_cont_factory codevector_cont_factory;
+	scm_eval_cont_factory eval_cont_factory;
+	scm_code_cont_factory codevector_cont_factory;
 
 	/*
 	 * "general-purpose" frontends
