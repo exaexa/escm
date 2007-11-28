@@ -78,6 +78,35 @@ text::text (scm_env*e, const char*c, int len) : scm (e)
 }
 
 /*
+ * VECTOR
+ */
+
+vector::vector (scm_env*e, size_t size) : scm (e)
+{
+	d = new_data_scm (e, sizeof (scm*) * size);
+	if (!d) return;
+	for (size_t i = 0;i < size;++i) * (scm**) dataof (d) = 0;
+}
+
+scm* vector::ref (size_t i)
+{
+	if (i < size) return ( (scm**) dataof (d) ) [i];
+	return 0;
+}
+
+void vector::set (size_t i, scm*a)
+{
+	if (i <= size) ( (scm**) dataof (d) ) [i] = a;
+}
+
+scm* vector::get_child (int i)
+{
+	if (i < (int) size) return ref (i);
+	if (i == size) return d;
+	return scm_no_more_children;
+}
+
+/*
  * TODO
  * just create some better hash function. This one most probably sux.
  *

@@ -191,6 +191,19 @@ public:
 #define symbol_p(a) (dynamic_cast<symbol*>(a))
 
 
+class vector : public scm
+{
+public:
+	data_placeholder*d;
+	size_t size;
+
+	vector (scm_env*e, size_t size);
+	scm*ref (size_t i);
+	void set (size_t i, scm*d);
+
+	virtual scm* get_child (int);
+};
+
 /*
  * FRAMES
  */
