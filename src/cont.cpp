@@ -120,6 +120,14 @@ void syntax_continuation::eval_step (scm_env*e)
 		                 (e, eval_continuation, e->val)
 		                 ->collectable<continuation>() );
 	}
+
+	/*
+	 * NOTE to self. (just to be damn sure)
+	 * Some macros don't even vant the second phase to occur
+	 * (e.g. quote, which we mentioned elsewhere). Then apply
+	 * doesn't push the evaluation, but uses pop_cont 
+	 * (or replace. or whatever.)
+	 */
 }
 
 void lambda_continuation::eval_step (scm_env*e)

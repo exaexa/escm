@@ -382,6 +382,23 @@ public:
 
 #define syntax_p(a) (dynamic_cast<syntax*>(a))
 
+/*
+ * code macros are implemented just like in tinyscheme
+ *
+ * we have a code which gets a list (of name argname) which
+ * it should transform. Evaluation proceeds with replacing syntax
+ * continuation with eval continuation that evaluates produced code.
+ *
+ * So, handler (or apply()) can:
+ * 	a] push an evaluation/other continuation, syntax_cont is then gonna
+ * 	   make sure that result ("template") is evaluated.
+ * 	b] pop the continuation - in this case we just return something,
+ * 	   and it will be returned by a macro. (no further evaluations)
+ *
+ * 	   and so, for example, quote is a macro with handler like this:
+ * 	   	handler(e,code) { e->val=code->d; e->pop_cont(); }
+ *
+ */
 
 typedef scm* (*scm_c_macro) (scm_env*, pair*);
 
@@ -400,16 +417,6 @@ public:
 		return handler (e, code);
 	}
 };
-
-/*
- * code macros are implemented just like in tinyscheme
- *
- * we have a code which gets a list (of name argname) which
- * it should transform. Evaluation proceeds with replacing syntax
- * continuation with eval continuation that evaluates produced code.
- *
- * (note: apply PUSHES a continuation)
- */
 
 class macro : public syntax
 {
