@@ -138,6 +138,7 @@ public:
 	inline void push_cont (continuation*c)
 	{
 		c->parent = cont;
+		c->env = cont ? (cont->env) : global_frame;
 		cont = c;
 	}
 
@@ -145,6 +146,7 @@ public:
 	{
 		if (cont) {
 			c->parent = cont->parent;
+			c->env = cont->env->parent;
 			cont = c;
 		} else printf ("!!! replace_cont misused, tried to replace with %p\n", c);
 	}
