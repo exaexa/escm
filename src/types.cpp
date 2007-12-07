@@ -31,6 +31,44 @@ void scm::mark_collectable()
 }
 
 /*
+ * PAIR
+ */
+
+int pair::list_length()
+{
+	pair *a=this,*b=this; //a moves 2x faster than b, we detect "overtakes"
+	int size=0;
+	while(a){
+		a=pair_p(a->d); //pair_p may be used as dynamic_cast;) useful!
+		if(a==b) return -1; // cycle detected
+		if(size&1)
+			b=pair_p(b->d);
+		++size;
+	}
+	return size;
+}
+
+/*
+ * list_loop_position
+ *
+ * this one has terrible time (O(n^2)), use it only for lists you are sure
+ * they are loops.
+ */
+int pair::list_loop_position()
+{
+	pair*a=this,*b;
+	int i=0;
+	while(a){
+		b=a;
+		while(b&&(b!=a)) b=pair_p(b->d);
+		if(b) return i;
+		++i;
+		a=pair_p(a->d);
+	}
+	return -1;
+}
+
+/*
  * STRINGS AND SYMBOLS
  */
 
@@ -102,7 +140,7 @@ void vector::set (size_t i, scm*a)
 scm* vector::get_child (int i)
 {
 	if (i < (int) size) return ref (i);
-	if (i == size) return d;
+	if (i == (int) size) return d;
 	return scm_no_more_children;
 }
 

@@ -91,6 +91,12 @@ public:
 		a = addr;
 		d = dat;
 	}
+
+	//returns -1 if the list is cyclic
+	int list_length();
+
+	//if is cyclic, return which element is being referenced by the "tail"
+	int list_loop_position();  
 };
 
 #define pair_p(a) (dynamic_cast<pair*>(a))
