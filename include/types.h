@@ -97,10 +97,13 @@ public:
 
 	//if is cyclic, return which element is being referenced by the "tail"
 	int list_loop_position();  
+
+	//returns true number of elements in the list (loop+
+	int list_size();
 };
 
 #define pair_p(a) (dynamic_cast<pair*>(a))
-#define atom_p(a) (!dynamic_cast<pair*>(a))
+#define atom_p(a) ((dynamic_cast<pair*>(a))?0:a)
 
 /*
  * Data placeholder is here for data:D

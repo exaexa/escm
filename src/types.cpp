@@ -69,6 +69,32 @@ int pair::list_loop_position()
 }
 
 /*
+ * same problem, terrible time on cyclic lists
+ */
+int pair::list_size()
+{
+	int i=list_length(),j=0;
+	if(i>=0)return i;
+	j=i=list_loop_position();
+
+	pair*a=this,*b;
+
+	while(i>=0){
+		--i;
+		a=pair_p(a->d);
+	}
+
+	b=a;
+
+	while(b&&(b->d!=a)){
+		++j;
+		b=pair_p(b->d);
+	}
+
+	return j;
+}
+
+/*
  * STRINGS AND SYMBOLS
  */
 
