@@ -10,7 +10,7 @@
 using std::queue;
 
 
-scm_env::scm_env (size_t heap_size, size_t alignment)
+scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 {
 	heap = malloc (heap_size);
 	hs = heap_size;
@@ -19,10 +19,14 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	val = 0;
 	cont = 0;
 	global_frame = new_scm (this, hashed_frame)->collectable<frame>();
+
+	if(par)parser=par;
+	else parser=new scm_classical_parser;
 }
 
 scm_env::~scm_env()
 {
+	if (parser) free (parser);
 	if (heap) free (heap);
 }
 
@@ -277,7 +281,7 @@ void scm_env::eval_expr (scm*s)
 
 void scm_env::eval_string (const char*s)
 {
-	pair*code = scm_parse_string (this, s);
-	eval_code (code->collectable<pair>() );
+	pair*code = parser->parse_string (this, s);
+	if(code) eval_code (code->collectable<pair>() );
 }
 
