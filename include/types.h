@@ -96,7 +96,7 @@ public:
 	int list_length();
 
 	//if is cyclic, return which element is being referenced by the "tail"
-	int list_loop_position();  
+	int list_loop_position();
 
 	//returns true number of elements in the list (loop+
 	int list_size();
@@ -202,11 +202,13 @@ public:
 
 class vector : public scm
 {
+	bool alloc (scm_env*e, size_t size);
 public:
 	data_placeholder*d;
 	size_t size;
 
 	vector (scm_env*e, size_t size);
+	vector (scm_env*e, pair*);
 	scm*ref (size_t i);
 	void set (size_t i, scm*d);
 

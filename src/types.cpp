@@ -36,13 +36,13 @@ void scm::mark_collectable()
 
 int pair::list_length()
 {
-	pair *a=this,*b=this; //a moves 2x faster than b, we detect "overtakes"
-	int size=0;
-	while(a){
-		a=pair_p(a->d); //pair_p may be used as dynamic_cast;) useful!
-		if(a==b) return -1; // cycle detected
-		if(size&1)
-			b=pair_p(b->d);
+	pair *a = this, *b = this; //a moves 2x faster than b, we detect "overtakes"
+	int size = 0;
+	while (a) {
+		a = pair_p (a->d); //pair_p may be used as dynamic_cast;) useful!
+		if (a == b) return -1; // cycle detected
+		if (size&1)
+			b = pair_p (b->d);
 		++size;
 	}
 	return size;
@@ -56,14 +56,14 @@ int pair::list_length()
  */
 int pair::list_loop_position()
 {
-	pair*a=this,*b;
-	int i=0;
-	while(a){
-		b=a;
-		while(b&&(b!=a)) b=pair_p(b->d);
-		if(b) return i;
+	pair*a = this, *b;
+	int i = 0;
+	while (a) {
+		b = a;
+		while (b && (b != a) ) b = pair_p (b->d);
+		if (b) return i;
 		++i;
-		a=pair_p(a->d);
+		a = pair_p (a->d);
 	}
 	return -1;
 }
@@ -73,22 +73,22 @@ int pair::list_loop_position()
  */
 int pair::list_size()
 {
-	int i=list_length(),j=0;
-	if(i>=0)return i;
-	j=i=list_loop_position();
+	int i = list_length(), j = 0;
+	if (i >= 0) return i;
+	j = i = list_loop_position();
 
-	pair*a=this,*b;
+	pair*a = this, *b;
 
-	while(i>=0){
+	while (i >= 0) {
 		--i;
-		a=pair_p(a->d);
+		a = pair_p (a->d);
 	}
 
-	b=a;
+	b = a;
 
-	while(b&&(b->d!=a)){
+	while (b && (b->d != a) ) {
 		++j;
-		b=pair_p(b->d);
+		b = pair_p (b->d);
 	}
 
 	return j;
@@ -145,11 +145,35 @@ text::text (scm_env*e, const char*c, int len) : scm (e)
  * VECTOR
  */
 
-vector::vector (scm_env*e, size_t size) : scm (e)
+bool vector::alloc (scm_env*e, size_t size)
 {
 	d = new_data_scm (e, sizeof (scm*) * size);
-	if (!d) return;
-	for (size_t i = 0;i < size;++i) * (scm**) dataof (d) = 0;
+	if (!d) {
+		this->size = 0;
+		return false;
+	}
+	this->size = size;
+	return true;
+}
+
+vector::vector (scm_env*e, size_t size) : scm (e)
+{
+	if (!alloc (e, size) ) return;
+	for (size_t i = 0;i < size;++i)  ( (scm**) dataof (d) ) [i] = 0;
+}
+
+vector::vector (scm_env*e, pair* l) : scm (e)
+{
+	if (!l) {
+		d = 0;
+		size = 0;
+		return;
+	}
+	size = l->list_size();
+	for (int i = 0;i < (int) size;++i) {
+		( (scm**) dataof (d) ) [i] = l->a;
+		l = pair_p (l->d);
+	}
 }
 
 scm* vector::ref (size_t i)
