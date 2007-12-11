@@ -21,7 +21,7 @@ scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 	global_frame = new_scm (this, hashed_frame)->collectable<frame>();
 
 	if(par)parser=par;
-	else parser=new scm_classical_parser;
+	else parser=new scm_classical_parser(this);
 }
 
 scm_env::~scm_env()
@@ -281,7 +281,7 @@ void scm_env::eval_expr (scm*s)
 
 void scm_env::eval_string (const char*s)
 {
-	pair*code = parser->parse_string (this, s);
+	pair*code = parser->parse_string (s);
 	if(code) eval_code (code->collectable<pair>() );
 }
 

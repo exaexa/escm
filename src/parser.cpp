@@ -1,7 +1,7 @@
 
 #include "parser.h"
 
-pair* scm_parser::parse_string (scm_env*e, const char*str)
+pair* scm_classical_parser::parse_string (const char*str)
 {
 	return 0;
 }
