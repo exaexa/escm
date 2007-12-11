@@ -10,8 +10,11 @@ public:
 	inline scm_parser(scm_env*e):env(e){}
 	inline virtual ~scm_parser(){}
 
-	virtual pair* parse_string(const char* str)=0;
+	virtual int parse_string(const char* str)=0;
+	virtual pair* get_result(bool keep)=0;
 	virtual void reset()=0;
+	virtual int end_stream()=0;
+	virtual const char* get_parse_error(int);
 };
 
 #include <string>
@@ -32,13 +35,22 @@ class scm_classical_parser:public scm_parser {
 
 	class parser_cont{
 	public:
-		pair *res,*res_tail;
+		pair *result,**result_tail;
 		int flags;
+		inline parser_cont()
+		{
+			result=0;result_tail=0;flags=0;
+		}
+		enum {
+			fl_tailnext=0x01,
+			fl_mustpop=0x02,
+			fl_retvector=0x04
+		};
 	};
 
 	List<parser_cont> stack;
 
-	parser_cont& cont();
+	inline parser_cont& cont(){return stack.front();}
 
 	void push();
 	void pop();
@@ -56,13 +68,16 @@ class scm_classical_parser:public scm_parser {
 	bool parse_char(char c, String&output_token);
 
 	/*
-	 * This is the environment we work with
+	 * interface
 	 */
 
 public:	
-	inline scm_classical_parser(scm_env*e):scm_parser(e){}
-	virtual pair* parse_string(const char* str);
+	scm_classical_parser(scm_env*);
+	virtual int parse_string(const char* str);
+	virtual pair* get_result(bool);
 	virtual void reset();
+	virtual int end_stream();
+	virtual const char* get_parse_error(int);
 };
 
 #endif

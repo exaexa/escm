@@ -281,7 +281,14 @@ void scm_env::eval_expr (scm*s)
 
 void scm_env::eval_string (const char*s)
 {
-	pair*code = parser->parse_string (s);
+	if(!parser->parse_string (s))return;
+	
+	/*
+	 * what to do on errors?? seems like this function should not
+	 * be used at all. Marked as future subject of removal.
+	 */
+
+	pair*code=parser->get_result(false);
 	if(code) eval_code (code->collectable<pair>() );
 }
 
