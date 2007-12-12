@@ -6,6 +6,7 @@
 
 class scm_parser
 {
+protected:
 	scm_env*env;
 public:
 	inline scm_parser (scm_env*e) : env (e)
@@ -40,19 +41,29 @@ class scm_classical_parser: public scm_parser
 	class parser_cont
 	{
 	public:
-		pair *result, **result_tail;
-		int flags;
+		pair *result;
+		scm **result_tail;
+
+		union{
+			unsigned int flags;
+			struct {
+unsigned tail_next:
+				1;
+unsigned must_pop:
+				1;
+unsigned pop_after_next:
+				1;
+unsigned return_vector:
+				               1;
+			};
+		};
+
 		inline parser_cont()
 		{
 			result = 0;
 			result_tail = 0;
 			flags = 0;
 		}
-		enum {
-		    fl_tailnext = 0x01,
-		    fl_mustpop = 0x02,
-		    fl_retvector = 0x04
-		};
 	};
 
 	List<parser_cont> stack;
@@ -86,6 +97,7 @@ public:
 	virtual int parse_string (const char* str);
 	virtual pair* get_result (bool);
 	virtual void reset();
+	void reset_current_cont();
 	virtual int end_stream();
 	virtual const char* get_parse_error (int);
 };
