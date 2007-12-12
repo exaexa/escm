@@ -184,7 +184,7 @@ scm* vector::ref (size_t i)
 
 void vector::set (size_t i, scm*a)
 {
-	if (i <= size) ( (scm**) dataof (d) ) [i] = a;
+	if (i < size) ( (scm**) dataof (d) ) [i] = a;
 }
 
 scm* vector::get_child (int i)
