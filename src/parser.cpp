@@ -9,71 +9,65 @@
 int scm_classical_parser::parse_string (const char*str)
 {
 	String token;
-	try{
-		while(*str) if(parse_char(*(str++),token))
-			process_token(token);
-	}
-	catch (int i){
+	try {
+		while (*str) if (parse_char (* (str++), token) )
+				process_token (token);
+	} catch (int i) {
 		return i;
 	}
 	return 0;
 }
 
-pair* scm_classical_parser::get_result(bool keep)
+pair* scm_classical_parser::get_result (bool keep)
 {
-	pair*t=stack.back().result;
-	if(!keep){
-		stack.back().result=0;
-		stack.back().result_tail=0;
+	pair*t = stack.back().result;
+	if (!keep) {
+		stack.back().result = 0;
+		stack.back().result_tail = 0;
 	}
 	return t;
 }
 
 int scm_classical_parser::end_stream()
 {
-	
+
 	return 0;
 }
 
 void scm_classical_parser::reset()
 {
-	
 }
 
 void scm_classical_parser::push()
 {
-
 }
 
 void scm_classical_parser::pop()
 {
-
 }
 
-void scm_classical_parser::append(scm*s)
+void scm_classical_parser::append (scm*s)
 {
-
 }
 
-void process_token(const String& tok)
+void process_token (const String& tok)
 {
-
 }
 
-bool scm_classical_parser::parse_char(char c, String&out)
+bool scm_classical_parser::parse_char (char c, String&out)
 {
 
 	return false;
 }
 
-scm_classical_parser::scm_classical_parser(scm_env*e):scm_parser(e)
+scm_classical_parser::scm_classical_parser (scm_env*e) : scm_parser (e)
 {
-
 }
 
-const char* scm_classical_parser::get_parse_error(int i)
+const char* scm_classical_parser::get_parse_error (int i)
 {
-	switch(i){
-	default: return 0;
+	switch (i) {
+	default:
+		return 0;
 	}
 }

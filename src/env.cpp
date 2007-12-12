@@ -20,8 +20,8 @@ scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 	cont = 0;
 	global_frame = new_scm (this, hashed_frame)->collectable<frame>();
 
-	if(par)parser=par;
-	else parser=new scm_classical_parser(this);
+	if (par) parser = par;
+	else parser = new scm_classical_parser (this);
 }
 
 scm_env::~scm_env()
@@ -281,14 +281,14 @@ void scm_env::eval_expr (scm*s)
 
 void scm_env::eval_string (const char*s)
 {
-	if(!parser->parse_string (s))return;
-	
+	if (!parser->parse_string (s) ) return;
+
 	/*
 	 * what to do on errors?? seems like this function should not
 	 * be used at all. Marked as future subject of removal.
 	 */
 
-	pair*code=parser->get_result(false);
-	if(code) eval_code (code->collectable<pair>() );
+	pair*code = parser->get_result (false);
+	if (code) eval_code (code->collectable<pair>() );
 }
 
