@@ -47,14 +47,14 @@ class scm_classical_parser: public scm_parser
 		union{
 			unsigned int flags;
 			struct {
-unsigned tail_next:
+			unsigned tail_next:
 				1;
-unsigned must_pop:
+			unsigned must_pop:
 				1;
-unsigned pop_after_next:
+			unsigned pop_after_next:
 				1;
-unsigned return_vector:
-				               1;
+			unsigned return_vector:
+					       1;
 			};
 		};
 
@@ -77,7 +77,7 @@ unsigned return_vector:
 	void pop();
 	void append (scm*);
 
-	void process_token (const String&);
+	void process_token (int type, const String&);
 
 	/*
 	 * tokenizer
@@ -85,14 +85,21 @@ unsigned return_vector:
 	 */
 
 	String token_rest;
+	int t_state;
 
-	bool parse_char (char c, String&output_token);
+	void parse_char (char c);
 
 	/*
 	 * interface
 	 */
 
 public:
+	struct
+	{
+		int col, row;
+	}
+	pos;
+
 	scm_classical_parser (scm_env*);
 	virtual int parse_string (const char* str);
 	virtual pair* get_result (bool);

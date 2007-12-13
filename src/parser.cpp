@@ -6,12 +6,38 @@
  * gonna shit bricks when we use C++ exception catching. kthxbai.
  */
 
+
+enum { //token type
+	tok_paren_open,
+	tok_paren_open_vector,
+	tok_paren_close,
+	tok_dot,
+	tok_number,
+	tok_symbol,
+	tok_string,
+	tok_char,
+	tok_bool,
+	tok_quote,
+	tok_quasiquote,
+	tok_unquote,
+	tok_unquote_splice
+};
+
+
+enum { //tokenizer state
+	ts_normal,
+	ts_in_string,
+	ts_in_sharp,
+	ts_in_char,
+	ts_after_unquote,
+	ts_in_atom,
+	ts_in_comment
+};
+
 int scm_classical_parser::parse_string (const char*str)
 {
-	String token;
 	try {
-		while (*str) if (parse_char (* (str++), token) )
-				process_token (token);
+		while (*str) parse_char (* (str++) );
 	} catch (int i) {
 		reset_current_cont();
 		return i;
@@ -39,6 +65,8 @@ void scm_classical_parser::reset()
 {
 	stack = List<parser_cont>();
 	stack.push_back (parser_cont() );
+	pos.col = pos.row = 0;
+	t_state = ts_normal;
 }
 
 void scm_classical_parser::reset_current_cont()
@@ -46,6 +74,8 @@ void scm_classical_parser::reset_current_cont()
 	List<parser_cont> newstack;
 	newstack.push_front (stack.back() );
 	stack = newstack;
+	pos.col = pos.row = 0;
+	t_state = ts_normal;
 }
 
 void scm_classical_parser::push()
@@ -64,6 +94,7 @@ void scm_classical_parser::pop()
 	 * kthxbai.
 	 */
 	if (cont().tail_next) throw 3;
+	if (stack.size() <= 1) throw 4;
 
 	scm*result = cont().result;
 	stack.pop_front();
@@ -92,12 +123,14 @@ void scm_classical_parser::append (scm*s)
 	if (cont().pop_after_next) pop();
 }
 
-void process_token (const String& tok)
+void process_token (int type, const String& tok)
 {}
 
-bool scm_classical_parser::parse_char (char c, String&out)
+void scm_classical_parser::parse_char (char c)
 {
-	return false;
+
+
+	//process_token(...) here!
 }
 
 scm_classical_parser::scm_classical_parser (scm_env*e) : scm_parser (e)
@@ -114,7 +147,10 @@ const char* scm_classical_parser::get_parse_error (int i)
 		return "list termination expected";
 	case 3:
 		return "illegal dot expression";
+	case 4:
+		return "unexpected list termination";
 	default:
 		return 0;
 	}
 }
+
