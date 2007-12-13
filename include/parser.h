@@ -77,7 +77,7 @@ class scm_classical_parser: public scm_parser
 	void pop();
 	void append (scm*);
 
-	void process_token (int type, const String&);
+	void process_token (int type, const String*contents = 0);
 
 	/*
 	 * tokenizer

@@ -12,11 +12,15 @@ enum { //token type
 	tok_paren_open_vector,
 	tok_paren_close,
 	tok_dot,
-	tok_number,
+	tok_number_decimal,
+	tok_number_binary,
+	tok_number_octal,
+	tok_number_hex,
 	tok_symbol,
 	tok_string,
 	tok_char,
-	tok_bool,
+	tok_bool_true,
+	tok_bool_false,
 	tok_quote,
 	tok_quasiquote,
 	tok_unquote,
@@ -90,7 +94,7 @@ void scm_classical_parser::pop()
 	 * this throw is needed just because of cleaniness
 	 * ( 1 2 3 . ) should cause an error
 	 * if this is (simply) commented out, such expression
-	 * behaves as (1 2 3) or (1 2 3 . ()).
+	 * behaves just like (1 2 3) or (1 2 3 . ()).
 	 * kthxbai.
 	 */
 	if (cont().tail_next) throw 3;
@@ -123,12 +127,136 @@ void scm_classical_parser::append (scm*s)
 	if (cont().pop_after_next) pop();
 }
 
-void process_token (int type, const String& tok)
+void process_token (int type, const String* tok)
 {}
+
+static bool is_white (char c)
+{
+	if (c == ' ') return true;
+	if (c == '\t') return true;
+	if (c == '\n') return true;
+	return false;
+}
 
 void scm_classical_parser::parse_char (char c)
 {
+#define pt process_token
+	switch (t_state) {
+	case ts_in_string:
+		break;
 
+	case ts_in_sharp:
+		switch (c) {
+		case '(':
+			pt (tok_paren_open_vector);
+			t_state = ts_normal;
+			break;
+		case 't':
+			pt (tok_bool_true);
+			t_state = ts_normal;
+			break;
+
+		case 'f':
+			pt (tok_bool_false);
+			t_state = ts_normal;
+			break;
+
+		case '\\':
+			t_state = ts_in_char;
+			token_rest = "";
+			break;
+
+			/*
+			 * NOTE. R5RS here also defines #e and #i prefixes for
+			 * exact and inexact numbers. This sux, because all
+			 * numbers that can possibly e entered via this parser
+			 * are exact. omitted, conversion e<->i shall be
+			 * done by some functions.
+			 */
+
+		case 'b': //binary
+		case 'o': //octal
+		case 'd': //decimal
+			t_state = ts_in_atom;
+			token_rest = "#";
+			token_rest.append (1, c);
+			break;
+		default:
+			throw 5; //undefined sharp expression
+		}
+		break;
+
+	case ts_in_char:
+		if (is_white (c) ) {
+			t_state = ts_normal;
+			pt (tok_char, &token_rest);
+		} else
+			token_rest.append (1, c);
+		break;
+
+	case ts_after_unquote:
+
+		if (c == '@') {
+			pt (tok_unquote_splice);
+			t_state = ts_normal;
+		} else {
+			pt (tok_unquote);
+			t_state = ts_normal;
+			parse_char (c);
+		}
+		break;
+
+	case ts_in_atom:
+		if (is_white (c) || (c == '(') || (c == ')') ) {
+			//TODO!!PROCESS THE TOKEN + guess the type of it.
+			//TODO TODO
+			t_state = ts_normal;
+			parse_char (c);
+		} else
+			token_rest.append (1, c);
+		break;
+
+	case ts_in_comment:
+		if (c == '\n') t_state = ts_normal;
+		break;
+
+	case ts_normal:
+	default:
+		if (is_white (c) ) return;
+		switch (c) {
+		case '(':
+			pt (tok_paren_open);
+			break;
+		case ')':
+			pt (tok_paren_close);
+			break;
+		case '\'':
+			pt (tok_quote);
+			break;
+		case '`':
+			pt (tok_quasiquote);
+			break;
+		case ',':
+			t_state = ts_after_unquote;
+			break;
+		case '#':
+			t_state = ts_in_sharp;
+			break;
+		case '"':
+			t_state = ts_in_string;
+			token_rest = "";
+			break;
+		case ';':
+			t_state = ts_in_comment;
+			break;
+		default:
+			t_state = ts_in_atom;
+			token_rest = "";
+			token_rest.append (1, c);
+			break;
+		}
+		break;
+	}
 
 	//process_token(...) here!
 }
@@ -149,6 +277,8 @@ const char* scm_classical_parser::get_parse_error (int i)
 		return "illegal dot expression";
 	case 4:
 		return "unexpected list termination";
+	case 5:
+		return "illegal sharp expression";
 	default:
 		return 0;
 	}
