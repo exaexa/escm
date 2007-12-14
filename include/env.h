@@ -17,6 +17,7 @@ class scm_env;
 
 #include "types.h"
 #include "builtins.h"
+#include "parser.h"
 
 #define new_scm(env, type, params...) \
 	(new ((env)->allocate(sizeof(type))) type ((env), ##params))
