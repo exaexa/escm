@@ -24,7 +24,6 @@ class scm_env;
 
 typedef continuation* (*scm_eval_cont_factory) (scm_env*, scm*);
 typedef continuation* (*scm_code_cont_factory) (scm_env*, pair*);
-typedef pair* (*scm_parser_func) (scm_env*, const char*);
 
 class scm_env
 {
@@ -95,6 +94,13 @@ public:
 	continuation *cont;
 
 	/*
+	 * Parser pointer.
+	 * use whichever parser you create here.
+	 */
+
+	scm_parser* parser;
+
+	/*
 	 * env uses those functions as an interface to external parts.
 	 * Use builtins to set them to "scheme" values.
 	 *
@@ -104,15 +110,12 @@ public:
 	 * marked collectable by env.
 	 */
 
-	scm_parser_func parser;
 	scm_eval_cont_factory eval_cont_factory;
 	scm_code_cont_factory codevector_cont_factory;
 
 	/*
 	 * "general-purpose" frontends
 	 */
-
-	scm_parser* parser;
 
 	scm_env (scm_parser* defaultparser = NULL,
 	         size_t heap_size = 65536,
