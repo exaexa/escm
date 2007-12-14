@@ -19,6 +19,9 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	val = 0;
 	cont = 0;
 	global_frame = new_scm (this, hashed_frame)->collectable<frame>();
+	parser = 0;
+	eval_cont_factory = 0;
+	codevector_cont_factory = 0;
 }
 
 scm_env::~scm_env()
@@ -263,21 +266,19 @@ bool scm_env::lexget (symbol*sym, int d)
 
 void scm_env::eval_code (pair*s)
 {
-	//TODO
-	//push an codevector continuation.
-	//We might add some support for default cv continuation type setting
+	push_cont (codevector_cont_factory (this ,s) );
 }
 
 void scm_env::eval_expr (scm*s)
 {
-	//nearly the same as eval_code, but pushes eval_cont instead of cv
+	push_cont (eval_cont_factory (this, s) );
 }
 
 #include "parser.h"
 
 void scm_env::eval_string (const char*s)
 {
-	pair*code = scm_parse_string (this, s);
-	eval_code (code->collectable<pair>() );
+	eval_code (parser (this, s)
+	           ->collectable<pair>() );
 }
 
