@@ -10,7 +10,7 @@
 using std::queue;
 
 
-scm_env::scm_env (size_t heap_size, size_t alignment)
+scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 {
 	heap = malloc (heap_size);
 	hs = heap_size;
@@ -19,13 +19,16 @@ scm_env::scm_env (size_t heap_size, size_t alignment)
 	val = 0;
 	cont = 0;
 	global_frame = new_scm (this, hashed_frame)->collectable<frame>();
-	parser = 0;
 	eval_cont_factory = 0;
 	codevector_cont_factory = 0;
+
+	if (par) parser = par;
+	else parser = new scm_classical_parser (this);
 }
 
 scm_env::~scm_env()
 {
+	if (parser) free (parser);
 	if (heap) free (heap);
 }
 
@@ -278,7 +281,14 @@ void scm_env::eval_expr (scm*s)
 
 void scm_env::eval_string (const char*s)
 {
-	eval_code (parser (this, s)
-	           ->collectable<pair>() );
+	if (!parser->parse_string (s) ) return;
+
+	/*
+	 * what to do on errors?? seems like this function should not
+	 * be used at all. Marked as future subject of removal.
+	 */
+
+	pair*code = parser->get_result (false);
+	if (code) eval_code (code->collectable<pair>() );
 }
 
