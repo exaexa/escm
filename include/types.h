@@ -248,7 +248,7 @@ public:
 	chained_frame_entry*next;
 
 	inline chained_frame_entry (scm_env*e,
-	                            symbol*s, scm*c, chained_frame_entry*n)
+				    symbol*s, scm*c, chained_frame_entry*n)
 			: frame_entry (e, s, c)
 	{
 		next = n;

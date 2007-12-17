@@ -56,8 +56,8 @@ void eval_continuation::eval_step (scm_env*e)
 {
 	if (pair_p (object) ) {
 		e->replace_cont (new_scm
-		                 (e, pair_continuation, (pair*) object)
-		                 ->collectable<continuation>() );
+				 (e, pair_continuation, (pair*) object)
+				 ->collectable<continuation>() );
 	}
 	if (symbol_p (object) ) {
 		e->lexget ( (symbol*) object);
@@ -75,14 +75,14 @@ void pair_continuation::eval_step (scm_env*e)
 
 		if (lambda_p (selector) ) {
 			e->replace_cont (new_scm
-			                 (e, lambda_continuation,
-			                  (lambda*) selector, list)
-			                 ->collectable<continuation>() );
+					 (e, lambda_continuation,
+					  (lambda*) selector, list)
+					 ->collectable<continuation>() );
 		} else if (syntax_p (selector) ) {
 			e->replace_cont (new_scm
-			                 (e, syntax_continuation,
-			                  (syntax*) selector, list)
-			                 ->collectable<continuation>() );
+					 (e, syntax_continuation,
+					  (syntax*) selector, list)
+					 ->collectable<continuation>() );
 		} else if (cont_p (selector) ) {
 			e->cont = (continuation*) selector;
 			if (pair_p (list->d) )
@@ -102,7 +102,7 @@ void pair_continuation::eval_step (scm_env*e)
 		}
 	} else {
 		e->push_cont (new_scm (e, eval_continuation, list->a)
-		              ->collectable<continuation>() );
+			      ->collectable<continuation>() );
 		selector_evaluated = true;
 	}
 }
@@ -117,8 +117,8 @@ void syntax_continuation::eval_step (scm_env*e)
 	} else {
 		//replace with eval of val
 		e->replace_cont (new_scm
-		                 (e, eval_continuation, e->val)
-		                 ->collectable<continuation>() );
+				 (e, eval_continuation, e->val)
+				 ->collectable<continuation>() );
 	}
 }
 
@@ -136,11 +136,11 @@ void lambda_continuation::eval_step (scm_env*e)
 		if (pair_p (arglist) ) {
 			arglist_pos = 1;
 			e->push_cont (new_scm (e, eval_continuation, arglist->a)
-			              ->collectable<continuation>() );
+				      ->collectable<continuation>() );
 		} else if (arglist) {
 			arglist_pos = 2;
 			e->push_cont (new_scm (e, eval_continuation, arglist)
-			              ->collectable<continuation>() );
+				      ->collectable<continuation>() );
 		} else {
 			l->apply (e, evaluated_args);
 		}

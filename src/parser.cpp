@@ -12,11 +12,7 @@ enum { //token type
 	tok_paren_open_vector,
 	tok_paren_close,
 	tok_dot,
-	tok_number_decimal,
-	tok_number_binary,
-	tok_number_octal,
-	tok_number_hex,
-	tok_symbol,
+	tok_symbol_or_number,
 	tok_string,
 	tok_char,
 	tok_bool_true,
@@ -31,6 +27,7 @@ enum { //token type
 enum { //tokenizer state
 	ts_normal,
 	ts_in_string,
+	ts_in_string_backslashed,
 	ts_in_sharp,
 	ts_in_char,
 	ts_after_unquote,
@@ -143,6 +140,62 @@ void scm_classical_parser::parse_char (char c)
 #define pt process_token
 	switch (t_state) {
 	case ts_in_string:
+		switch (c) {
+		case '"':
+			pt (tok_string, &token_rest);
+			token_rest.clear();
+			t_state = ts_normal;
+			break;
+		case '\\':
+			t_state = ts_in_string_backslashed;
+			break;
+		default:
+			token_rest.append (1, c);
+		}
+		break;
+
+	case ts_in_string_backslashed:
+		switch (c) {
+		case '\\':
+		case '"':
+			token_rest.append (1, c);
+			break;
+
+			/*
+			 * TODO
+			 * someone could invent better "conversion" mechanism ;D
+			 */
+		case 'a':
+			token_rest.append (1, '\a');
+			break;
+
+		case 'b':
+			token_rest.append (1, '\b');
+			break;
+
+		case 'f':
+			token_rest.append (1, '\f');
+			break;
+
+		case 'n':
+			token_rest.append (1, '\n');
+			break;
+
+		case 'r':
+			token_rest.append (1, '\r');
+			break;
+
+		case 't':
+			token_rest.append (1, '\t');
+			break;
+
+		case 'v':
+			token_rest.append (1, '\v');
+			break;
+		}
+
+		t_state = ts_in_string;
+
 		break;
 
 	case ts_in_sharp:
@@ -169,9 +222,9 @@ void scm_classical_parser::parse_char (char c)
 			/*
 			 * NOTE. R5RS here also defines #e and #i prefixes for
 			 * exact and inexact numbers. This sux, because all
-			 * numbers that can possibly e entered via this parser
-			 * are exact. omitted, conversion e<->i shall be
-			 * done by some functions.
+			 * numbers that can possibly be entered via this parser
+			 * are exact -> omitted; conversion e<->i shall be
+			 * done by some function.
 			 */
 
 		case 'b': //binary
@@ -190,6 +243,7 @@ void scm_classical_parser::parse_char (char c)
 		if (is_white (c) ) {
 			t_state = ts_normal;
 			pt (tok_char, &token_rest);
+			token_rest.clear();
 		} else
 			token_rest.append (1, c);
 		break;
@@ -208,8 +262,8 @@ void scm_classical_parser::parse_char (char c)
 
 	case ts_in_atom:
 		if (is_white (c) || (c == '(') || (c == ')') ) {
-			//TODO!!PROCESS THE TOKEN + guess the type of it.
-			//TODO TODO
+			pt (tok_symbol_or_number, &token_rest);
+			token_rest.clear();
 			t_state = ts_normal;
 			parse_char (c);
 		} else
@@ -257,8 +311,6 @@ void scm_classical_parser::parse_char (char c)
 		}
 		break;
 	}
-
-	//process_token(...) here!
 }
 
 scm_classical_parser::scm_classical_parser (scm_env*e) : scm_parser (e)
