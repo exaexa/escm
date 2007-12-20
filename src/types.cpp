@@ -31,6 +31,70 @@ void scm::mark_collectable()
 }
 
 /*
+ * PAIR
+ */
+
+int pair::list_length()
+{
+	pair *a = this, *b = this; //a moves 2x faster than b, we detect "overtakes"
+	int size = 0;
+	while (a) {
+		a = pair_p (a->d); //pair_p may be used as dynamic_cast;) useful!
+		if (a == b) return -1; // cycle detected
+		if (size&1)
+			b = pair_p (b->d);
+		++size;
+	}
+	return size;
+}
+
+/*
+ * list_loop_position
+ *
+ * this one has terrible time (O(n^2)), use it only for lists you are sure
+ * they are loops.
+ */
+int pair::list_loop_position()
+{
+	pair*a = this, *b;
+	int i = 0;
+	while (a) {
+		b = a;
+		while (b && (b != a) ) b = pair_p (b->d);
+		if (b) return i;
+		++i;
+		a = pair_p (a->d);
+	}
+	return -1;
+}
+
+/*
+ * same problem, terrible time on cyclic lists
+ */
+int pair::list_size()
+{
+	int i = list_length(), j = 0;
+	if (i >= 0) return i;
+	j = i = list_loop_position();
+
+	pair*a = this, *b;
+
+	while (i >= 0) {
+		--i;
+		a = pair_p (a->d);
+	}
+
+	b = a;
+
+	while (b && (b->d != a) ) {
+		++j;
+		b = pair_p (b->d);
+	}
+
+	return j;
+}
+
+/*
  * STRINGS AND SYMBOLS
  */
 
@@ -75,6 +139,59 @@ text::text (scm_env*e, const char*c, int len) : scm (e)
 		++c;
 	}
 	*p = 0;
+}
+
+/*
+ * VECTOR
+ */
+
+bool vector::alloc (scm_env*e, size_t size)
+{
+	d = new_data_scm (e, sizeof (scm*) * size);
+	if (!d) {
+		this->size = 0;
+		return false;
+	}
+	this->size = size;
+	return true;
+}
+
+vector::vector (scm_env*e, size_t size) : scm (e)
+{
+	if (!alloc (e, size) ) return;
+	for (size_t i = 0;i < size;++i)  ( (scm**) dataof (d) ) [i] = 0;
+}
+
+vector::vector (scm_env*e, pair* l) : scm (e)
+{
+	if (!l) {
+		d = 0;
+		size = 0;
+		return;
+	}
+	size = l->list_size();
+	for (int i = 0;i < (int) size;++i) {
+		( (scm**) dataof (d) ) [i] = l->a;
+		l = pair_p (l->d);
+	}
+}
+
+scm* vector::ref (size_t i)
+{
+	if (i < size) return ( (scm**) dataof (d) ) [i];
+	return 0;
+}
+
+void vector::set (size_t i, scm*a)
+{
+	if (i < size) ( (scm**) dataof (d) ) [i] = a;
+}
+
+scm* vector::get_child (int i)
+{
+	if (i < (int) size) return ref (i);
+	if (i == (int) size) return d;
+	return scm_no_more_children;
 }
 
 /*

@@ -91,10 +91,19 @@ public:
 		a = addr;
 		d = dat;
 	}
+
+	//returns -1 if the list is cyclic
+	int list_length();
+
+	//if is cyclic, return which element is being referenced by the "tail"
+	int list_loop_position();
+
+	//returns true number of elements in the list (loop+
+	int list_size();
 };
 
 #define pair_p(a) (dynamic_cast<pair*>(a))
-#define atom_p(a) (!dynamic_cast<pair*>(a))
+#define atom_p(a) ((dynamic_cast<pair*>(a))?0:a)
 
 /*
  * Data placeholder is here for data:D
@@ -190,6 +199,21 @@ public:
 
 #define symbol_p(a) (dynamic_cast<symbol*>(a))
 
+
+class vector : public scm
+{
+	bool alloc (scm_env*e, size_t size);
+public:
+	data_placeholder*d;
+	size_t size;
+
+	vector (scm_env*e, size_t size);
+	vector (scm_env*e, pair*);
+	scm*ref (size_t i);
+	void set (size_t i, scm*d);
+
+	virtual scm* get_child (int);
+};
 
 /*
  * FRAMES
