@@ -98,8 +98,13 @@ void scm_classical_parser::pop()
 	if (stack.size() <= 1) throw 4;
 
 	scm*result = cont().result;
+	bool vectorize = cont().return_vector;
 	stack.pop_front();
-	append (result);
+	if (vectorize) {
+		vector*v = new_scm (env, vector, result);
+		result.mark_collectable();
+		append (v);
+	} else append (result);
 }
 
 void scm_classical_parser::append (scm*s)
@@ -124,8 +129,69 @@ void scm_classical_parser::append (scm*s)
 	if (cont().pop_after_next) pop();
 }
 
-void process_token (int type, const String* tok)
-{}
+void scm_classical_parser::process_token (int type, const String* tok)
+{
+	switch (type) {
+
+	case tok_paren_open:
+		push();
+		break;
+
+	case tok_paren_open_vector:
+		push();
+		cont().return_vector = 1;
+		break;
+
+	case tok_paren_close:
+		pop();
+		break;
+
+	case tok_dot:
+		cont().tail_next = 1;
+		break;
+
+	case tok_symbol_or_number:
+		//detect what it is, append it!
+		break;
+
+	case tok_string:
+		append(new_scm(env,string,tok->c_str()));
+		break;
+
+	case tok_char:
+		append(new_scm(env,character,tok->c_str()[0]));
+		break;
+
+	case tok_bool_true:
+		append(new_scm(env,boolean,true));
+		break;
+
+	case tok_bool_false:
+		append(new_scm(env,boolean,false));
+		break;
+
+	case tok_quote:
+	case tok_quasiquote:
+	case tok_unquote:
+	case tok_unquote_splice:
+		{
+			const char*t;
+			switch(type){
+			case tok_quote: t="quote"; break;
+			case tok_quasiquote: t="quasiquote"; break;
+			case tok_unquote: t="unquote"; break;
+			case tok_unquote_splice: t="unquote-splicing"; break;
+			}
+			push();
+			append(new_scm(env,symbol,t));
+			cont().pop_after_next=1;
+		}
+		break;
+
+	default:
+		throw 6;
+	}
+}
 
 static bool is_white (char c)
 {
@@ -137,6 +203,11 @@ static bool is_white (char c)
 
 void scm_classical_parser::parse_char (char c)
 {
+	if (c == '\n') {
+		++pos.row;
+		pos.col = 0;
+	} else ++pos.col;
+
 #define pt process_token
 	switch (t_state) {
 	case ts_in_string:
@@ -331,6 +402,8 @@ const char* scm_classical_parser::get_parse_error (int i)
 		return "unexpected list termination";
 	case 5:
 		return "illegal sharp expression";
+	case 6:
+		return "internal parser error";
 	default:
 		return 0;
 	}
