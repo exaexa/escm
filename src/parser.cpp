@@ -97,12 +97,12 @@ void scm_classical_parser::pop()
 	if (cont().tail_next) throw 3;
 	if (stack.size() <= 1) throw 4;
 
-	scm*result = cont().result;
+	pair*result = cont().result;
 	bool vectorize = cont().return_vector;
 	stack.pop_front();
 	if (vectorize) {
 		vector*v = new_scm (env, vector, result);
-		result.mark_collectable();
+		result->mark_collectable();
 		append (v);
 	} else append (result);
 }
@@ -155,38 +155,47 @@ void scm_classical_parser::process_token (int type, const String* tok)
 		break;
 
 	case tok_string:
-		append(new_scm(env,string,tok->c_str()));
+		append (new_scm (env, string, tok->c_str() ) );
 		break;
 
 	case tok_char:
-		append(new_scm(env,character,tok->c_str()[0]));
+		append (new_scm (env, character, tok->c_str() [0]) );
 		break;
 
 	case tok_bool_true:
-		append(new_scm(env,boolean,true));
+		append (new_scm (env, boolean, true) );
 		break;
 
 	case tok_bool_false:
-		append(new_scm(env,boolean,false));
+		append (new_scm (env, boolean, false) );
 		break;
 
 	case tok_quote:
 	case tok_quasiquote:
 	case tok_unquote:
-	case tok_unquote_splice:
-		{
-			const char*t;
-			switch(type){
-			case tok_quote: t="quote"; break;
-			case tok_quasiquote: t="quasiquote"; break;
-			case tok_unquote: t="unquote"; break;
-			case tok_unquote_splice: t="unquote-splicing"; break;
-			}
-			push();
-			append(new_scm(env,symbol,t));
-			cont().pop_after_next=1;
+	case tok_unquote_splice: {
+		const char*t;
+		switch (type) {
+		case tok_quote:
+			t = "quote";
+			break;
+		case tok_quasiquote:
+			t = "quasiquote";
+			break;
+		case tok_unquote:
+			t = "unquote";
+			break;
+		case tok_unquote_splice:
+			t = "unquote-splicing";
+			break;
+		default:
+			throw 6;
 		}
-		break;
+		push();
+		append (new_scm (env, symbol, t) );
+		cont().pop_after_next = 1;
+	}
+	break;
 
 	default:
 		throw 6;
