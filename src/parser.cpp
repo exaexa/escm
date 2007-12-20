@@ -203,7 +203,7 @@ static int guess_token_type (const String& s)
 		} else if (!digit_check (s[i]) ) break;
 		else ++dc;
 
-	if (i == len) {
+	if ( (i == len) && dc) {
 		if (s[0] == '#') {
 			switch (s[1]) {
 			case 'b':
