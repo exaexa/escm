@@ -129,6 +129,100 @@ void scm_classical_parser::append (scm*s)
 	if (cont().pop_after_next) pop();
 }
 
+enum { //symbol or number type
+	type_symbol,
+	type_number_decimal,
+	type_number_decimal_prefix,
+	type_number_octal_prefix,
+	type_number_binary_prefix,
+	type_number_hex_prefix
+};
+
+static bool is_binary_digit (char c)
+{
+	return (c == '0') || (c == '1');
+}
+
+static bool is_octal_digit (char c)
+{
+	return (c >= '0') && (c <= '7');
+}
+
+static bool is_decimal_digit (char c)
+{
+	return (c >= '0') && (c <= '9');
+}
+
+static bool is_hex_digit (char c)
+{
+	return ( (c >= '0') && (c <= '9') )
+	       || ( (c >= 'a') && (c <= 'f') )
+	       || ( (c >= 'A') && (c <= 'F') );
+}
+
+static int guess_token_type (const String& s)
+{
+	//first, check if we have a prefix
+	int i, len = s.length();
+	bool (*digit_check) (char);
+	if ( (len > 2) && (s[0] == '#') ) {
+
+		switch (s[1]) {
+		case 'b':
+			digit_check = is_binary_digit;
+			break;
+		case 'o':
+			digit_check = is_octal_digit;
+			break;
+		case 'd':
+			digit_check = is_decimal_digit;
+			break;
+		case 'x':
+			digit_check = is_hex_digit;
+			break;
+		default:
+			digit_check = 0;
+		}
+	}
+
+	int cc = 0; //comma count. shloud be <=1
+	int dc = 0; //digit count. shloud be >0. also, no digits before minus.
+	int minus = 0; //minus unacceptable?
+	if (!digit_check) {
+		i = 0;
+		digit_check = is_decimal_digit;
+	} else i = 2;
+	for (;i < len;++i)
+		if (s[i] == '.') {
+			++cc;
+			minus = 1;
+		} else if (s[i] == '-') {
+			if (minus) break;
+			minus = 1;
+			if (dc) break;
+		} else if (!digit_check (s[i]) ) break;
+		else ++dc;
+
+	if (i == len) {
+		if (s[0] == '#') {
+			switch (s[1]) {
+			case 'b':
+				return type_number_binary_prefix;
+			case 'o':
+				return type_number_octal_prefix;
+			case 'd':
+				return type_number_decimal_prefix;
+			case 'x':
+				return type_number_hex_prefix;
+			default:
+				throw 6;
+			}
+		} else return type_number_decimal;
+	}
+
+	return type_symbol;
+}
+
 void scm_classical_parser::process_token (int type, const String* tok)
 {
 	switch (type) {
@@ -310,6 +404,7 @@ void scm_classical_parser::parse_char (char c)
 		case 'b': //binary
 		case 'o': //octal
 		case 'd': //decimal
+		case 'x': //hexadecimal
 			t_state = ts_in_atom;
 			token_rest = "#";
 			token_rest.append (1, c);
