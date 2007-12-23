@@ -160,7 +160,14 @@ public:
 
 class number : public scm
 {
-	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE WE WANT!
+	//TODO
+	
+	double n;
+	bool exact;
+
+	number (scm_env*, const char*);
+	number (scm_env* e, double num, bool ex=true):scm(e),n(num),exact(ex)
+	{}
 };
 
 class text : public scm
