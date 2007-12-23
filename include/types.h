@@ -160,6 +160,7 @@ public:
 
 class number : public scm
 {
+public:
 	//TODO
 	
 	double n;
