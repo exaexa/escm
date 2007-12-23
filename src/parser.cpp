@@ -245,7 +245,10 @@ void scm_classical_parser::process_token (int type, const String* tok)
 		break;
 
 	case tok_symbol_or_number:
-		//detect what it is, append it!
+		if (guess_token_type (*tok) == type_symbol)
+			append (new_scm (env, symbol, tok->c_str() ) );
+		else
+			append (new_scm (env, number, tok->c_str() ) );
 		break;
 
 	case tok_string:
