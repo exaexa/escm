@@ -256,11 +256,11 @@ public:
 	inline frame (scm_env*e) : scm (e)
 	{}
 
-	virtual bool lookup (symbol*, scm**)=0;
-	virtual bool set (symbol*, scm*)=0;
-	virtual scm* define (scm_env*e, symbol*, scm*)=0;
+	virtual bool lookup (symbol*, scm**) = 0;
+	virtual bool set (symbol*, scm*) = 0;
+	virtual scm* define (scm_env*e, symbol*, scm*) = 0;
 
-	virtual scm* get_child (int)=0;
+	virtual scm* get_child (int) = 0;
 };
 
 //normal binding pair

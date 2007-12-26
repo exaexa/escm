@@ -11,7 +11,8 @@ protected:
 public:
 	inline scm_parser (scm_env*e) : env (e)
 	{}
-	inline virtual ~scm_parser(){}
+	inline virtual ~scm_parser()
+	{}
 
 	virtual int parse_string (const char* str) = 0;
 	virtual pair* get_result (bool keep) = 0;

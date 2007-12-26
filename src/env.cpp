@@ -16,6 +16,13 @@ scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 	hs = heap_size;
 	align = alignment;
 
+	{
+		gc_heap_entry h;
+		h.size = heap_size;
+		h.start = 0;
+		free_space.insert (h);
+	}
+
 	val = 0;
 	cont = 0;
 	global_frame = new_scm (this, hashed_frame)->collectable<frame>();
@@ -47,6 +54,7 @@ void * scm_env::new_heap_object (size_t size)
 
 	for (i = free_space.begin();i != free_space.end();++i)
 		if (i->size >= size) {
+			dprint ("%d\n", i->size);
 
 			he = *i;
 
@@ -65,6 +73,7 @@ void * scm_env::new_heap_object (size_t size)
 			return t; //finish searching
 		}
 
+	dprint ("out of memory\n");
 	return 0;  //too bad, none found. we shall collect.
 }
 
@@ -72,6 +81,7 @@ void * scm_env::allocate (size_t size)
 {
 	//Try to Allocate, then try to sweep and allocate, then die.
 	void*d;
+	dprint ("Allocating %d bytes\n", (int) size);
 	d = new_heap_object (size);
 	if (d) return d;
 	collect_garbage();
@@ -269,7 +279,7 @@ bool scm_env::lexget (symbol*sym, int d)
 
 void scm_env::eval_code (pair*s)
 {
-	push_cont (codevector_cont_factory (this ,s) );
+	push_cont (codevector_cont_factory (this , s) );
 }
 
 void scm_env::eval_expr (scm*s)

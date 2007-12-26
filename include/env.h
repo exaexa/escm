@@ -3,6 +3,8 @@
 #ifndef _ESCM_ENV_
 #define _ESCM_ENV_
 
+#include "debug.h"
+
 /*
  * This class contains all the things needed to run scheme. One scm_env is equal
  * to one execution environment with separate memory/procs/data/everything.
