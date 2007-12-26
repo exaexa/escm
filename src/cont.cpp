@@ -132,7 +132,7 @@ void lambda_continuation::eval_step (scm_env*e)
 			scm**temp = & ( (*evaluated_args_d)->d);
 			evaluated_args_d = (pair**) temp;
 		}
-	case 0: //initial
+	case 0: //initial (note break is missing here with a reason!)
 		if (pair_p (arglist) ) {
 			arglist_pos = 1;
 			e->push_cont (new_scm (e, eval_continuation, arglist->a)

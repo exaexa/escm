@@ -182,7 +182,15 @@ public:
 	void pow (number*);
 	void log (number*);
 	void exp();
+
+	inline void set (number*a)
+	{
+		n = a->n;
+		exact = a->exact;
+	}
 };
+
+#define number_p(a) (dynamic_cast<number*>(a))
 
 class text : public scm
 {
@@ -368,7 +376,7 @@ public:
 
 #define lambda_p(a) (dynamic_cast<lambda*>(a))
 
-typedef scm* (*scm_c_func) (scm_env*, scm* args);
+typedef void (*scm_c_func) (scm_env*, scm* args);
 
 class extern_func : public lambda
 {
@@ -422,13 +430,13 @@ class syntax : public scm
 public:
 	syntax (scm_env*e) : scm (e)
 	{}
-	virtual scm* apply (scm_env*e, pair*code) = 0;
+	virtual void apply (scm_env*e, pair*code) = 0;
 };
 
 #define syntax_p(a) (dynamic_cast<syntax*>(a))
 
 
-typedef scm* (*scm_c_macro) (scm_env*, pair*);
+typedef void (*scm_c_macro) (scm_env*, pair*);
 
 class extern_syntax : public syntax
 {
@@ -440,9 +448,9 @@ public:
 		handler = h;
 	}
 
-	inline virtual scm* apply (scm_env*e, pair*code)
+	inline virtual void apply (scm_env*e, pair*code)
 	{
-		return handler (e, code);
+		handler (e, code);
 	}
 };
 
@@ -481,7 +489,7 @@ public:
 		}
 	}
 
-	virtual scm* apply (scm_env*e, pair*code); //TODO
+	virtual void apply (scm_env*e, pair*code); //TODO
 };
 
 /*
