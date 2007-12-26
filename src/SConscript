@@ -8,7 +8,7 @@ for i in ld:
 		if i[-4:].lower()=='.cpp':
 			files.append(i)
 
-retval=env.SharedObject(files)
+retval=env.Object(files)
 Return('retval')
 
 
