@@ -79,7 +79,7 @@ class pair : public scm
 public:
 	scm *a, *d;
 
-	scm *get_child (int i)
+	virtual scm *get_child (int i)
 	{
 		if (!i) return a ;
 		if (i > 1) return scm_no_more_children;
@@ -197,7 +197,7 @@ class text : public scm
 public:
 	data_placeholder*d;
 
-	virtual inline scm* get_child (int i)
+	virtual scm* get_child (int i)
 	{
 		if (i) return scm_no_more_children ;
 		else return d;
@@ -256,16 +256,11 @@ public:
 	inline frame (scm_env*e) : scm (e)
 	{}
 
-	virtual bool lookup (symbol*, scm**);
-	virtual bool set (symbol*, scm*);
-	virtual scm* define (scm_env*e, symbol*, scm*);
+	virtual bool lookup (symbol*, scm**)=0;
+	virtual bool set (symbol*, scm*)=0;
+	virtual scm* define (scm_env*e, symbol*, scm*)=0;
 
-	virtual scm* get_child (int);
-
-	/*
-	 * think about: what if we also created a recursive
-	 * lookup function just here?
-	 */
+	virtual scm* get_child (int)=0;
 };
 
 //normal binding pair
@@ -406,7 +401,7 @@ public:
 
 	virtual void apply (scm_env* e, scm* args);
 
-	inline scm* get_child (int i)
+	virtual scm* get_child (int i)
 	{
 		switch (i) {
 		case 0:

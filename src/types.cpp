@@ -440,9 +440,9 @@ closure::closure (scm_env*e, pair*Arglist,
 	paramcount = i;
 }
 
-/* FIXME FIXME FIXME
-void closure::apply (scm_env*e)
+void closure::apply (scm_env*e, scm*args)
 {
+	/*
 	//TODO this should move to lambda_continuation
 	pair *argdata = (pair*) (e->val), *argname = arglist;
 	frame*f;
@@ -470,5 +470,6 @@ void closure::apply (scm_env*e)
 		}
 
 	//TODO create new environment
-} FIXME FIXME FIXME*/
+	 FIXME FIXME FIXME*/
+}
 

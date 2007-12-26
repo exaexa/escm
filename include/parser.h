@@ -11,14 +11,13 @@ protected:
 public:
 	inline scm_parser (scm_env*e) : env (e)
 	{}
-	inline virtual ~scm_parser()
-	{}
+	inline virtual ~scm_parser(){}
 
 	virtual int parse_string (const char* str) = 0;
 	virtual pair* get_result (bool keep) = 0;
 	virtual void reset() = 0;
 	virtual int end_stream() = 0;
-	virtual const char* get_parse_error (int);
+	virtual const char* get_parse_error (int) = 0;
 };
 
 #include <string>
