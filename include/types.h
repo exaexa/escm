@@ -160,8 +160,37 @@ public:
 
 class number : public scm
 {
-	int n; //TODO if someone would... OMG FIX IT! UNLIMITED SIZE WE WANT!
+public:
+	//TODO
+
+	double n;
+	bool exact;
+
+	number (scm_env*, const char*);
+	number (scm_env*, int);
+	number (scm_env*, double);
+	number (scm_env* e, double num, bool ex = true) : scm (e), n (num), exact (ex)
+	{}
+
+	void zero();
+	void neg();
+	void add (number*);
+	void sub (number*);
+	void mul (number*);
+	void div (number*);
+	void mod (number*);
+	void pow (number*);
+	void log (number*);
+	void exp();
+
+	inline void set (number*a)
+	{
+		n = a->n;
+		exact = a->exact;
+	}
 };
+
+#define number_p(a) (dynamic_cast<number*>(a))
 
 class text : public scm
 {
@@ -272,7 +301,7 @@ public:
 	chained_frame_entry*next;
 
 	inline chained_frame_entry (scm_env*e,
-	                            symbol*s, scm*c, chained_frame_entry*n)
+				    symbol*s, scm*c, chained_frame_entry*n)
 			: frame_entry (e, s, c)
 	{
 		next = n;
@@ -347,7 +376,7 @@ public:
 
 #define lambda_p(a) (dynamic_cast<lambda*>(a))
 
-typedef scm* (*scm_c_func) (scm_env*, scm* args);
+typedef void (*scm_c_func) (scm_env*, scm* args);
 
 class extern_func : public lambda
 {
@@ -401,7 +430,7 @@ class syntax : public scm
 public:
 	syntax (scm_env*e) : scm (e)
 	{}
-	virtual scm* apply (scm_env*e, pair*code) = 0;
+	virtual void apply (scm_env*e, pair*code) = 0;
 };
 
 #define syntax_p(a) (dynamic_cast<syntax*>(a))
@@ -424,7 +453,7 @@ public:
  *
  */
 
-typedef scm* (*scm_c_macro) (scm_env*, pair*);
+typedef void (*scm_c_macro) (scm_env*, pair*);
 
 class extern_syntax : public syntax
 {
@@ -436,9 +465,9 @@ public:
 		handler = h;
 	}
 
-	inline virtual scm* apply (scm_env*e, pair*code)
+	inline virtual void apply (scm_env*e, pair*code)
 	{
-		return handler (e, code);
+		handler (e, code);
 	}
 };
 
@@ -467,7 +496,7 @@ public:
 		}
 	}
 
-	virtual scm* apply (scm_env*e, pair*code); //TODO
+	virtual void apply (scm_env*e, pair*code); //TODO
 };
 
 /*

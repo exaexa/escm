@@ -144,7 +144,7 @@ public:
 	pair **evaluated_args_d;
 
 	inline lambda_continuation (scm_env*e,
-	                            lambda*lam, pair*code)
+				    lambda*lam, pair*code)
 			: continuation (e)
 	{
 		l = lam;

@@ -22,9 +22,9 @@ void scm::mark_collectable()
 		if (v) if (is_scm_protected (v) ) {
 				mark_scm_collectable (v);
 				for (i = 0;
-				        (t = v->get_child (i++) )
-				        != scm_no_more_children
-				        ;)
+						(t = v->get_child (i++) )
+						!= scm_no_more_children
+						;)
 					if (t) q.push (t);
 			}
 	}
@@ -224,7 +224,7 @@ hashed_frame::hashed_frame (scm_env*e) : frame (e)
 	chained_frame_entry**t;
 
 	table = new_data_scm (e,
-	                      sizeof (chained_frame_entry*) * hash_table_size);
+			      sizeof (chained_frame_entry*) * hash_table_size);
 	if (!table) return;
 
 	t = (chained_frame_entry**) dataof (table);
@@ -233,11 +233,11 @@ hashed_frame::hashed_frame (scm_env*e) : frame (e)
 }
 
 bool hashed_frame::lookup_frame (symbol*s, chained_frame_entry**result,
-                                 int hash)
+				 int hash)
 {
 	chained_frame_entry*p =
-	    ( (chained_frame_entry**) dataof (table) )
-	    [ (hash>=0) ?hash:hash_string ( (const char*) dataof (s->d) ) ];
+		( (chained_frame_entry**) dataof (table) )
+		[ (hash>=0) ?hash:hash_string ( (const char*) dataof (s->d) ) ];
 	while (p) {
 		if (!s->cmp (p->name) ) {
 			*result = p;
@@ -279,7 +279,7 @@ scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
 	}
 
 	f = new_scm (e, chained_frame_entry, s, d,
-	             ( (chained_frame_entry**) dataof (table) ) [hash])
+		     ( (chained_frame_entry**) dataof (table) ) [hash])
 	    ->collectable<chained_frame_entry>();
 	if (!f) return 0;
 
@@ -337,7 +337,7 @@ int local_frame::get_index (symbol*name)
 	 */
 
 	printf ("!!! bad lookup in local_frame at %p, data at %p\n",
-	        this, table);
+		this, table);
 	return -1;
 }
 
@@ -393,7 +393,7 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 		size_t new_size = size + 1; //compute new frame size
 
 		local_frame* f = new_scm (e, local_frame, new_size)
-		                 ->collectable<local_frame>();
+				 ->collectable<local_frame>();
 		if (!f) return 0;
 
 		/*
@@ -425,7 +425,7 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
  */
 
 closure::closure (scm_env*e, pair*Arglist,
-                  pair*Ip, frame*Env) : lambda (e)
+		  pair*Ip, frame*Env) : lambda (e)
 {
 	int i;
 	arglist = Arglist;
