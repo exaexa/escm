@@ -162,13 +162,26 @@ class number : public scm
 {
 public:
 	//TODO
-	
+
 	double n;
 	bool exact;
 
 	number (scm_env*, const char*);
-	number (scm_env* e, double num, bool ex=true):scm(e),n(num),exact(ex)
+	number (scm_env*, int);
+	number (scm_env*, double);
+	number (scm_env* e, double num, bool ex = true) : scm (e), n (num), exact (ex)
 	{}
+
+	void zero();
+	void neg();
+	void add (number*);
+	void sub (number*);
+	void mul (number*);
+	void div (number*);
+	void mod (number*);
+	void pow (number*);
+	void log (number*);
+	void exp();
 };
 
 class text : public scm
