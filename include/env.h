@@ -29,6 +29,8 @@ typedef continuation* (*scm_code_cont_factory) (scm_env*, pair*);
 
 class scm_env
 {
+public:
+
 	/*
 	 * memory allocator
 	 */
@@ -73,8 +75,6 @@ class scm_env
 	list<scm*> collector_queue;
 
 	void* new_heap_object (size_t size);
-
-public:
 
 	/*
 	 * memory management

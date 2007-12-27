@@ -8,6 +8,9 @@
 	general escm todo
 
 
+] we might catch memory exceptions as real c++ exceptions. Otherwise check
+	if all new_scm's are checked for returning zero.
+
 ] come up with some reasonable hash function for hashed_frame.
 
 ] make collector heap dynamic 

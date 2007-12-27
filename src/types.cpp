@@ -3,6 +3,12 @@
 #include <queue>
 using std::queue;
 
+scm::scm (scm_env*e)
+{
+	flags = scmf_nocollect;
+	e->collector_queue.push_front (this);
+}
+
 /*
  * note. because of compatibility with embedded systems, we'll later
  * try not to use as much library functions as we'll be able to;)

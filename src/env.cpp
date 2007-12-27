@@ -68,7 +68,11 @@ void * scm_env::new_heap_object (size_t size)
 	for (i = free_space.begin();i != free_space.end();++i)
 		if (i->size >= size) {
 
+			dprint ("free block: %ld\n", i->size);
+
 			he = *i;
+
+			allocated_space.insert (gc_heap_entry (he.start, size) );
 
 			//remove old free space entry
 			free_space.erase (i);
@@ -82,9 +86,10 @@ void * scm_env::new_heap_object (size_t size)
 				he.start += size; //move it and push it back
 				free_space.insert (he);
 			}
+
 			return t; //finish searching
 		}
-
+	dprint ("out of memory\n");
 	return 0;  //too bad, none found. we shall collect.
 }
 
@@ -97,7 +102,8 @@ void * scm_env::allocate (size_t size)
 	collect_garbage();
 	d = new_heap_object (size);
 	if (d) return d;
-	else return 0;
+	dprint ("HARD out of memory\n");
+	return 0;
 }
 
 void scm_env::deallocate (void* p)
@@ -105,10 +111,12 @@ void scm_env::deallocate (void* p)
 	set<gc_heap_entry>::iterator i;
 	i = allocated_space.find
 	    (gc_heap_entry ( (byte*) p - (byte*) heap, 0) );
-	//note. heap entries are indexed by start, not by size,
-	//so the zero here doesn't harm anything.
-	if (i != allocated_space.end() ) free_space.insert (*i);
-	allocated_space.erase (i);
+	if (i != allocated_space.end() ) {
+		free_space.insert (*i);
+		allocated_space.erase (i);
+	} else {
+		dprint ("deallocating unknown block %p !!!\n", p);
+	}
 }
 
 void scm_env::sort_out_free_space()
@@ -156,7 +164,7 @@ void scm_env::sort_out_free_space()
 
 void scm_env::collect_garbage ()
 {
-	set<scm*> active, unused;
+	set<scm*> active;
 	queue<scm*> processing;
 	list<scm*>::iterator i;
 	set<scm*>::iterator k, l;
@@ -165,6 +173,8 @@ void scm_env::collect_garbage ()
 
 	//TODO, IMPROVE THE COLLECTOR! OOH PLZ SOMEONE!
 	//TODO2, find out how?!
+
+	dprint ("----- GC\n");
 
 	for (i = collector_queue.begin();i != collector_queue.end();++i)
 		collector.insert (*i);
@@ -176,7 +186,10 @@ void scm_env::collect_garbage ()
 	processing.push (cont);
 
 	for (k = collector.begin();k != collector.end();++k)
-		if ( is_scm_protected (*k) ) processing.push (*k);
+		if ( is_scm_protected (*k) ) {
+			dprint ("adding protected %p\n", *k);
+			processing.push (*k);
+		}
 
 	while (!processing.empty() ) {
 
@@ -187,8 +200,8 @@ void scm_env::collect_garbage ()
 
 		active.insert (v);
 
-		for (a = 0;
-				(t = v->get_child (a++) ) != scm_no_more_children ;) {
+		for (a = 0; (t = v->get_child (a++) )
+				!= scm_no_more_children ;) {
 			if (t) processing.push (t);
 		}
 	}
@@ -197,15 +210,26 @@ void scm_env::collect_garbage ()
 	l = collector.begin();
 	while (l != collector.end() ) {
 		while ( (*k) > (*l) ) {
-			if ( is_scm_protected (*l) );
-			else deallocate (*l);
+			if ( is_scm_protected (*l) )
+				dprint ("%p is protected\n", *l);
+			else {
+				dprint ("deallocating %p\n", *l);
+				collector_queue.push_front (*l);
+			}
 			++l;
 		}
 		++k;
 		++l;
 	}
 
+	for (i = collector_queue.begin();i != collector_queue.end();++i) {
+		deallocate (*i);
+		collector.erase (*i);
+	}
+	collector_queue.clear();
+
 	sort_out_free_space();
+	dprint ("----- GC done\n");
 }
 
 

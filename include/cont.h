@@ -23,6 +23,8 @@ public:
 			return ip;
 		case 1:
 			return parent;
+		case 2:
+			return env;
 		default:
 			return scm_no_more_children;
 		}
@@ -49,6 +51,8 @@ public:
 			return object;
 		case 1:
 			return parent;
+		case 2:
+			return env;
 		default:
 			return scm_no_more_children;
 		}
@@ -83,6 +87,8 @@ public:
 			return list;
 		case 1:
 			return parent;
+		case 2:
+			return env;
 		default:
 			return scm_no_more_children;
 		}
@@ -114,6 +120,8 @@ public:
 			return code;
 		case 2:
 			return parent;
+		case 3:
+			return env;
 		default:
 			return scm_no_more_children;
 		}
@@ -166,6 +174,10 @@ public:
 			return arglist;
 		case 2:
 			return evaluated_args;
+		case 3:
+			return parent;
+		case 4:
+			return env;
 
 			/*NOTE - no need to mark *evaluated_args_d */
 

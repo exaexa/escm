@@ -137,7 +137,8 @@ void lambda_continuation::eval_step (scm_env*e)
 	switch (arglist_pos) {
 	case 1: //we have evaluated list arg
 		arglist = (pair*) (arglist->d);
-		* (pair**) evaluated_args_d = new_scm (e, pair, e->val, 0);
+		* (pair**) evaluated_args_d = new_scm (e, pair, e->val, 0)
+					      ->collectable<pair>();
 		{
 			scm**temp = & ( (*evaluated_args_d)->d);
 			evaluated_args_d = (pair**) temp;

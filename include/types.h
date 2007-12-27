@@ -46,10 +46,7 @@ protected:
 	char flags;
 public:
 
-	inline scm (scm_env*)
-	{
-		flags = scmf_nocollect;
-	}
+	scm (scm_env*);
 
 	virtual scm* get_child (int)
 	{
