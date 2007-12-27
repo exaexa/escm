@@ -134,6 +134,16 @@ void op_exp (scm_env*e, scm*params)
 }
 
 /*
+ * QUOTE
+ */
+
+static void op_quote (scm_env*e, pair*code)
+{
+	if(pair_p(code->d)) e->val=pair_p(code->d)->a;
+	e->pop_cont();
+}
+
+/*
  * GENERAL
  */
 
@@ -149,6 +159,9 @@ static void add_global (scm_env*e, char*name, scm*data)
 	e->val = t;
 }
 
+#define add_syntax_handler(name,h)\
+add_global(e,name,new_scm(e,extern_syntax,h))
+
 #define add_func_handler(name,h)\
 add_global(e,name,new_scm(e,extern_func,h))
 
@@ -162,6 +175,8 @@ void escm_add_scheme_builtins (scm_env*e)
 	add_func_handler ("expt", op_pow);
 	add_func_handler ("log", op_log);
 	add_func_handler ("pow-e", op_exp);
+
+	add_syntax_handler ("quote", op_quote);
 }
 
 /*
