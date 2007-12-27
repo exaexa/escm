@@ -1,4 +1,5 @@
 #include "builtins.h"
+#include "debug.h"
 
 /*
  * NUMBER FUNCTIONS

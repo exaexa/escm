@@ -10,6 +10,19 @@
 using std::queue;
 
 
+static continuation* default_eval_factory (scm_env*e, scm*s)
+{
+	return new_scm (e, eval_continuation, s)
+	       ->collectable<eval_continuation>();
+}
+
+static continuation* default_cv_factory (scm_env*e, pair*s)
+{
+	return new_scm (e, codevector_continuation, s)
+	       ->collectable<codevector_continuation>();
+}
+
+
 scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 {
 	heap = malloc (heap_size);
@@ -26,8 +39,8 @@ scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 	val = 0;
 	cont = 0;
 	global_frame = new_scm (this, hashed_frame)->collectable<frame>();
-	eval_cont_factory = 0;
-	codevector_cont_factory = 0;
+	eval_cont_factory = default_eval_factory;
+	codevector_cont_factory = default_cv_factory;
 
 	if (par) parser = par;
 	else parser = new scm_classical_parser (this);
@@ -54,7 +67,6 @@ void * scm_env::new_heap_object (size_t size)
 
 	for (i = free_space.begin();i != free_space.end();++i)
 		if (i->size >= size) {
-			dprint ("free mem block: %ld \n", i->size);
 
 			he = *i;
 
@@ -73,7 +85,6 @@ void * scm_env::new_heap_object (size_t size)
 			return t; //finish searching
 		}
 
-	dprint ("out of memory\n");
 	return 0;  //too bad, none found. we shall collect.
 }
 
@@ -81,7 +92,6 @@ void * scm_env::allocate (size_t size)
 {
 	//Try to Allocate, then try to sweep and allocate, then die.
 	void*d;
-	dprint ("Allocating %d bytes\n", (int) size);
 	d = new_heap_object (size);
 	if (d) return d;
 	collect_garbage();
@@ -270,6 +280,7 @@ bool scm_env::lexget (symbol*sym, int d)
 		}
 		i = i->parent;
 	}
+	val = 0;
 	return false;
 }
 
@@ -291,7 +302,7 @@ void scm_env::eval_expr (scm*s)
 
 void scm_env::eval_string (const char*s)
 {
-	if (!parser->parse_string (s) ) return;
+	if (parser->parse_string (s) ) return;
 
 	/*
 	 * what to do on errors?? seems like this function should not

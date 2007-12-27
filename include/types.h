@@ -222,6 +222,7 @@ public:
 	int cmp (symbol*);
 };
 
+#define string_p(a) (dynamic_cast<string*>(a))
 #define symbol_p(a) (dynamic_cast<symbol*>(a))
 
 
@@ -363,6 +364,7 @@ public:
 	{}
 
 	virtual void apply (scm_env* e, scm* evaluated_args) = 0;
+	//This should replace lambda continuation!
 };
 
 #define lambda_p(a) (dynamic_cast<lambda*>(a))
@@ -379,10 +381,7 @@ public:
 		handler = h;
 	}
 
-	inline virtual void apply (scm_env* e, scm* args)
-	{
-		handler (e, args);
-	}
+	virtual void apply (scm_env* e, scm* args);
 };
 
 class closure : public lambda
@@ -500,9 +499,10 @@ public:
 	continuation*parent;
 	frame*env;
 
-	inline continuation (scm_env*e, continuation*p = NULL) : scm (e)
+	inline continuation (scm_env*e, continuation*p = 0) : scm (e)
 	{
 		parent = p;
+		env = 0;
 	}
 
 	virtual scm* get_child (int) = 0;

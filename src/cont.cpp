@@ -57,13 +57,15 @@ void eval_continuation::eval_step (scm_env*e)
 	if (pair_p (object) ) {
 		e->replace_cont (new_scm
 				 (e, pair_continuation, (pair*) object)
-				 ->collectable<continuation>() );
+				 ->collectable<pair_continuation>() );
+
+		return;
 	}
-	if (symbol_p (object) ) {
+	if (symbol_p (object) )
 		e->lexget ( (symbol*) object);
-		e->pop_cont();
-	} else //tis just an atom.
+	else //tis just an atom.
 		e->val = object;
+	e->pop_cont();
 }
 
 void pair_continuation::eval_step (scm_env*e)
@@ -156,6 +158,7 @@ void lambda_continuation::eval_step (scm_env*e)
 	default: //we have evaluated a non-null list-termination
 		* (pair**) evaluated_args_d = (pair*) (e->val);
 		l->apply (e, evaluated_args);
+		e->pop_cont();
 	}
 }
 

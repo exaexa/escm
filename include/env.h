@@ -120,7 +120,7 @@ public:
 	 */
 
 	scm_env (scm_parser* defaultparser = NULL,
-		 size_t heap_size = 65536,
+		 size_t heap_size = 4096,
 		 size_t alignment = 4);
 
 	~scm_env();
@@ -166,7 +166,7 @@ public:
 	inline void push_cont (continuation*c)
 	{
 		c->parent = cont;
-		c->env = cont ? (cont->env) : global_frame;
+		if (!c->env) c->env = cont ? (cont->env) : global_frame;
 		cont = c;
 	}
 
@@ -174,7 +174,7 @@ public:
 	{
 		if (cont) {
 			c->parent = cont->parent;
-			c->env = cont->env->parent;
+			if (!c->env) c->env = cont->env;
 			cont = c;
 		} else push_cont (c);
 	}

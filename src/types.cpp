@@ -168,6 +168,7 @@ vector::vector (scm_env*e, pair* l) : scm (e)
 		return;
 	}
 	size = l->list_size();
+	if (!alloc (e, size) ) return;
 	for (int i = 0;i < (int) size;++i) {
 		( (scm**) dataof (d) ) [i] = l->a;
 		l = pair_p (l->d);
@@ -421,6 +422,12 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 /*
  * FUNCTIONS
  */
+
+void extern_func::apply (scm_env*e, scm*args)
+{
+	handler (e, args);
+	e->pop_cont();
+}
 
 closure::closure (scm_env*e, pair*Arglist,
 		  pair*Ip, frame*Env) : lambda (e)

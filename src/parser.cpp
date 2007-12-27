@@ -1,5 +1,6 @@
 
 #include "parser.h"
+#include "display.h"
 
 /*
  * Oh hai hell! this parser is a little complicated...so no one's
