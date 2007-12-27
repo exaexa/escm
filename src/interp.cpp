@@ -9,7 +9,7 @@
 //If we don't want a lib, then -Drun_interpreter=main
 int run_interpreter (int argc, char**argv)
 {
-	scm_env e;
+	scm_env e(0,32768,4);
 
 	escm_add_scheme_builtins (&e);
 

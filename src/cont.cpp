@@ -99,7 +99,7 @@ void pair_continuation::eval_step (scm_env*e)
 		} else {
 			//error, bad selector.
 			//TODO trigger an error, now we just ignore it
-			e->val = NULL;
+			e->val = 0;
 			e->pop_cont();
 		}
 	} else {

@@ -119,8 +119,8 @@ public:
 	 * "general-purpose" frontends
 	 */
 
-	scm_env (scm_parser* defaultparser = NULL,
-		 size_t heap_size = 4096,
+	scm_env (scm_parser* defaultparser = 0,
+		 size_t heap_size = 65536,
 		 size_t alignment = 4);
 
 	~scm_env();
