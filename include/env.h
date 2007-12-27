@@ -22,7 +22,7 @@ class scm_env;
 #include "parser.h"
 
 #define new_scm(env, type, params...) \
-	(new ((env)->allocate(sizeof(type))) type ((env), ##params))
+	(fprintf(stderr,"allocating "#type"\n"),new ((env)->allocate(sizeof(type))) type ((env), ##params))
 
 typedef continuation* (*scm_eval_cont_factory) (scm_env*, scm*);
 typedef continuation* (*scm_code_cont_factory) (scm_env*, pair*);

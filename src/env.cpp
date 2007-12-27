@@ -54,7 +54,7 @@ void * scm_env::new_heap_object (size_t size)
 
 	for (i = free_space.begin();i != free_space.end();++i)
 		if (i->size >= size) {
-			dprint ("%d\n", i->size);
+			dprint ("free mem block: %ld \n", i->size);
 
 			he = *i;
 

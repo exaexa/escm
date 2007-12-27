@@ -3,6 +3,7 @@
 #define _ESCM_TYPES_
 
 #include <stddef.h>
+#include "debug.h"
 
 class scm_env;
 
@@ -152,11 +153,6 @@ public:
 		c = a;
 	}
 };
-
-
-/*
- * symbols are case insensitive, so we store them in upper case.
- */
 
 class number : public scm
 {

@@ -1,5 +1,6 @@
 
 #include "env.h"
+#include "builtins.h"
 #include <stdio.h>
 
 
@@ -9,7 +10,7 @@ int run_interpreter (int argc, char**argv)
 {
 	scm_env e;
 
-
+	escm_add_scheme_builtins (&e);
 
 	return 0;
 }

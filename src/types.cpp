@@ -131,8 +131,6 @@ text::text (scm_env*e, const char*c, int len) : scm (e)
 
 	p = (char*) dataof (d);
 
-	datasize--; //we don't copy the finishing zero
-
 	while (--datasize) {
 		*p = *c;
 		++p;
@@ -203,12 +201,12 @@ scm* vector::get_child (int i)
 
 #define hash_table_size 256
 
-static char hash_string (const char*s)
+static unsigned char hash_string (const char*s)
 {
-	char t = 0;
+	unsigned char t = 0;
 	while (*s) {
-		t += *s;
-		t = (t << 1) + (t & 0x80);
+		t += (unsigned char) * s;
+		t = (t << 1) + ( (t & 0x80) ? 1 : 0);
 		++s;
 	}
 	return t;
@@ -273,7 +271,7 @@ scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
 	int hash = hash_string ( (const char*) dataof (s->d) );
 	chained_frame_entry*f;
 
-	if (lookup_frame (s, &f) ) {
+	if (lookup_frame (s, &f, hash) ) {
 		f->content = d;
 		return s;
 	}
