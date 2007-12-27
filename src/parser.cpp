@@ -41,8 +41,11 @@ int scm_classical_parser::parse_string (const char*str)
 		while (*str) parse_char (* (str++) );
 	} catch (int i) {
 		reset_current_cont();
+		dprint("parser exception: %d\n",i);
 		return i;
 	}
+
+	escm_display_to_stdout(stack.back().result);
 	return 0;
 }
 
@@ -115,6 +118,7 @@ void scm_classical_parser::append (scm*s)
 		if (!cont().result) throw 3;
 		* (cont().result_tail) = s;
 		cont().must_pop = 1;
+		cont().tail_next = 0;
 	} else {
 		pair* tmp = new_scm (env, pair, s, 0);
 
@@ -440,7 +444,8 @@ void scm_classical_parser::parse_char (char c)
 
 	case ts_in_atom:
 		if (is_white (c) || (c == '(') || (c == ')') ) {
-			pt (tok_symbol_or_number, &token_rest);
+			if(token_rest==".") pt (tok_dot);
+			else pt (tok_symbol_or_number, &token_rest);
 			token_rest.clear();
 			t_state = ts_normal;
 			parse_char (c);
