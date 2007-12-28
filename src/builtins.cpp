@@ -1,5 +1,4 @@
 #include "builtins.h"
-#include "debug.h"
 
 /*
  * NUMBER FUNCTIONS
@@ -139,8 +138,62 @@ void op_exp (scm_env*e, scm*params)
 
 static void op_quote (scm_env*e, pair*code)
 {
-	if(pair_p(code->d)) e->val=pair_p(code->d)->a;
+	if (pair_p (code->d) ) e->val = pair_p (code->d)->a;
 	e->pop_cont();
+}
+
+/*
+ * DEFINEs
+ */
+
+static void op_actual_define (scm_env*e, scm*params)
+{
+	e->val = 0;
+	symbol*name;
+	pair*p = pair_p (params);
+	if (!p) return;
+	name = symbol_p (p->a);
+	if (!name) return;
+	p = pair_p (p->d);
+	if (!p) return;
+	e->val = p->a;
+	e->lexdef (name);
+	e->val = name;
+}
+
+static void op_define (scm_env*e, pair*code)
+{
+	code = pair_p (code->d);
+	symbol*name;
+	scm*def;
+	if (!code) return;
+	if (pair_p (code->a) ) { //defining a lambda, shortened syntax
+		pair*l = (pair*) code->a;
+		name = symbol_p (l->a);
+		scm*lam = new_scm (e, symbol, "LAMBDA");
+		scm*temp = new_scm (e, pair, l->d, code->d);
+		def = new_scm (e, pair, lam, temp);
+		//generates (lambda params . code)
+	} else if (symbol_p (code->a) ) {
+		name = (symbol*) code->a;
+		if (pair_p (code->d) ) def = pair_p (code->d)->a;
+		else def = code->d;
+	} else {
+		e->val = 0;
+		e->pop_cont();
+		return; //error
+	}
+
+	//generates (#<op_actual_define> (QUOTE name) def)
+	lambda*func = new_scm (e, extern_func, op_actual_define);
+	scm*quoted_name = new_scm (e, pair, name, 0);
+	scm*quote = new_scm (e, symbol, "QUOTE");
+	quoted_name = new_scm (e, pair, quote, quoted_name);
+	pair*params = new_scm (e, pair, def, 0);
+	params = new_scm (e, pair, quoted_name, params);
+	continuation*cont = new_scm (e, lambda_continuation, func, params, false);
+	e->replace_cont (cont);
+	cont->mark_collectable();
 }
 
 /*
@@ -177,6 +230,9 @@ void escm_add_scheme_builtins (scm_env*e)
 	add_func_handler ("pow-e", op_exp);
 
 	add_syntax_handler ("quote", op_quote);
+
+	add_func_handler ("*do-define*", op_actual_define);
+	add_syntax_handler ("define", op_define);
 }
 
 /*

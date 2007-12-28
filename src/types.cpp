@@ -27,10 +27,8 @@ void scm::mark_collectable()
 		q.pop();
 		if (v) if (is_scm_protected (v) ) {
 				mark_scm_collectable (v);
-				for (i = 0;
-						(t = v->get_child (i++) )
-						!= scm_no_more_children
-						;)
+				for (i = 0; (t = v->get_child (i++) )
+						!= scm_no_more_children;)
 					if (t) q.push (t);
 			}
 	}

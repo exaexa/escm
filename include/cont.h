@@ -152,14 +152,16 @@ public:
 	pair **evaluated_args_d;
 
 	inline lambda_continuation (scm_env*e,
-				    lambda*lam, pair*code)
+				    lambda*lam, pair*code,
+				    bool with_selector = true)
 			: continuation (e)
 	{
 		l = lam;
 		evaluated_args = 0;
 		evaluated_args_d = &evaluated_args;
 
-		arglist = (pair*) (code->d);
+		if (with_selector) arglist = (pair*) (code->d);
+		else arglist = code;
 		arglist_pos = 0;
 		//we should examine real type of arglist later,
 		//but we can be sure that pair_p(code)

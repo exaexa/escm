@@ -69,6 +69,24 @@ public:
 };
 
 /*
+ * TYPE PREDICATES
+ */
+
+#define pair_p(a) (dynamic_cast<pair*>((scm*)a))
+#define atom_p(a) ((dynamic_cast<pair*>((scm*)a))?0:a)
+
+#define number_p(a) (dynamic_cast<number*>((scm*)a))
+
+#define string_p(a) (dynamic_cast<string*>((scm*)a))
+#define symbol_p(a) (dynamic_cast<symbol*>((scm*)a))
+
+#define lambda_p(a) (dynamic_cast<lambda*>((scm*)a))
+#define syntax_p(a) (dynamic_cast<syntax*>((scm*)a))
+
+#define continuation_p(a) (dynamic_cast<continuation*>((scm*)a))
+#define cont_p continuation_p
+
+/*
  * BASIC TYPES
  */
 
@@ -99,9 +117,6 @@ public:
 	//returns true number of elements in the list (loop+
 	int list_size();
 };
-
-#define pair_p(a) (dynamic_cast<pair*>(a))
-#define atom_p(a) ((dynamic_cast<pair*>(a))?0:a)
 
 /*
  * Data placeholder is here for data:D
@@ -183,8 +198,6 @@ public:
 	}
 };
 
-#define number_p(a) (dynamic_cast<number*>(a))
-
 class text : public scm
 {
 public:
@@ -218,10 +231,6 @@ public:
 
 	int cmp (symbol*);
 };
-
-#define string_p(a) (dynamic_cast<string*>(a))
-#define symbol_p(a) (dynamic_cast<symbol*>(a))
-
 
 class vector : public scm
 {
@@ -364,8 +373,6 @@ public:
 	//This should replace lambda continuation!
 };
 
-#define lambda_p(a) (dynamic_cast<lambda*>(a))
-
 typedef void (*scm_c_func) (scm_env*, scm* args);
 
 class extern_func : public lambda
@@ -420,8 +427,6 @@ public:
 	virtual void apply (scm_env*e, pair*code) = 0;
 };
 
-#define syntax_p(a) (dynamic_cast<syntax*>(a))
-
 /*
  * code macros are implemented just like in tinyscheme
  *
@@ -452,7 +457,7 @@ public:
 		handler = h;
 	}
 
-	inline virtual void apply (scm_env*e, pair*code)
+	virtual void apply (scm_env*e, pair*code)
 	{
 		handler (e, code);
 	}
@@ -505,9 +510,6 @@ public:
 	virtual scm* get_child (int) = 0;
 	virtual void eval_step (scm_env*) = 0;
 };
-
-#define continuation_p(a) (dynamic_cast<continuation*>(a))
-#define cont_p continuation_p
 
 #include "cont.h"
 
