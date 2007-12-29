@@ -363,8 +363,6 @@ scm* local_frame::get_child (int i)
 	return scm_no_more_children;
 }
 
-#include "display.h"
-
 scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 {
 	scm**p = (scm**) dataof (table);
