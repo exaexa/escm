@@ -391,12 +391,12 @@ public:
 class closure : public lambda
 {
 public:
-	pair *arglist;
+	scm *arglist;
 	pair *ip;
 	frame *env;
-	size_t paramcount;
+	size_t paramsize;
 
-	closure (scm_env*e, pair*arglist, pair*ip, frame*env);
+	closure (scm_env*e, scm*arglist, pair*ip, frame*env);
 
 	virtual void apply (scm_env* e, scm* args);
 

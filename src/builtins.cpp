@@ -29,7 +29,7 @@ void op_sub (scm_env*e, scm*params)
 		p = pair_p (p->d);
 		while (p) {
 			if (number_p (p->a) )
-				res->add (number_p (p->a) );
+				res->sub (number_p (p->a) );
 			//else cast error
 			p = pair_p (p->d);
 		}
@@ -143,7 +143,7 @@ static void op_quote (scm_env*e, pair*code)
 }
 
 /*
- * DEFINEs
+ * DEFINEs, SETs
  */
 
 static void op_actual_define (scm_env*e, scm*params)
@@ -197,6 +197,16 @@ static void op_define (scm_env*e, pair*code)
 }
 
 /*
+ * LAMBDA
+ */
+
+void op_lambda(scm_env*e, pair*code)
+{
+	code=pair_p(code->d);
+	e->val=new_scm(e,closure,code->a,pair_p(code->d),e->cont->env);
+}
+
+/*
  * GENERAL
  */
 
@@ -233,6 +243,8 @@ void escm_add_scheme_builtins (scm_env*e)
 
 	add_func_handler ("*do-define*", op_actual_define);
 	add_syntax_handler ("define", op_define);
+
+	add_syntax_handler ("lambda",op_lambda);
 }
 
 /*

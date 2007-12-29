@@ -122,7 +122,7 @@ int symbol::cmp (symbol* s)
 		++a;
 		++b;
 	}
-	return (int) *b - (int) *a;
+	return (int) *a - (int) *b;
 }
 
 text::text (scm_env*e, const char*c, int len) : scm (e)
@@ -323,24 +323,20 @@ local_frame::local_frame (scm_env*e, size_t s) : frame (e)
 
 int local_frame::get_index (symbol*name)
 {
-	int s = 0, e = size, i, t;
+	int s = 0, e = used, i, t;
 	scm**p = (scm**) dataof (table);
-	while (s <= e) {
+
+	while (s < e) {
 		i = (s + e) / 2;
 		t = name->cmp ( (symbol*) p[i*2]);
-		if (!t) return i;
-		else if (s == e) return - (s + 1);
+		if (!t) {
+			return i;
+		}
 		else if (t < 0) e = i;
 		else s = i + 1;
 	}
-
-	/*
-	 * program should never come here, if it does it's
-	 * seriously broken. returning 'failsafe' value.
-	 */
-
-	printf ("!!! bad lookup in local_frame at %p, data at %p\n",
-		this, table);
+	if (s == e) return - (s + 1);
+	//bad lookup, throw error!
 	return -1;
 }
 
@@ -368,30 +364,20 @@ scm* local_frame::get_child (int i)
 	return scm_no_more_children;
 }
 
+#include "display.h"
+
 scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 {
+	scm**p = (scm**) dataof (table);
 	int t = get_index (name);
 	if (t > 0) {
-		( (scm**) dataof (table) ) [ (t*2) +1] = content;
+		p[ (t*2) +1] = content;
 		return name;
 	}
 
 	t = (-t) - 1;
 
-	if (used < size) { //insert into vector
-
-		scm**p = (scm**) dataof (table);
-		int i;
-
-		for (i = size - 1;i > t;--i) {
-			p[2*i] = p[2* (i-1) ];
-			p[1+2*i] = p[1+2* (i-1) ];
-		}
-
-		p[2*i] = name;
-		p[2*i+1] = content;
-
-	} else { //chain the frames
+	if (used >= size) { //chain the frames
 
 		size_t new_size = size + 1; //compute new frame size
 
@@ -410,14 +396,27 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 		f->used = used;
 		f->size = size;
 		f->table = table;
-
 		f->parent = parent;
-		parent = f;
 
+		parent = f;
 		table = new_table;
 		used = 0;
 		size = new_size;
+
+		p=(scm**)dataof(table);
+
+		t=0;
 	}
+
+	for (int i = used;i > t;--i) {
+		p[2*i] = p[2* (i-1) ];
+		p[1+2*i] = p[1+2* (i-1) ];
+	}
+
+	++used;
+
+	p[2*t] = name;
+	p[2*t+1] = content;
 
 	return name;
 }
@@ -433,7 +432,7 @@ void extern_func::apply (scm_env*e, scm*args)
 	e->pop_cont();
 }
 
-closure::closure (scm_env*e, pair*Arglist,
+closure::closure (scm_env*e, scm*Arglist,
 		  pair*Ip, frame*Env) : lambda (e)
 {
 	int i;
@@ -445,40 +444,50 @@ closure::closure (scm_env*e, pair*Arglist,
 	while (Arglist) {
 		++i;
 		if (!pair_p (Arglist) ) break;
+		Arglist=((pair*)Arglist)->d;
 	}
-	paramcount = i;
+	paramsize = i;
 }
 
 void closure::apply (scm_env*e, scm*args)
 {
+	continuation*cont=new_scm(e,codevector_continuation,ip);
+	e->val=args; 
 	/*
-	//TODO this should move to lambda_continuation
-	pair *argdata = (pair*) (e->val), *argname = arglist;
-	frame*f;
-	f = new_scm (e, local_frame, paramcount);
-	if (!f) return;
-	//FIXME. improve this so it really supports "rest" arguments
-	while (argdata && argname && pair_p (argdata) ) {
-		if (pair_p (argname) ) {
-			f->define (e, (symbol*) (argname->a), argdata->a);
-			argname = (pair*) (argname->d);
-			argdata = (pair*) (argdata->d);
-		} else {
-			f->define (e, (symbol*) argname, argdata);
-			argname = argdata = 0;
-			break;
-		}
+	 * ...so it doesn't get collected, 'cause its continuation
+	 * is gonna get replaced here:
+	 */
+
+	e->replace_cont(cont);
+	cont->mark_collectable();
+	e->cont->env=env;
+
+	frame*f=e->push_frame(paramsize);
+	if(!f)return;
+
+	pair *argdata = (pair*) args, *argname = (pair*) arglist;
+	while (1) {
+		if(pair_p(argname)) { //argument name in a list
+			if(symbol_p(argname->a)){
+				if(pair_p(argdata))
+					f->define(e,(symbol*)(argname->a),
+						argdata->a);
+				else break; //not enough args!
+			} else break; //something weird in args!
+		} else if(symbol_p(argname)) { //rest argument name
+			f->define(e,(symbol*)argname,argdata);			
+			return;
+		} else if(!argname) { //end of arguments
+			if(argdata) break; //too many arguments passed!
+			else return;
+		} else  //terrible creeping death!
+			break; //illegal thing in arglist
+		argname=(pair*)(argname->d);
+		argdata=(pair*)(argdata->d);
 	}
 
-	if (argname) if (pair_p (argname) ) {
-			//exception, not'nuff arguments
-		}
-
-	if (argdata) if (pair_p (argdata) ) {
-			//exception, too many args passed
-		}
-
-	//TODO create new environment
-	 FIXME FIXME FIXME*/
+	//error here
+	e->pop_cont();
+	return;
 }
 
