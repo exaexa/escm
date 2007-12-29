@@ -331,8 +331,7 @@ int local_frame::get_index (symbol*name)
 		t = name->cmp ( (symbol*) p[i*2]);
 		if (!t) {
 			return i;
-		}
-		else if (t < 0) e = i;
+		} else if (t < 0) e = i;
 		else s = i + 1;
 	}
 	if (s == e) return - (s + 1);
@@ -403,9 +402,9 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 		used = 0;
 		size = new_size;
 
-		p=(scm**)dataof(table);
+		p = (scm**) dataof (table);
 
-		t=0;
+		t = 0;
 	}
 
 	for (int i = used;i > t;--i) {
@@ -444,46 +443,46 @@ closure::closure (scm_env*e, scm*Arglist,
 	while (Arglist) {
 		++i;
 		if (!pair_p (Arglist) ) break;
-		Arglist=((pair*)Arglist)->d;
+		Arglist = ( (pair*) Arglist)->d;
 	}
 	paramsize = i;
 }
 
 void closure::apply (scm_env*e, scm*args)
 {
-	continuation*cont=new_scm(e,codevector_continuation,ip);
-	e->val=args; 
+	continuation*cont = new_scm (e, codevector_continuation, ip);
+	e->val = args;
 	/*
 	 * ...so it doesn't get collected, 'cause its continuation
 	 * is gonna get replaced here:
 	 */
 
-	e->replace_cont(cont);
+	e->replace_cont (cont);
 	cont->mark_collectable();
-	e->cont->env=env;
+	e->cont->env = env;
 
-	frame*f=e->push_frame(paramsize);
-	if(!f)return;
+	frame*f = e->push_frame (paramsize);
+	if (!f) return;
 
 	pair *argdata = (pair*) args, *argname = (pair*) arglist;
 	while (1) {
-		if(pair_p(argname)) { //argument name in a list
-			if(symbol_p(argname->a)){
-				if(pair_p(argdata))
-					f->define(e,(symbol*)(argname->a),
-						argdata->a);
+		if (pair_p (argname) ) { //argument name in a list
+			if (symbol_p (argname->a) ) {
+				if (pair_p (argdata) )
+					f->define (e, (symbol*) (argname->a),
+						   argdata->a);
 				else break; //not enough args!
 			} else break; //something weird in args!
-		} else if(symbol_p(argname)) { //rest argument name
-			f->define(e,(symbol*)argname,argdata);			
+		} else if (symbol_p (argname) ) { //rest argument name
+			f->define (e, (symbol*) argname, argdata);
 			return;
-		} else if(!argname) { //end of arguments
-			if(argdata) break; //too many arguments passed!
+		} else if (!argname) { //end of arguments
+			if (argdata) break; //too many arguments passed!
 			else return;
 		} else  //terrible creeping death!
 			break; //illegal thing in arglist
-		argname=(pair*)(argname->d);
-		argdata=(pair*)(argdata->d);
+		argname = (pair*) (argname->d);
+		argdata = (pair*) (argdata->d);
 	}
 
 	//error here
