@@ -184,6 +184,12 @@ public:
 		if (cont) cont = cont->parent;
 	}
 
+	inline void ret (scm*v)
+	{
+		val = v;
+		pop_cont();
+	}
+
 	scm* globdef (symbol* sym);
 	bool globset (symbol* sym);
 	bool globget (symbol* sym);
@@ -191,6 +197,15 @@ public:
 	scm* lexdef (symbol* sym, int d = 0);
 	bool lexset (symbol* sym, int d = 0);
 	bool lexget (symbol* sym, int d = 0);
+
+	/*
+	 * SCHEME HELPERS
+	 *
+	 * booleans are guaranteed to have true and false meaning,
+	 * so we don't need to alloc new booleans everytime we create them.
+	 */
+
+	boolean *t_true, *t_false;
 };
 
 #endif

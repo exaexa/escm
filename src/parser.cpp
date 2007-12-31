@@ -1,6 +1,5 @@
 
 #include "parser.h"
-#include "display.h"
 
 /*
  * Oh hai hell! this parser is a little complicated...so no one's
@@ -45,7 +44,6 @@ int scm_classical_parser::parse_string (const char*str)
 		return i;
 	}
 
-	escm_display_to_stdout (stack.back().result);
 	return 0;
 }
 
@@ -264,11 +262,11 @@ void scm_classical_parser::process_token (int type, const String* tok)
 		break;
 
 	case tok_bool_true:
-		append (new_scm (env, boolean, true) );
+		append (env->t_true);
 		break;
 
 	case tok_bool_false:
-		append (new_scm (env, boolean, false) );
+		append (env->t_false);
 		break;
 
 	case tok_quote:
@@ -386,11 +384,13 @@ void scm_classical_parser::parse_char (char c)
 			t_state = ts_normal;
 			break;
 		case 't':
+		case 'T':
 			pt (tok_bool_true);
 			t_state = ts_normal;
 			break;
 
 		case 'f':
+		case 'F':
 			pt (tok_bool_false);
 			t_state = ts_normal;
 			break;

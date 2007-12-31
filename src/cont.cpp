@@ -159,7 +159,6 @@ void lambda_continuation::eval_step (scm_env*e)
 	default: //we have evaluated a non-null list-termination
 		* (pair**) evaluated_args_d = (pair*) (e->val);
 		l->apply (e, evaluated_args);
-		e->pop_cont();
 	}
 }
 

@@ -76,6 +76,8 @@ public:
 #define atom_p(a) ((dynamic_cast<pair*>((scm*)a))?0:a)
 
 #define number_p(a) (dynamic_cast<number*>((scm*)a))
+#define character_p(a) (dynamic_cast<character*>((scm*)a))
+#define boolean_p(a) (dynamic_cast<boolean*>((scm*)a))
 
 #define string_p(a) (dynamic_cast<string*>((scm*)a))
 #define symbol_p(a) (dynamic_cast<symbol*>((scm*)a))
@@ -370,7 +372,7 @@ public:
 	{}
 
 	virtual void apply (scm_env* e, scm* evaluated_args) = 0;
-	//This should replace lambda continuation!
+	//This should replace lambda continuation! (or at least pop it. e->ret)
 };
 
 typedef void (*scm_c_func) (scm_env*, scm* args);
@@ -488,7 +490,7 @@ public:
 		}
 	}
 
-	virtual void apply (scm_env*e, pair*code); //TODO
+	virtual void apply (scm_env*e, pair*code);
 };
 
 /*

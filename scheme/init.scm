@@ -8,6 +8,8 @@
 ;
 ;  ***
 
+(define (apply selector l) (eval (cons selector l)))
+
 ; Per R5RS, up to four deep compositions should be defined
 (define (caar x) (car (car x)))
 (define (cadr x) (car (cdr x)))

@@ -16,6 +16,7 @@ void op_add (scm_env*e, scm*params)
 		//else cast error
 		p = pair_p (p->d);
 	}
+	e->pop_cont();
 }
 
 void op_sub (scm_env*e, scm*params)
@@ -34,6 +35,7 @@ void op_sub (scm_env*e, scm*params)
 			p = pair_p (p->d);
 		}
 	}
+	e->pop_cont();
 }
 
 void op_mul (scm_env*e, scm*params)
@@ -48,6 +50,7 @@ void op_mul (scm_env*e, scm*params)
 		//else cast error
 		p = pair_p (p->d);
 	}
+	e->pop_cont();
 }
 
 void op_div (scm_env*e, scm*params)
@@ -74,6 +77,7 @@ void op_div (scm_env*e, scm*params)
 			}
 		}
 	}
+	e->pop_cont();
 }
 
 #define two_number_func(name,func) \
@@ -93,6 +97,7 @@ void name(scm_env*e, scm*params) \
 	if(!(a&&b))return; \
 	res->set(a); \
 	res->func(b); \
+	e->pop_cont(); \
 }
 
 two_number_func (op_mod, mod)
@@ -119,6 +124,7 @@ void op_log (scm_env*e, scm*params)
 		res->set (a);
 		res->log (0);
 	}
+	e->pop_cont();
 }
 
 void op_exp (scm_env*e, scm*params)
@@ -130,10 +136,11 @@ void op_exp (scm_env*e, scm*params)
 	pair*p = pair_p (params);
 	if (p) if (number_p (p->a) ) res->set (number_p (p->a) );
 	res->exp();
+	e->pop_cont();
 }
 
 /*
- * QUOTE
+ * QUOTE, EVAL and friends
  */
 
 static void op_quote (scm_env*e, pair*code)
@@ -141,6 +148,14 @@ static void op_quote (scm_env*e, pair*code)
 	if (pair_p (code->d) ) e->val = pair_p (code->d)->a;
 	e->pop_cont();
 }
+
+static void op_eval (scm_env*e, scm*args)
+{
+	if(pair_p(args)) e->replace_cont(new_scm(
+		e,eval_continuation,((pair*)args)->a)
+		->collectable<continuation>());
+}
+
 
 /*
  * DEFINEs, SETs
@@ -158,7 +173,7 @@ static void op_actual_define (scm_env*e, scm*params)
 	if (!p) return;
 	e->val = p->a;
 	e->lexdef (name);
-	e->val = name;
+	e->ret(name);
 }
 
 static void op_define (scm_env*e, pair*code)
@@ -191,7 +206,8 @@ static void op_define (scm_env*e, pair*code)
 	quoted_name = new_scm (e, pair, quote, quoted_name);
 	pair*params = new_scm (e, pair, def, 0);
 	params = new_scm (e, pair, quoted_name, params);
-	continuation*cont = new_scm (e, lambda_continuation, func, params, false);
+	continuation*cont = new_scm (e, lambda_continuation,
+		func, params, false);
 	e->replace_cont (cont);
 	cont->mark_collectable();
 }
@@ -203,7 +219,102 @@ static void op_define (scm_env*e, pair*code)
 void op_lambda (scm_env*e, pair*code)
 {
 	code = pair_p (code->d);
-	e->val = new_scm (e, closure, code->a, pair_p (code->d), e->cont->env);
+	e->ret(new_scm (e, closure, code->a, pair_p (code->d), e->cont->env)
+		->collectable<scm>());
+}
+
+/*
+ * MACRO
+ */
+
+void op_macro (scm_env*e, pair*code)
+{
+	symbol*name=0;
+	symbol*argname=0;
+	pair*macro_code=0;
+	code=pair_p(code->d);
+	macro_code=pair_p(code->d);
+	if(pair_p(code->a)){
+		code=(pair*)(code->a);
+		if(pair_p(code->d)){
+			name=symbol_p(code->a);
+			argname=symbol_p(((pair*)(code->d))->a);
+		} else {
+			argname=symbol_p(code->a);
+		}
+		if(argname){
+			macro*m=new_scm(e,macro,macro_code,argname);
+			if(name){
+				e->val=m->collectable<scm>();
+				e->lexdef(name);
+				e->ret(name);
+			} else {
+				e->ret(m->collectable<scm>());
+			}
+		}
+	}
+}
+
+/*
+ * LISTs
+ */
+
+void op_list(scm_env*e, scm*arglist)
+{
+	e->ret(arglist);
+}
+
+void op_car(scm_env*e, scm*arglist)
+{
+	if(pair_p(arglist)) arglist=((pair*)arglist)->a;
+	if(pair_p(arglist)) {
+		e->ret(((pair*)arglist)->a);
+		return;
+	}
+	e->ret(0);
+}
+
+void op_cdr(scm_env*e, scm*arglist)
+{
+	if(pair_p(arglist)) arglist=((pair*)arglist)->a;
+	if(pair_p(arglist)) {
+		e->ret(((pair*)arglist)->d);
+		return;
+	}
+	e->ret(0);
+}
+
+void op_cons(scm_env*e, scm*arglist)
+{
+	scm*a=0;
+	if(pair_p(arglist)){
+		a=((pair*)arglist)->a;
+		arglist=((pair*)arglist)->d;
+		if(pair_p(arglist)){
+			e->ret(new_scm(e,pair,a,((pair*)arglist)->a)
+				->collectable<pair>());
+			return;
+		}
+	}
+	e->ret(0);
+}
+
+/*
+ * DISPLAY (subject to remove)
+ */
+
+#include "display.h"
+
+static void op_display(scm_env*e, scm*arglist)
+{
+	if(pair_p(arglist)) escm_display_to_stdout(((pair*)arglist)->a,false);
+	e->ret(0);	
+}
+
+static void op_newline(scm_env*e, scm*arglist)
+{
+	printf("\n");
+	e->ret(0);
 }
 
 /*
@@ -240,11 +351,21 @@ void escm_add_scheme_builtins (scm_env*e)
 	add_func_handler ("pow-e", op_exp);
 
 	add_syntax_handler ("quote", op_quote);
+	add_func_handler ("eval", op_eval);
 
 	add_func_handler ("*do-define*", op_actual_define);
 	add_syntax_handler ("define", op_define);
 
 	add_syntax_handler ("lambda", op_lambda);
+	add_syntax_handler ("macro", op_macro);
+
+	add_func_handler ("list", op_list);
+	add_func_handler ("cons", op_cons);
+	add_func_handler ("car", op_car);
+	add_func_handler ("cdr", op_cdr);
+
+	add_func_handler ("display", op_display);
+	add_func_handler ("newline", op_newline);
 }
 
 /*

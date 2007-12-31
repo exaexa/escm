@@ -42,6 +42,9 @@ scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 	eval_cont_factory = default_eval_factory;
 	codevector_cont_factory = default_cv_factory;
 
+	t_true = new_scm (this, boolean, true)->collectable<boolean>();
+	t_false = new_scm (this, boolean, false)->collectable<boolean>();
+
 	if (par) parser = par;
 	else parser = new scm_classical_parser (this);
 }
@@ -159,6 +162,8 @@ void scm_env::sort_out_free_space()
 	}
 }
 
+#include "display.h"
+
 void scm_env::collect_garbage ()
 {
 	set<scm*> active;
@@ -179,10 +184,16 @@ void scm_env::collect_garbage ()
 	processing.push (val);
 	processing.push (global_frame);
 	processing.push (cont);
+	processing.push (t_true);
+	processing.push (t_false);
 
 	for (k = collector.begin();k != collector.end();++k)
-		if ( is_scm_protected (*k) )
+		if ( is_scm_protected (*k) ) {
 			processing.push (*k);
+			printf ("gc-protected scm at %p: ", *k);
+			escm_display_to_stdout (*k);
+			printf ("\n");
+		}
 
 	while (!processing.empty() ) {
 

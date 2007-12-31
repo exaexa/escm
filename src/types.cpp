@@ -426,7 +426,6 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 void extern_func::apply (scm_env*e, scm*args)
 {
 	handler (e, args);
-	e->pop_cont();
 }
 
 closure::closure (scm_env*e, scm*Arglist,
@@ -486,5 +485,22 @@ void closure::apply (scm_env*e, scm*args)
 	//error here
 	e->pop_cont();
 	return;
+}
+
+/*
+ * MACRO
+ */
+
+#include "display.h"
+
+void macro::apply(scm_env*e, pair*code_to_eval)
+{
+	printf("\nAPPLYING MACRO\ncode is:");
+	escm_display_to_stdout(code_to_eval);
+	printf("\n");
+	continuation*c=new_scm(e,codevector_continuation,code);
+	e->push_cont(c);
+	e->push_frame(1)->define(e,argname,code_to_eval);
+	c->mark_collectable();
 }
 
