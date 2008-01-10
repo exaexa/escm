@@ -40,10 +40,11 @@ void scm::mark_collectable()
 
 int pair::list_length()
 {
-	pair *a = this, *b = this; //a moves 2x faster than b, we detect "overtakes"
+	pair *a = this, *b = this;
+	//a moves 2x faster than b, we detect "overtakes"
 	int size = 0;
 	while (a) {
-		a = pair_p (a->d); //pair_p may be used as dynamic_cast;) useful!
+		a = pair_p (a->d);
 		if (a == b) return -1; // cycle detected
 		if (size&1)
 			b = pair_p (b->d);
@@ -493,14 +494,14 @@ void closure::apply (scm_env*e, scm*args)
 
 #include "display.h"
 
-void macro::apply(scm_env*e, pair*code_to_eval)
+void macro::apply (scm_env*e, pair*code_to_eval)
 {
-	printf("\nAPPLYING MACRO\ncode is:");
-	escm_display_to_stdout(code_to_eval);
-	printf("\n");
-	continuation*c=new_scm(e,codevector_continuation,code);
-	e->push_cont(c);
-	e->push_frame(1)->define(e,argname,code_to_eval);
+	printf ("\nAPPLYING MACRO\ncode is:");
+	escm_display_to_stdout (code_to_eval);
+	printf ("\n");
+	continuation*c = new_scm (e, codevector_continuation, code);
+	e->push_cont (c);
+	e->push_frame (1)->define (e, argname, code_to_eval);
 	c->mark_collectable();
 }
 

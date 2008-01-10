@@ -151,9 +151,9 @@ static void op_quote (scm_env*e, pair*code)
 
 static void op_eval (scm_env*e, scm*args)
 {
-	if(pair_p(args)) e->replace_cont(new_scm(
-		e,eval_continuation,((pair*)args)->a)
-		->collectable<continuation>());
+	if (pair_p (args) ) e->replace_cont
+		(new_scm (e, eval_continuation,
+			  ( (pair*) args)->a)->collectable<continuation>() );
 }
 
 
@@ -173,7 +173,7 @@ static void op_actual_define (scm_env*e, scm*params)
 	if (!p) return;
 	e->val = p->a;
 	e->lexdef (name);
-	e->ret(name);
+	e->ret (name);
 }
 
 static void op_define (scm_env*e, pair*code)
@@ -207,7 +207,7 @@ static void op_define (scm_env*e, pair*code)
 	pair*params = new_scm (e, pair, def, 0);
 	params = new_scm (e, pair, quoted_name, params);
 	continuation*cont = new_scm (e, lambda_continuation,
-		func, params, false);
+				     func, params, false);
 	e->replace_cont (cont);
 	cont->mark_collectable();
 }
@@ -219,8 +219,8 @@ static void op_define (scm_env*e, pair*code)
 void op_lambda (scm_env*e, pair*code)
 {
 	code = pair_p (code->d);
-	e->ret(new_scm (e, closure, code->a, pair_p (code->d), e->cont->env)
-		->collectable<scm>());
+	e->ret (new_scm (e, closure, code->a, pair_p (code->d), e->cont->env)
+		->collectable<scm>() );
 }
 
 /*
@@ -229,27 +229,27 @@ void op_lambda (scm_env*e, pair*code)
 
 void op_macro (scm_env*e, pair*code)
 {
-	symbol*name=0;
-	symbol*argname=0;
-	pair*macro_code=0;
-	code=pair_p(code->d);
-	macro_code=pair_p(code->d);
-	if(pair_p(code->a)){
-		code=(pair*)(code->a);
-		if(pair_p(code->d)){
-			name=symbol_p(code->a);
-			argname=symbol_p(((pair*)(code->d))->a);
+	symbol*name = 0;
+	symbol*argname = 0;
+	pair*macro_code = 0;
+	code = pair_p (code->d);
+	macro_code = pair_p (code->d);
+	if (pair_p (code->a) ) {
+		code = (pair*) (code->a);
+		if (pair_p (code->d) ) {
+			name = symbol_p (code->a);
+			argname = symbol_p ( ( (pair*) (code->d) )->a);
 		} else {
-			argname=symbol_p(code->a);
+			argname = symbol_p (code->a);
 		}
-		if(argname){
-			macro*m=new_scm(e,macro,macro_code,argname);
-			if(name){
-				e->val=m->collectable<scm>();
-				e->lexdef(name);
-				e->ret(name);
+		if (argname) {
+			macro*m = new_scm (e, macro, macro_code, argname);
+			if (name) {
+				e->val = m->collectable<scm>();
+				e->lexdef (name);
+				e->ret (name);
 			} else {
-				e->ret(m->collectable<scm>());
+				e->ret (m->collectable<scm>() );
 			}
 		}
 	}
@@ -259,44 +259,44 @@ void op_macro (scm_env*e, pair*code)
  * LISTs
  */
 
-void op_list(scm_env*e, scm*arglist)
+void op_list (scm_env*e, scm*arglist)
 {
-	e->ret(arglist);
+	e->ret (arglist);
 }
 
-void op_car(scm_env*e, scm*arglist)
+void op_car (scm_env*e, scm*arglist)
 {
-	if(pair_p(arglist)) arglist=((pair*)arglist)->a;
-	if(pair_p(arglist)) {
-		e->ret(((pair*)arglist)->a);
+	if (pair_p (arglist) ) arglist = ( (pair*) arglist)->a;
+	if (pair_p (arglist) ) {
+		e->ret ( ( (pair*) arglist)->a);
 		return;
 	}
-	e->ret(0);
+	e->ret (0);
 }
 
-void op_cdr(scm_env*e, scm*arglist)
+void op_cdr (scm_env*e, scm*arglist)
 {
-	if(pair_p(arglist)) arglist=((pair*)arglist)->a;
-	if(pair_p(arglist)) {
-		e->ret(((pair*)arglist)->d);
+	if (pair_p (arglist) ) arglist = ( (pair*) arglist)->a;
+	if (pair_p (arglist) ) {
+		e->ret ( ( (pair*) arglist)->d);
 		return;
 	}
-	e->ret(0);
+	e->ret (0);
 }
 
-void op_cons(scm_env*e, scm*arglist)
+void op_cons (scm_env*e, scm*arglist)
 {
-	scm*a=0;
-	if(pair_p(arglist)){
-		a=((pair*)arglist)->a;
-		arglist=((pair*)arglist)->d;
-		if(pair_p(arglist)){
-			e->ret(new_scm(e,pair,a,((pair*)arglist)->a)
-				->collectable<pair>());
+	scm*a = 0;
+	if (pair_p (arglist) ) {
+		a = ( (pair*) arglist)->a;
+		arglist = ( (pair*) arglist)->d;
+		if (pair_p (arglist) ) {
+			e->ret (new_scm (e, pair, a, ( (pair*) arglist)->a)
+				->collectable<pair>() );
 			return;
 		}
 	}
-	e->ret(0);
+	e->ret (0);
 }
 
 /*
@@ -305,17 +305,24 @@ void op_cons(scm_env*e, scm*arglist)
 
 #include "display.h"
 
-static void op_display(scm_env*e, scm*arglist)
+static void op_display (scm_env*e, scm*arglist)
 {
-	if(pair_p(arglist)) escm_display_to_stdout(((pair*)arglist)->a,false);
-	e->ret(0);	
+	if (pair_p (arglist) ) 
+		escm_display_to_stdout ( ( (pair*) arglist)->a, true);
+	e->ret (0);
 }
 
-static void op_newline(scm_env*e, scm*arglist)
+static void op_newline (scm_env*e, scm*arglist)
 {
-	printf("\n");
-	e->ret(0);
+	printf ("\n");
+	e->ret (0);
 }
+
+/*
+ * TYPE PREDICATES
+ */
+
+//TODO
 
 /*
  * GENERAL
