@@ -8,22 +8,27 @@
 	general escm todo
 
 
-] we might catch memory exceptions as real c++ exceptions. Otherwise check
-	if all new_scm's are checked for returning zero.
-
 ] come up with some reasonable hash function for hashed_frame.
 
 ] make collector heap dynamic 
 	(at least growable to some defined extent, possibly non-continuous)
 
-] What the hell should happen, when we run out of memory?!
-	should THAT be allowed? should we free some memory and run an exception?
-	Guess that allocating nil is really not the best idea we have.
+] About exception implementation:
+	Use standart C++ exception throw/catch, it's quite good, usuable
+	for (error) and for extension programmers too.
 
-] oooh that^ reminds me - someone should think about exceptions. :D
-	we should have *error-hook*, which is lambda and (error) which
-	calls it a little. Default *error-hook* lambda is internal and causes
-	some kind of continuation crash;)
+	if we catch an exception, we should reset the continuation and pass
+	it to *error-hook*, which is some kind of lambda. If it's NULL, use
+	some builtin error catcher.
+	
+	Out-of-memory error should be quite OK, because when we reset a cont
+	we actually free a lot of memory (read: nearly all memory, except
+	global objects). Then we classically call *error-hook*. If it cannot be
+	called because of another memory shortage, let's assume that:
+	a] program defined error stack shortens, and then we come to point
+		where we have memory, OR builtin error-hook kills it all.
+	b] program defined error stack makes a cycle, then we usually die in
+		an infinite loop. But let's pretend that's a desired behavior.
 
 ] As we replace continuations, we come to problem that they might be still
 	running when are already garbage collected. No need to say what would
@@ -31,7 +36,6 @@
 	We could add some optical solution which solves it (e.g. returning
 	some kind of functor which pushes the thing when it's safe)
 
-] Support for call/cc needs the continuation objects to be "somehow callable".
-	for example this way - save a parameter to val (so it seems to be
-	returned by the computation) and just switch the scm_env->cont?
-	(maybe some stack pops would possibly need to occur)
+] Invent some good usage of call/cc. Something no one else can even imagine.
+	...2] ??? 3] PROFIT!
+
