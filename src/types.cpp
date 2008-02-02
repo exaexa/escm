@@ -297,6 +297,7 @@ scm* hashed_frame::get_child (int i)
 	if (i < hash_table_size)
 		return ( (chained_frame_entry**) dataof (table) ) [i];
 	if (i == hash_table_size) return table;
+	if (i == hash_table_size + 1) return parent;
 	return scm_no_more_children;
 }
 
@@ -316,10 +317,13 @@ scm* hashed_frame::get_child (int i)
 
 local_frame::local_frame (scm_env*e, size_t s) : frame (e)
 {
-	table = new_data_scm (e, 2 * sizeof (scm*) * s);
-	if (!table) return;
+	used = size = 0;
+	parent = 0;
+	table = 0; //just be sure. It might get collected NOW:
+
+	table = new_data_scm (e, 2 * sizeof (scm*) * s)
+		->collectable<data_placeholder>();
 	size = s;
-	used = 0;
 }
 
 int local_frame::get_index (symbol*name)
@@ -358,9 +362,10 @@ bool local_frame::set (symbol* name, scm*data)
 
 scm* local_frame::get_child (int i)
 {
-	if ( (unsigned int) i < size*2)
+	if ( (unsigned int) i < used*2)
 		return ( (scm**) dataof (table) ) [i];
-	if ( (unsigned int) i == size*2) return table;
+	if ( (unsigned int) i == used*2) return table;
+	if ( (unsigned int) i == 1 + (used*2) ) return parent;
 	return scm_no_more_children;
 }
 
@@ -368,7 +373,7 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 {
 	scm**p = (scm**) dataof (table);
 	int t = get_index (name);
-	if (t > 0) {
+	if (t >= 0) {
 		p[ (t*2) +1] = content;
 		return name;
 	}
@@ -411,10 +416,9 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 		p[1+2*i] = p[1+2* (i-1) ];
 	}
 
-	++used;
-
 	p[2*t] = name;
 	p[2*t+1] = content;
+	++used;
 
 	return name;
 }
@@ -492,13 +496,8 @@ void closure::apply (scm_env*e, scm*args)
  * MACRO
  */
 
-#include "display.h"
-
 void macro::apply (scm_env*e, pair*code_to_eval)
 {
-	printf ("\nAPPLYING MACRO\ncode is:");
-	escm_display_to_stdout (code_to_eval);
-	printf ("\n");
 	continuation*c = new_scm (e, codevector_continuation, code);
 	e->push_cont (c);
 	e->push_frame (1)->define (e, argname, code_to_eval);
