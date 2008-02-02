@@ -307,7 +307,7 @@ void op_cons (scm_env*e, scm*arglist)
 
 static void op_display (scm_env*e, scm*arglist)
 {
-	if (pair_p (arglist) ) 
+	if (pair_p (arglist) )
 		escm_display_to_stdout ( ( (pair*) arglist)->a, true);
 	e->ret (0);
 }
@@ -322,7 +322,153 @@ static void op_newline (scm_env*e, scm*arglist)
  * TYPE PREDICATES
  */
 
-//TODO
+static void op_null_p (scm_env*e, scm*arglist)
+{
+	if (!pair_p (arglist) ) e->ret (0);
+	else if ( ( (pair*) arglist)->a) e->ret (e->t_false);
+	else e->ret (e->t_true);
+}
+
+/*static void op_pair_p (scm_env*e, scm*arglist)
+{
+	if (!pair_p (arglist) ) e->ret (0);
+	else if (pair_p ( ( (pair*) arglist)->a) ) e->ret (e->t_true);
+	else e->ret (e->t_false);
+}*/
+
+#define create_predicate_function(type) \
+static void op_##type##_p (scm_env*e, scm*arglist) \
+{ \
+	if (!pair_p (arglist) ) e->ret (0); \
+	else if (type##_p ( ( (pair*) arglist)->a) ) e->ret (e->t_true); \
+	else e->ret (e->t_false); \
+}
+
+create_predicate_function (pair)
+create_predicate_function (atom)
+create_predicate_function (number)
+create_predicate_function (character)
+create_predicate_function (boolean)
+create_predicate_function (string)
+create_predicate_function (symbol)
+create_predicate_function (lambda)
+create_predicate_function (syntax)
+create_predicate_function (continuation)
+
+/*
+ * BOOLEAN OPERATIONS
+ */
+
+static void op_true_p (scm_env*e, scm*arglist)
+{
+	if (!pair_p (arglist) ) e->ret (0);
+	else if (!boolean_p ( ( (pair*) arglist)->a) ) e->ret (0);
+	else if ( ( (boolean*) ( ( (pair*) arglist)->a) )->b)
+		e->ret (e->t_true);
+	else e->ret (e->t_false);
+}
+
+static void op_false_p (scm_env*e, scm*arglist)
+{
+	if (!pair_p (arglist) ) e->ret (0);
+	else if (!boolean_p ( ( (pair*) arglist)->a) ) e->ret (0);
+	else if ( ( (boolean*) ( ( (pair*) arglist)->a) )->b)
+		e->ret (e->t_false);
+	else e->ret (e->t_true);
+}
+
+
+/*
+ * PROGRAM FLOW CONTROL
+ */
+
+static void op_begin(scm_env*e, pair*code)
+{
+	e->replace_cont(new_scm(e,codevector_continuation,pair_p(code->d))
+		->collectable<continuation>());
+}
+
+/*
+ * IF CONTINUATION
+ * works this way:
+ * 1] condition evaluation is pushed right in the constructor
+ * 2] eval step is given a result of the cond, so therefore replaces
+ * 	itself with true or false branch evaluation
+ *
+ * note: ANYTHING given IS true, unless it really IS false.
+ */
+
+class if_continuation : public continuation
+{
+public:
+	scm *t, *f, *c;
+
+	inline if_continuation (scm_env*e, scm*cond, scm*T, scm*F)
+			: continuation (e)
+	{
+		t = T;
+		f = F;
+		c = cond;
+		e->val = 0;
+	}
+
+	virtual scm*get_child (int i)
+	{
+		switch (i) {
+		case 0:
+			return t;
+		case 1:
+			return f;
+		case 2:
+			return c;
+		case 3:
+			return parent;
+		case 4:
+			return env;
+		default:
+			return scm_no_more_children;
+		}
+	}
+
+	virtual void eval_step (scm_env*e);
+};
+
+#include <stdio.h>
+
+void if_continuation::eval_step (scm_env*e)
+{
+	if (c) {
+		e->push_cont (new_scm (e, eval_continuation, c)
+			      ->collectable<continuation>() );
+		c = 0;
+		return;
+	}
+	scm*res = t;
+	if (boolean_p (e->val) ) if (! ( ( (boolean*) (e->val) )->b) ) res = f;
+	e->replace_cont (new_scm (e, eval_continuation, res)
+			 ->collectable<continuation>() );
+}
+
+static void op_if (scm_env*e, pair*code)
+{
+	pair*p = pair_p (code->d);
+	scm*cond = 0, *t = 0, *f = 0;
+	if (p) {
+		cond = p->a;
+		p = pair_p (p->d);
+	}
+	if (p) {
+		t = p->a;
+		p = pair_p (p->d);
+	}
+	if (p) {
+		f = p->a;
+		p = pair_p (p->d);
+	}
+	e->replace_cont (new_scm (e, if_continuation, cond, t, f)
+			 ->collectable<continuation>() );
+}
+
 
 /*
  * GENERAL
@@ -348,15 +494,18 @@ add_global(e,name,new_scm(e,extern_func,h))
 
 void escm_add_scheme_builtins (scm_env*e)
 {
+	//arithmetics
 	add_func_handler ("+", op_add);
 	add_func_handler ("-", op_sub);
 	add_func_handler ("*", op_mul);
 	add_func_handler ("/", op_div);
 	add_func_handler ("modulo", op_mod);
+	add_func_handler ("%", op_mod);
 	add_func_handler ("expt", op_pow);
 	add_func_handler ("log", op_log);
 	add_func_handler ("pow-e", op_exp);
 
+	//basic scheme
 	add_syntax_handler ("quote", op_quote);
 	add_func_handler ("eval", op_eval);
 
@@ -366,11 +515,35 @@ void escm_add_scheme_builtins (scm_env*e)
 	add_syntax_handler ("lambda", op_lambda);
 	add_syntax_handler ("macro", op_macro);
 
+	add_syntax_handler ("if", op_if);
+
+	add_syntax_handler ("begin", op_begin);
+
+	//lists
 	add_func_handler ("list", op_list);
 	add_func_handler ("cons", op_cons);
 	add_func_handler ("car", op_car);
 	add_func_handler ("cdr", op_cdr);
 
+	//types
+	add_func_handler ("null?", op_null_p);
+	add_func_handler ("atom?", op_atom_p);
+	add_func_handler ("pair?", op_pair_p);
+	add_func_handler ("number?", op_number_p);
+	add_func_handler ("character?", op_character_p);
+	add_func_handler ("boolean?", op_boolean_p);
+	add_func_handler ("string?", op_string_p);
+	add_func_handler ("symbol?", op_symbol_p);
+	add_func_handler ("lambda?", op_lambda_p);
+	add_func_handler ("syntax?", op_syntax_p);
+	add_func_handler ("continuation?", op_continuation_p);
+
+	//booleans
+	add_func_handler ("true?", op_true_p);
+	add_func_handler ("false?", op_false_p);
+	add_func_handler ("not", op_false_p);
+
+	//I/O
 	add_func_handler ("display", op_display);
 	add_func_handler ("newline", op_newline);
 }
