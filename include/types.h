@@ -48,7 +48,7 @@ public:
 
 	scm (scm_env*);
 
-	virtual scm* get_child (int)
+	virtual scm* get_child (int i)
 	{
 		return scm_no_more_children;
 	}

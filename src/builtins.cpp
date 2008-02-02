@@ -382,10 +382,10 @@ static void op_false_p (scm_env*e, scm*arglist)
  * PROGRAM FLOW CONTROL
  */
 
-static void op_begin(scm_env*e, pair*code)
+static void op_begin (scm_env*e, pair*code)
 {
-	e->replace_cont(new_scm(e,codevector_continuation,pair_p(code->d))
-		->collectable<continuation>());
+	e->replace_cont (new_scm (e, codevector_continuation, pair_p (code->d) )
+			 ->collectable<continuation>() );
 }
 
 /*

@@ -57,5 +57,5 @@ void display (scm*a, bool output)
 		printf (">");
 	} else if (!a)
 		printf ("()");
-	else printf ("#<scm %p>", a);
+	else printf ("#<scm %s@%p>", typeid (*a).name(), a);
 }
