@@ -11,6 +11,7 @@ env['CCFLAGS']+=' -DDEBUG=1 -g '
 
 # we want to build an interpreter, not lib. Otherwise comment this out.:
 env['CCFLAGS']+=' -Drun_interpreter=main '
+env['LIBS']=['readline']
 
 Export('env')
 
