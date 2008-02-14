@@ -39,7 +39,7 @@ int scm_classical_parser::parse_string (const char*str)
 	try {
 		while (*str) parse_char (* (str++) );
 	} catch (int i) {
-		reset_current_cont();
+		reset();
 		dprint ("parser exception: %d\n", i);
 		return i;
 	}
@@ -67,7 +67,6 @@ void scm_classical_parser::reset()
 {
 	stack = List<parser_cont>();
 	stack.push_back (parser_cont() );
-	pos.col = pos.row = 0;
 	t_state = ts_normal;
 }
 
@@ -76,7 +75,6 @@ void scm_classical_parser::reset_current_cont()
 	List<parser_cont> newstack;
 	newstack.push_front (stack.back() );
 	stack = newstack;
-	pos.col = pos.row = 0;
 	t_state = ts_normal;
 }
 
@@ -311,11 +309,6 @@ static bool is_white (char c)
 
 void scm_classical_parser::parse_char (char c)
 {
-	if (c == '\n') {
-		++pos.row;
-		pos.col = 0;
-	} else ++pos.col;
-
 #define pt process_token
 	switch (t_state) {
 	case ts_in_string:

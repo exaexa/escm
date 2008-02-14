@@ -94,12 +94,6 @@ class scm_classical_parser: public scm_parser
 	 */
 
 public:
-	struct
-	{
-		int col, row;
-	}
-	pos;
-
 	scm_classical_parser (scm_env*);
 	virtual int parse_string (const char* str);
 	virtual pair* get_result (bool);

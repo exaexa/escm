@@ -3,6 +3,8 @@
 #ifndef _ESCM_ENV_
 #define _ESCM_ENV_
 
+#define ESCM_VERSION_STR "pre-0"
+
 #include "debug.h"
 
 /*
@@ -127,7 +129,7 @@ public:
 
 	void eval_code (pair*);
 	void eval_expr (scm*);
-	void eval_string (const char* str);
+	int eval_string (const char* str);
 
 	inline void run_eval_loop()
 	{

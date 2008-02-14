@@ -326,9 +326,10 @@ void scm_env::eval_expr (scm*s)
 
 #include "parser.h"
 
-void scm_env::eval_string (const char*s)
+int scm_env::eval_string (const char*s)
 {
-	if (parser->parse_string (s) ) return;
+	int err = parser->parse_string (s);
+	if (err) return err;
 
 	/*
 	 * what to do on errors?? seems like this function should not
@@ -337,5 +338,6 @@ void scm_env::eval_string (const char*s)
 
 	pair*code = parser->get_result (false);
 	if (code) eval_code (code->collectable<pair>() );
+	return 0;
 }
 
