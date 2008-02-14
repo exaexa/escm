@@ -38,7 +38,7 @@ void display (scm*a, bool output)
 		printf ("#<extern_func h=%p>", ( (extern_func*) a) -> handler);
 	else if (dynamic_cast<closure*> (a) ) {
 		closure*c = (closure*) a;
-		printf ("#<closure args[%ld] ", c->paramsize);
+		printf ("#<closure args[%zd] ", c->paramsize);
 		display (c->arglist);
 		printf (" code ");
 		display (c->ip);
@@ -57,5 +57,5 @@ void display (scm*a, bool output)
 		printf (">");
 	} else if (!a)
 		printf ("()");
-	else printf ("#<scm %p>", a);
+	else printf ("#<scm %s@%p>", typeid (*a).name(), a);
 }

@@ -242,7 +242,8 @@ frame* scm_env::push_frame (size_t s)
 {
 	if (!cont) return global_frame; //global frame is infinately extensible
 
-	frame*new_frame = new_scm (this, local_frame, s)->collectable<frame>();
+	frame*new_frame = new_scm (this, local_frame, s)
+			  ->collectable<local_frame>();
 	if (!new_frame) return 0;
 	new_frame->parent = cont->env;
 	cont->env = new_frame;
