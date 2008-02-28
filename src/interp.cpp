@@ -23,7 +23,7 @@ int run_interpreter (int argc, char**argv)
 	bool firstline = true;
 	int err;
 
-	printf (" -- escm (version "ESCM_VERSION_STR") --\n");
+	printf (" -- escm "ESCM_VERSION_STR" --\n");
 
 	while (1) {
 		firstline = true;
@@ -31,7 +31,11 @@ int run_interpreter (int argc, char**argv)
 			c = readline (firstline ? "> " : " | ");
 			firstline = false;
 
-			if (!c) break;
+			if (!c) {
+				printf("\n -- escm terminating. --\n");
+				return 0;
+			}
+
 			add_history (c);
 
 			err = e.eval_string (c);
@@ -50,7 +54,4 @@ int run_interpreter (int argc, char**argv)
 
 		printf ("\n");
 	}
-	printf ("\n");
-
-	return 0;
 }
