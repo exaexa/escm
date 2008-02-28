@@ -465,6 +465,17 @@ static void op_if (scm_env*e, pair*code)
 
 
 /*
+ * ERROR HANDLING
+ *
+ * not rly moar?
+ */
+
+static void op_error (scm_env*e, scm*arglist)
+{
+	e->throw_exception(arglist);
+}
+
+/*
  * GENERAL
  */
 
@@ -540,6 +551,9 @@ void escm_add_scheme_builtins (scm_env*e)
 	//I/O
 	add_func_handler ("display", op_display);
 	add_func_handler ("newline", op_newline);
+
+	//errors
+	add_func_handler ("error", op_error);
 }
 
 /*
