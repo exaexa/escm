@@ -39,11 +39,18 @@ scm_env::scm_env (scm_parser*par, size_t heap_size, size_t alignment)
 	val = 0;
 	cont = 0;
 	global_frame = new_scm (this, hashed_frame)->collectable<frame>();
+
 	eval_cont_factory = default_eval_factory;
 	codevector_cont_factory = default_cv_factory;
 
 	t_true = new_scm (this, boolean, true)->collectable<boolean>();
 	t_false = new_scm (this, boolean, false)->collectable<boolean>();
+	t_errorhook = new_scm (this, symbol, "*error-hook*")
+		      ->collectable<symbol>();
+	t_memoryerror = new_scm (this, string, "out of memory")
+			->collectable<string>();
+
+	protected_exception = 0;
 
 	if (par) parser = par;
 	else parser = new scm_classical_parser (this);
@@ -102,7 +109,7 @@ void * scm_env::allocate (size_t size)
 	collect_garbage();
 	d = new_heap_object (size);
 	if (d) return d;
-	dprint ("HARD out of memory\n");
+	throw_exception(t_memoryerror);
 	return 0;
 }
 
@@ -186,6 +193,9 @@ void scm_env::collect_garbage ()
 	processing.push (cont);
 	processing.push (t_true);
 	processing.push (t_false);
+	processing.push (t_errorhook);
+	processing.push (t_memoryerror);
+	processing.push (protected_exception);
 
 	for (k = collector.begin();k != collector.end();++k)
 		if ( is_scm_protected (*k) ) {
