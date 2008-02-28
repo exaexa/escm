@@ -212,8 +212,9 @@ static void op_define (scm_env*e, pair*code)
 
 void op_lambda (scm_env*e, pair*code)
 {
-	code = pair_p (code->d);
-	e->ret (new_scm (e, closure, code->a, pair_p (code->d), e->cont->env)
+	pair* c = pair_p (code->d);
+	if (!c) e->throw_exception(code);
+	e->ret (new_scm (e, closure, c->a, pair_p (c->d), e->cont->env)
 		->collectable<scm>() );
 }
 
