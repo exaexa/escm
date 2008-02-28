@@ -57,9 +57,9 @@ void op_div (scm_env*e, scm*params)
 {
 	number*res = new_scm (e, number, 1);
 	if (!res) return;
-	e->val = res->collectable<number>();
 	number*f = 0;
 	pair*p = pair_p (params);
+	e->val = res->collectable<number>();
 	if (p) {
 		f = number_p (p->a);
 
@@ -68,14 +68,8 @@ void op_div (scm_env*e, scm*params)
 			if (f) {
 				res->set (f);
 				if (number_p (p->a) ) res->div (number_p (p->a) );
-				return;
 			}
-		} else {
-			if (f) {
-				res->div (f);
-				return;
-			}
-		}
+		} else if (f) res->div (f);
 	}
 	e->pop_cont();
 }
