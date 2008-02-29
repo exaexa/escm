@@ -12,7 +12,7 @@ void op_add (scm_env*e, scm*params)
 	while (p) {
 		if (number_p (p->a) )
 			res->add (number_p (p->a) );
-		else e->throw_desc_exception("not a number",p->a);
+		else e->throw_desc_exception ("not a number", p->a);
 		p = pair_p (p->d);
 	}
 	e->pop_cont();
@@ -29,7 +29,7 @@ void op_sub (scm_env*e, scm*params)
 		while (p) {
 			if (number_p (p->a) )
 				res->sub (number_p (p->a) );
-			else e->throw_desc_exception("not a number",p->a);
+			else e->throw_desc_exception ("not a number", p->a);
 			p = pair_p (p->d);
 		}
 	}
@@ -163,7 +163,7 @@ static void op_actual_define (scm_env*e, scm*params)
 	e->ret (name);
 	return;
 except:
-	e->throw_desc_exception("bad define:",params);
+	e->throw_desc_exception ("bad define:", params);
 }
 
 static void op_define (scm_env*e, pair*code)
@@ -171,7 +171,7 @@ static void op_define (scm_env*e, pair*code)
 	code = pair_p (code->d);
 	symbol*name;
 	scm*def;
-	if (!code) e->throw_desc_exception ("invalid define",code);
+	if (!code) e->throw_string_exception ("invalid define");
 	if (pair_p (code->a) ) { //defining a lambda, shortened syntax
 		pair*l = (pair*) code->a;
 		name = symbol_p (l->a);
@@ -183,10 +183,10 @@ static void op_define (scm_env*e, pair*code)
 		name = symbol_p (code->a);
 		if (pair_p (code->d) ) def = pair_p (code->d)->a;
 		else def = code->d;
-	} 
-	
-	if(!name) e->throw_desc_exception
-		("invalid define symbol format",code->a);
+	}
+
+	if (!name) e->throw_desc_exception
+		("invalid define symbol format", code->a);
 
 	//generates (#<op_actual_define> (QUOTE name) def)
 	lambda*func = new_scm (e, extern_func, op_actual_define);
@@ -261,7 +261,7 @@ void op_car (scm_env*e, scm*arglist)
 		e->ret ( ( (pair*) arglist)->a);
 		return;
 	}
-	e->throw_desc_exception("not a pair",arglist);
+	e->throw_desc_exception ("not a pair", arglist);
 }
 
 void op_cdr (scm_env*e, scm*arglist)
@@ -271,7 +271,7 @@ void op_cdr (scm_env*e, scm*arglist)
 		e->ret ( ( (pair*) arglist)->d);
 		return;
 	}
-	e->throw_desc_exception("not a pair",arglist);
+	e->throw_desc_exception ("not a pair", arglist);
 }
 
 void op_cons (scm_env*e, scm*arglist)
@@ -286,7 +286,7 @@ void op_cons (scm_env*e, scm*arglist)
 			return;
 		}
 	}
-	e->throw_string_exception("cons needs 2 arguments");
+	e->throw_string_exception ("cons needs 2 arguments");
 }
 
 /*
