@@ -285,7 +285,6 @@ scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
 	f = new_scm (e, chained_frame_entry, s, d,
 		     ( (chained_frame_entry**) dataof (table) ) [hash])
 	    ->collectable<chained_frame_entry>();
-	if (!f) return 0;
 
 	( (chained_frame_entry**) dataof (table) ) [hash] = f;
 
@@ -386,7 +385,6 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 
 		local_frame* f = new_scm (e, local_frame, new_size)
 				 ->collectable<local_frame>();
-		if (!f) return 0;
 
 		/*
 		 * because we can't push the newly allocated frame on top
