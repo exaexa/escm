@@ -131,11 +131,21 @@ public:
 	 * "general-purpose" frontends
 	 */
 
-	scm_env (scm_parser* defaultparser = 0,
-		 size_t heap_size = 65536,
-		 size_t alignment = 4);
+	inline scm_env ()
+	{
+		is_init = false;
+	}
+	inline ~scm_env()
+	{
+		if (is_init) release();
+	}
 
-	~scm_env();
+	bool is_init;
+	bool init (scm_parser* defaultparser = 0,
+		   size_t heap_size = 65536,
+		   size_t alignment = 4);
+
+	void release ();
 
 	void eval_code (pair*);
 	void eval_expr (scm*);
