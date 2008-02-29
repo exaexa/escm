@@ -7,7 +7,6 @@
 void op_add (scm_env*e, scm*params)
 {
 	number*res = new_scm (e, number, 0);
-	if (!res) return;
 	pair*p = pair_p (params);
 	e->val = res->collectable<number>();
 	while (p) {
@@ -22,7 +21,6 @@ void op_add (scm_env*e, scm*params)
 void op_sub (scm_env*e, scm*params)
 {
 	number*res = new_scm (e, number, 0);
-	if (!res) return;
 	pair*p = pair_p (params);
 	e->val = res->collectable<number>();
 	if (pair_p (p) ) {
@@ -41,7 +39,6 @@ void op_sub (scm_env*e, scm*params)
 void op_mul (scm_env*e, scm*params)
 {
 	number*res = new_scm (e, number, 1);
-	if (!res) return;
 	pair*p = pair_p (params);
 	e->val = res->collectable<number>();
 	while (p) {
@@ -56,7 +53,6 @@ void op_mul (scm_env*e, scm*params)
 void op_div (scm_env*e, scm*params)
 {
 	number*res = new_scm (e, number, 1);
-	if (!res) return;
 	e->val = res->collectable<number>();
 	number*f = 0;
 	pair*p = pair_p (params);
@@ -67,7 +63,8 @@ void op_div (scm_env*e, scm*params)
 		if (p) {
 			if (f) {
 				res->set (f);
-				if (number_p (p->a) ) res->div (number_p (p->a) );
+				if (number_p (p->a) )
+					res->div (number_p (p->a) );
 				return;
 			}
 		} else {
@@ -84,7 +81,6 @@ void op_div (scm_env*e, scm*params)
 void name(scm_env*e, scm*params) \
 { \
 	number*res=new_scm(e,number,0); \
-	if(!res)return; \
 	e->val=res->collectable<number>(); \
  \
 	pair*l=pair_p(params); \
@@ -106,7 +102,6 @@ two_number_func (op_pow, pow)
 void op_log (scm_env*e, scm*params)
 {
 	number*res = new_scm (e, number, 0);
-	if (!res) return;
 	e->val = res->collectable<number>();
 
 	pair*l = pair_p (params);
@@ -130,7 +125,6 @@ void op_log (scm_env*e, scm*params)
 void op_exp (scm_env*e, scm*params)
 {
 	number*res = new_scm (e, number, 1);
-	if (!res) return;
 	e->val = res->collectable<number>();
 
 	pair*p = pair_p (params);
@@ -471,6 +465,17 @@ static void op_if (scm_env*e, pair*code)
 
 
 /*
+ * ERROR HANDLING
+ *
+ * not rly moar?
+ */
+
+static void op_error (scm_env*e, scm*arglist)
+{
+	e->throw_exception (arglist);
+}
+
+/*
  * GENERAL
  */
 
@@ -478,7 +483,6 @@ static void add_global (scm_env*e, char*name, scm*data)
 {
 	scm*t = e->val;
 	symbol*s = new_scm (e, symbol, name);
-	if (!s) return;
 	e->val = data;
 	e->globdef (s);
 	s->mark_collectable();
@@ -492,60 +496,68 @@ add_global(e,name,new_scm(e,extern_syntax,h))
 #define add_func_handler(name,h)\
 add_global(e,name,new_scm(e,extern_func,h))
 
-void escm_add_scheme_builtins (scm_env*e)
+bool escm_add_scheme_builtins (scm_env*e)
 {
 	//arithmetics
-	add_func_handler ("+", op_add);
-	add_func_handler ("-", op_sub);
-	add_func_handler ("*", op_mul);
-	add_func_handler ("/", op_div);
-	add_func_handler ("modulo", op_mod);
-	add_func_handler ("%", op_mod);
-	add_func_handler ("expt", op_pow);
-	add_func_handler ("log", op_log);
-	add_func_handler ("pow-e", op_exp);
+	try {
+		add_func_handler ("+", op_add);
+		add_func_handler ("-", op_sub);
+		add_func_handler ("*", op_mul);
+		add_func_handler ("/", op_div);
+		add_func_handler ("modulo", op_mod);
+		add_func_handler ("%", op_mod);
+		add_func_handler ("expt", op_pow);
+		add_func_handler ("log", op_log);
+		add_func_handler ("pow-e", op_exp);
 
-	//basic scheme
-	add_syntax_handler ("quote", op_quote);
-	add_func_handler ("eval", op_eval);
+		//basic scheme
+		add_syntax_handler ("quote", op_quote);
+		add_func_handler ("eval", op_eval);
 
-	add_func_handler ("*do-define*", op_actual_define);
-	add_syntax_handler ("define", op_define);
+		add_func_handler ("*do-define*", op_actual_define);
+		add_syntax_handler ("define", op_define);
 
-	add_syntax_handler ("lambda", op_lambda);
-	add_syntax_handler ("macro", op_macro);
+		add_syntax_handler ("lambda", op_lambda);
+		add_syntax_handler ("macro", op_macro);
 
-	add_syntax_handler ("if", op_if);
+		add_syntax_handler ("if", op_if);
 
-	add_syntax_handler ("begin", op_begin);
+		add_syntax_handler ("begin", op_begin);
 
-	//lists
-	add_func_handler ("list", op_list);
-	add_func_handler ("cons", op_cons);
-	add_func_handler ("car", op_car);
-	add_func_handler ("cdr", op_cdr);
+		//lists
+		add_func_handler ("list", op_list);
+		add_func_handler ("cons", op_cons);
+		add_func_handler ("car", op_car);
+		add_func_handler ("cdr", op_cdr);
 
-	//types
-	add_func_handler ("null?", op_null_p);
-	add_func_handler ("atom?", op_atom_p);
-	add_func_handler ("pair?", op_pair_p);
-	add_func_handler ("number?", op_number_p);
-	add_func_handler ("character?", op_character_p);
-	add_func_handler ("boolean?", op_boolean_p);
-	add_func_handler ("string?", op_string_p);
-	add_func_handler ("symbol?", op_symbol_p);
-	add_func_handler ("lambda?", op_lambda_p);
-	add_func_handler ("syntax?", op_syntax_p);
-	add_func_handler ("continuation?", op_continuation_p);
+		//types
+		add_func_handler ("null?", op_null_p);
+		add_func_handler ("atom?", op_atom_p);
+		add_func_handler ("pair?", op_pair_p);
+		add_func_handler ("number?", op_number_p);
+		add_func_handler ("character?", op_character_p);
+		add_func_handler ("boolean?", op_boolean_p);
+		add_func_handler ("string?", op_string_p);
+		add_func_handler ("symbol?", op_symbol_p);
+		add_func_handler ("lambda?", op_lambda_p);
+		add_func_handler ("syntax?", op_syntax_p);
+		add_func_handler ("continuation?", op_continuation_p);
 
-	//booleans
-	add_func_handler ("true?", op_true_p);
-	add_func_handler ("false?", op_false_p);
-	add_func_handler ("not", op_false_p);
+		//booleans
+		add_func_handler ("true?", op_true_p);
+		add_func_handler ("false?", op_false_p);
+		add_func_handler ("not", op_false_p);
 
-	//I/O
-	add_func_handler ("display", op_display);
-	add_func_handler ("newline", op_newline);
+		//I/O
+		add_func_handler ("display", op_display);
+		add_func_handler ("newline", op_newline);
+
+		//errors
+		add_func_handler ("error", op_error);
+	} catch (scm*) {
+		return false;
+	}
+	return true;
 }
 
 /*

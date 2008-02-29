@@ -40,10 +40,11 @@ int scm_classical_parser::parse_string (const char*str)
 		while (*str) parse_char (* (str++) );
 	} catch (int i) {
 		reset();
-		dprint ("parser exception: %d\n", i);
 		return i;
+	} catch (scm* s) {
+		reset();
+		return 7; //special scm-OOM error.
 	}
-
 	return 0;
 }
 
@@ -509,6 +510,8 @@ const char* scm_classical_parser::get_parse_error (int i)
 		return "illegal sharp expression";
 	case 6:
 		return "internal parser error";
+	case 7:
+		return "scheme machine error, most probably out of memory";
 	default:
 		return 0;
 	}

@@ -15,9 +15,10 @@
 
 int run_interpreter (int argc, char**argv)
 {
-	scm_env e (0, 32768, 4);
+	scm_env e;
+	e.init (0, 32768, 4);
 
-	escm_add_scheme_builtins (&e);
+	if (!escm_add_scheme_builtins (&e) ) return 1;
 
 	char* c;
 	bool firstline = true;
@@ -33,6 +34,7 @@ int run_interpreter (int argc, char**argv)
 
 			if (!c) {
 				printf("\n -- escm terminating. --\n");
+				e.release ();
 				return 0;
 			}
 
@@ -43,7 +45,8 @@ int run_interpreter (int argc, char**argv)
 				printf ("** parse error: %s\n",
 					e.parser->get_parse_error (err) );
 				break;
-			} else e.eval_string ("\n"); //because it's really typed
+			}
+			e.eval_string ("\n"); //because it's really typed
 
 		} while (!e.evaluating() ) ;
 

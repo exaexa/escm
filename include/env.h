@@ -98,6 +98,16 @@ public:
 	continuation *cont;
 
 	/*
+	 * Exception handling
+	 */
+
+
+	inline void throw_exception (scm* s)
+	{
+		throw s;
+	}
+
+	/*
 	 * Parser pointer.
 	 * use whichever parser you create here.
 	 */
@@ -121,11 +131,21 @@ public:
 	 * "general-purpose" frontends
 	 */
 
-	scm_env (scm_parser* defaultparser = 0,
-		 size_t heap_size = 65536,
-		 size_t alignment = 4);
+	inline scm_env ()
+	{
+		is_init = false;
+	}
+	inline ~scm_env()
+	{
+		if (is_init) release();
+	}
 
-	~scm_env();
+	bool is_init;
+	bool init (scm_parser* defaultparser = 0,
+		   size_t heap_size = 65536,
+		   size_t alignment = 4);
+
+	void release ();
 
 	void eval_code (pair*);
 	void eval_expr (scm*);
@@ -141,10 +161,30 @@ public:
 		return cont ? true : false;
 	}
 
+	scm* protected_exception;
+
 	inline bool eval_step()
 	{
-		if (cont)
-			cont->eval_step (this);
+		try {
+			if (cont)
+				cont->eval_step (this);
+		} catch (scm* e) {
+			protected_exception = e;
+			cont = 0;
+			try {
+				if (globget (t_errorhook) ) if (lambda_p (val) )
+						( (lambda*) val)->apply (this, e);
+
+				protected_exception = 0;
+			} catch (scm* e) {
+				/*
+				 * if even this goes wrong, let's die terribly.
+				 * TODO Maybe pass some info to the caller?
+				 */
+				cont = 0;
+				return false;
+			}
+		}
 		return cont ? true : false;
 	}
 
@@ -205,9 +245,13 @@ public:
 	 *
 	 * booleans are guaranteed to have true and false meaning,
 	 * so we don't need to alloc new booleans everytime we create them.
+	 *
+	 * So we need the error hook symbol.
 	 */
 
 	boolean *t_true, *t_false;
+	symbol *t_errorhook;
+	string *t_memoryerror;
 };
 
 #endif
