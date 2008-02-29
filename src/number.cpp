@@ -76,3 +76,18 @@ void number::exp()
 	n =::exp (n);
 }
 
+bool number::is_greater (number*a)
+{
+	return n > (a->n);
+}
+
+bool number::is_less (number*a)
+{
+	return n < (a->n);
+}
+
+bool number::is_equal (number*a)
+{
+	return n == (a->n);
+}
+

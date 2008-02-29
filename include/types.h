@@ -193,6 +193,10 @@ public:
 	void log (number*);
 	void exp();
 
+	bool is_greater (number*);
+	bool is_less (number*);
+	bool is_equal (number*);
+
 	inline void set (number*a)
 	{
 		n = a->n;
