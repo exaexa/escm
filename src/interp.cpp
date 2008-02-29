@@ -33,7 +33,7 @@ int run_interpreter (int argc, char**argv)
 			firstline = false;
 
 			if (!c) {
-				printf("\n -- escm terminating. --\n");
+				printf ("\n -- escm terminating. --\n");
 				e.release ();
 				return 0;
 			}
