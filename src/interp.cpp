@@ -1,7 +1,6 @@
 
 #include "env.h"
 #include "builtins.h"
-#include "display.h"
 
 #include <stdio.h>
 #include <readline/readline.h>
@@ -53,7 +52,7 @@ int run_interpreter (int argc, char**argv)
 		e.run_eval_loop();
 
 		printf (" => ");
-		escm_display_to_stdout (e.get_last_result(), false);
+		printf (e.get_last_result()->display().c_str());
 
 		printf ("\n");
 	}

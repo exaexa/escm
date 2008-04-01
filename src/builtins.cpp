@@ -293,12 +293,10 @@ void op_cons (scm_env*e, scm*arglist)
  * DISPLAY (subject to remove)
  */
 
-#include "display.h"
-
 static void op_display (scm_env*e, scm*arglist)
 {
 	if (pair_p (arglist) )
-		escm_display_to_stdout ( ( (pair*) arglist)->a, true);
+		printf( ( (pair*) arglist)->a->display(1).c_str() );
 	e->ret (0);
 }
 

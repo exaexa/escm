@@ -176,8 +176,6 @@ void scm_env::sort_out_free_space()
 	}
 }
 
-#include "display.h"
-
 void scm_env::collect_garbage ()
 {
 	set<scm*> active;
@@ -208,7 +206,7 @@ void scm_env::collect_garbage ()
 		if ( is_scm_protected (*k) ) {
 			processing.push (*k);
 			printf ("gc-protected scm at %p: ", *k);
-			escm_display_to_stdout (*k);
+			printf ((*k)->display().c_str());
 			printf ("\n");
 		}
 

@@ -4,6 +4,7 @@
 
 #include <stddef.h>
 #include "debug.h"
+#include <string>
 
 class scm_env;
 
@@ -32,6 +33,9 @@ class scm_env;
 
 #include <typeinfo>
 #define is_type(a,b) (typeid(a)==typeid(b))
+
+#define scm_display_code 0
+#define scm_display_print 1
 
 /*
  * scm
@@ -66,6 +70,13 @@ public:
 		return (ret_scm*) this;
 	}
 
+	std::string display (int style=0)
+	{
+		if (!this) return "()";
+		return display_internal (style);
+	}
+
+	virtual std::string display_internal (int style);
 };
 
 /*
@@ -118,6 +129,8 @@ public:
 
 	//returns true number of elements in the list (loop+
 	int list_size();
+
+	virtual std::string display_internal (int style);
 };
 
 /*
@@ -156,6 +169,8 @@ public:
 	{
 		b = a;
 	}
+
+	virtual std::string display_internal (int style);
 };
 
 class character: public scm
@@ -166,6 +181,8 @@ public:
 	{
 		c = a;
 	}
+
+	virtual std::string display_internal (int style);
 };
 
 class number : public scm
@@ -202,6 +219,8 @@ public:
 		n = a->n;
 		exact = a->exact;
 	}
+
+	virtual std::string display_internal (int style);
 };
 
 class text : public scm
@@ -221,6 +240,8 @@ public:
 	{
 		return (const char*) dataof (d);
 	}
+
+	virtual std::string display_internal (int style);
 };
 
 class string : public text
@@ -236,6 +257,8 @@ public:
 	symbol (scm_env*, const char*, int length = -1);
 
 	int cmp (symbol*);
+
+	virtual std::string display_internal (int style);
 };
 
 class vector : public scm
@@ -251,6 +274,8 @@ public:
 	void set (size_t i, scm*d);
 
 	virtual scm* get_child (int);
+
+	virtual std::string display_internal (int style);
 };
 
 /*
@@ -392,6 +417,8 @@ public:
 	}
 
 	virtual void apply (scm_env* e, scm* args);
+
+	virtual std::string display_internal (int style);
 };
 
 class closure : public lambda
@@ -419,6 +446,8 @@ public:
 			return scm_no_more_children;
 		}
 	}
+
+	virtual std::string display_internal (int style);
 };
 
 /*
@@ -467,6 +496,8 @@ public:
 	{
 		handler (e, code);
 	}
+
+	virtual std::string display_internal (int style);
 };
 
 class macro : public syntax
@@ -495,6 +526,8 @@ public:
 	}
 
 	virtual void apply (scm_env*e, pair*code);
+
+	virtual std::string display_internal (int style);
 };
 
 /*

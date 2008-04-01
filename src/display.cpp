@@ -1,61 +1,113 @@
 
-#include "display.h"
-#include <stack>
+#include "types.h"
+#include <sstream>
 
-#define display escm_display_to_stdout
-void display (scm*a, bool output)
+std::string pair::display_internal (int style)
 {
-
-	if (pair_p (a) ) {
-		pair*p = pair_p (a);
-		printf ("(");
-		while (1) {
-			display (p->a, false);
-			if (!p->d) {
-				printf (")");
-				break;
-			}
-			printf (" ");
-			if (pair_p (p->d) ) {
-				p = pair_p (p->d);
-				continue;
-			} else {
-				printf (". ");
-				display (p->d, false);
-				printf (")");
-				break;
-			}
+	pair*p = this;
+	std::string buf = "(";
+	while (1) {
+		buf += p->a->display (0);
+		if (!p->d) {
+			buf += ")";
+			break;
 		}
-	} else if (number_p (a) )
-		printf ("%g", number_p (a)->n);
-	else if (symbol_p (a) )
-		printf ("%s", (const char*) *symbol_p (a) );
-	else if (string_p (a) )
-		printf (output ? "%s" : "\"%s\"", (const char*) *string_p (a) );
-	else if (boolean_p (a) )
-		printf ( ( (boolean*) a)->b ? "#T" : "#F");
-	else if (dynamic_cast<extern_func*> (a) )
-		printf ("#<extern_func h=%p>", ( (extern_func*) a) -> handler);
-	else if (dynamic_cast<closure*> (a) ) {
-		closure*c = (closure*) a;
-		printf ("#<closure args[%zd] ", c->paramsize);
-		display (c->arglist);
-		printf (" code ");
-		display (c->ip);
-		printf (" env ");
-		display (c->env);
-		printf (">");
-	} else if (dynamic_cast<extern_syntax*> (a) )
-		printf ("#<extern_syntax h=%p>",
-			( (extern_syntax*) a) -> handler);
-	else if (dynamic_cast<macro*> (a) ) {
-		macro*c = (macro*) a;
-		printf ("#<macro argname ");
-		display (c->argname);
-		printf (" code ");
-		display (c->code);
-		printf (">");
-	} else if (!a)
-		printf ("()");
-	else printf ("#<scm %s@%p>", typeid (*a).name(), a);
+		buf += " ";
+		if (pair_p (p->d) ) {
+			p = pair_p (p->d);
+			continue;
+		} else {
+			buf += ". ";
+			buf += p->d->display (0);
+			buf += ")";
+			break;
+		}
+	}
+	return buf;
 }
+
+std::string number::display_internal (int style)
+{
+	std::ostringstream os;
+	os << n;
+	return os.str();
+}
+
+std::string symbol::display_internal (int style)
+{
+	return (const char*) (*this);
+}
+
+std::string text::display_internal (int style)
+{
+	if (style) return std::string ("\"") + (const char*) (*this) + "\"";
+	return (const char*) (*this);
+}
+
+std::string boolean::display_internal (int style)
+{
+	return ( b ? "#T" : "#F");
+}
+
+std::string character::display_internal (int style)
+{
+	if(style)return std::string(1,c);
+	return std::string("#\\").append(1,c);
+}
+
+std::string extern_func::display_internal (int style)
+{
+	std::ostringstream os;
+	os << "#<extern_func@" << handler << ">";
+	return os.str();
+}
+
+std::string closure::display_internal (int style)
+{
+	std::ostringstream os;
+	os << "#<closure args[" << paramsize << "] "
+	<< arglist->display()
+	<< " code "
+	<< ip->display()
+	<< " env "
+	<< env->display() << ">";
+	return os.str();
+}
+
+std::string extern_syntax::display_internal (int style)
+{
+	std::ostringstream os;
+	os << "#<extern_syntax h=" << handler << ">";
+	return os.str();
+}
+
+std::string macro::display_internal (int style)
+{
+	std::ostringstream os;
+	os << "#<macro argname "
+	<< argname->display()
+	<< " code "
+	<< code->display()
+	<< ">";
+	return os.str();
+}
+
+std::string vector::display_internal (int style)
+{
+	std::ostringstream os;
+	os<<"#(";
+	for(size_t i=0;i<size;++i) {
+		if(i)os<<" ";
+		os<<ref(i)->display();
+	}
+	os<<")";
+	return os.str();
+}
+
+std::string scm::display_internal (int style)
+{
+	std::ostringstream os;
+	os << "#<scm " << typeid (*this).name() << "@" << this << ">";
+	return os.str();
+}
+
