@@ -40,7 +40,7 @@ std::string symbol::display_internal (int style)
 
 std::string text::display_internal (int style)
 {
-	if (style) return std::string ("\"") + (const char*) (*this) + "\"";
+	if (!style) return std::string ("\"") + (const char*) (*this) + "\"";
 	return (const char*) (*this);
 }
 
@@ -51,8 +51,8 @@ std::string boolean::display_internal (int style)
 
 std::string character::display_internal (int style)
 {
-	if(style)return std::string(1,c);
-	return std::string("#\\").append(1,c);
+	if (!style) return std::string (1, c);
+	return std::string ("#\\").append (1, c);
 }
 
 std::string extern_func::display_internal (int style)
@@ -95,12 +95,12 @@ std::string macro::display_internal (int style)
 std::string vector::display_internal (int style)
 {
 	std::ostringstream os;
-	os<<"#(";
-	for(size_t i=0;i<size;++i) {
-		if(i)os<<" ";
-		os<<ref(i)->display();
+	os << "#(";
+	for (size_t i = 0;i < size;++i) {
+		if (i) os << " ";
+		os << ref (i)->display();
 	}
-	os<<")";
+	os << ")";
 	return os.str();
 }
 
