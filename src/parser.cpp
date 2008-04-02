@@ -29,6 +29,7 @@ enum { //tokenizer state
 	ts_in_string_backslashed,
 	ts_in_sharp,
 	ts_in_char,
+	ts_in_char_letters,
 	ts_after_unquote,
 	ts_in_atom,
 	ts_in_comment
@@ -159,6 +160,14 @@ static bool is_hex_digit (char c)
 	return ( (c >= '0') && (c <= '9') )
 	       || ( (c >= 'a') && (c <= 'f') )
 	       || ( (c >= 'A') && (c <= 'F') );
+}
+
+static bool is_alnum (char c)
+{
+	if((c>='a')&&(c<='z'))return true;
+	if((c>='A')&&(c<='Z'))return true;
+	if((c>='0')&&(c<='9'))return true;
+	return false;
 }
 
 static int guess_token_type (const String& s)
@@ -416,10 +425,21 @@ void scm_classical_parser::parse_char (char c)
 		break;
 
 	case ts_in_char:
-		if (is_white (c) ) {
+		token_rest.append (1, c);
+		if(is_alnum(c)) t_state=ts_in_char_letters;
+		else {
 			t_state = ts_normal;
 			pt (tok_char, &token_rest);
 			token_rest.clear();
+		}
+		break;
+	
+	case ts_in_char_letters:
+		if (!is_alnum (c) ) {
+			t_state = ts_normal;
+			pt (tok_char, &token_rest);
+			token_rest.clear();
+			parse_char (c);
 		} else
 			token_rest.append (1, c);
 		break;

@@ -51,7 +51,7 @@ std::string boolean::display_internal (int style)
 
 std::string character::display_internal (int style)
 {
-	if (!style) return std::string (1, c);
+	if (style) return std::string (1, c);
 	return std::string ("#\\").append (1, c);
 }
 
