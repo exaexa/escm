@@ -164,9 +164,9 @@ static bool is_hex_digit (char c)
 
 static bool is_alnum (char c)
 {
-	if((c>='a')&&(c<='z'))return true;
-	if((c>='A')&&(c<='Z'))return true;
-	if((c>='0')&&(c<='9'))return true;
+	if ( (c >= 'a') && (c <= 'z') ) return true;
+	if ( (c >= 'A') && (c <= 'Z') ) return true;
+	if ( (c >= '0') && (c <= '9') ) return true;
 	return false;
 }
 
@@ -426,14 +426,14 @@ void scm_classical_parser::parse_char (char c)
 
 	case ts_in_char:
 		token_rest.append (1, c);
-		if(is_alnum(c)) t_state=ts_in_char_letters;
+		if (is_alnum (c) ) t_state = ts_in_char_letters;
 		else {
 			t_state = ts_normal;
 			pt (tok_char, &token_rest);
 			token_rest.clear();
 		}
 		break;
-	
+
 	case ts_in_char_letters:
 		if (!is_alnum (c) ) {
 			t_state = ts_normal;

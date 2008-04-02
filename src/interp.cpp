@@ -52,7 +52,7 @@ int run_interpreter (int argc, char**argv)
 		e.run_eval_loop();
 
 		printf (" => ");
-		printf (e.get_last_result()->display().c_str());
+		printf (e.get_last_result()->display().c_str() );
 
 		printf ("\n");
 	}

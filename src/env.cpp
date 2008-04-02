@@ -206,7 +206,7 @@ void scm_env::collect_garbage ()
 		if ( is_scm_protected (*k) ) {
 			processing.push (*k);
 			printf ("gc-protected scm at %p: ", *k);
-			printf ((*k)->display().c_str());
+			printf ( (*k)->display().c_str() );
 			printf ("\n");
 		}
 
@@ -354,4 +354,14 @@ int scm_env::eval_string (const char*s)
 	if (code) eval_code (code->collectable<pair>() );
 	return 0;
 }
+
+void scm_env::add_global (const char*name, scm*data)
+{
+	symbol*s = new_scm (this, symbol, name);
+	global_frame->define (this, s, data);
+	s->mark_collectable();
+	data->mark_collectable();
+}
+
+
 

@@ -70,7 +70,7 @@ public:
 		return (ret_scm*) this;
 	}
 
-	std::string display (int style=0)
+	std::string display (int style = 0)
 	{
 		if (!this) return "()";
 		return display_internal (style);

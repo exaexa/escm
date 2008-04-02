@@ -1,4 +1,5 @@
 #include "builtins.h"
+#include "macros.h"
 
 /*
  * NUMBER FUNCTIONS
@@ -296,7 +297,7 @@ void op_cons (scm_env*e, scm*arglist)
 static void op_display (scm_env*e, scm*arglist)
 {
 	if (pair_p (arglist) )
-		printf( ( (pair*) arglist)->a->display(1).c_str() );
+		printf ( ( (pair*) arglist)->a->display (1).c_str() );
 	e->ret (0);
 }
 
@@ -470,84 +471,67 @@ static void op_error (scm_env*e, scm*arglist)
 }
 
 /*
- * GENERAL
+ * General add-all-the-shaite function
  */
-
-static void add_global (scm_env*e, char*name, scm*data)
-{
-	scm*t = e->val;
-	symbol*s = new_scm (e, symbol, name);
-	e->val = data;
-	e->globdef (s);
-	s->mark_collectable();
-	data->mark_collectable();
-	e->val = t;
-}
-
-#define add_syntax_handler(name,h)\
-add_global(e,name,new_scm(e,extern_syntax,h))
-
-#define add_func_handler(name,h)\
-add_global(e,name,new_scm(e,extern_func,h))
 
 bool escm_add_scheme_builtins (scm_env*e)
 {
 	//arithmetics
 	try {
-		add_func_handler ("+", op_add);
-		add_func_handler ("-", op_sub);
-		add_func_handler ("*", op_mul);
-		add_func_handler ("/", op_div);
-		add_func_handler ("modulo", op_mod);
-		add_func_handler ("%", op_mod);
-		add_func_handler ("expt", op_pow);
-		add_func_handler ("log", op_log);
-		add_func_handler ("pow-e", op_exp);
+		escm_add_func_handler (e, "+", op_add);
+		escm_add_func_handler (e, "-", op_sub);
+		escm_add_func_handler (e, "*", op_mul);
+		escm_add_func_handler (e, "/", op_div);
+		escm_add_func_handler (e, "modulo", op_mod);
+		escm_add_func_handler (e, "%", op_mod);
+		escm_add_func_handler (e, "expt", op_pow);
+		escm_add_func_handler (e, "log", op_log);
+		escm_add_func_handler (e, "pow-e", op_exp);
 
 		//basic scheme
-		add_syntax_handler ("quote", op_quote);
-		add_func_handler ("eval", op_eval);
+		escm_add_syntax_handler (e, "quote", op_quote);
+		escm_add_func_handler (e, "eval", op_eval);
 
-		add_func_handler ("*do-define*", op_actual_define);
-		add_syntax_handler ("define", op_define);
+		escm_add_func_handler (e, "*do-define*", op_actual_define);
+		escm_add_syntax_handler (e, "define", op_define);
 
-		add_syntax_handler ("lambda", op_lambda);
-		add_syntax_handler ("macro", op_macro);
+		escm_add_syntax_handler (e, "lambda", op_lambda);
+		escm_add_syntax_handler (e, "macro", op_macro);
 
-		add_syntax_handler ("if", op_if);
+		escm_add_syntax_handler (e, "if", op_if);
 
-		add_syntax_handler ("begin", op_begin);
+		escm_add_syntax_handler (e, "begin", op_begin);
 
 		//lists
-		add_func_handler ("list", op_list);
-		add_func_handler ("cons", op_cons);
-		add_func_handler ("car", op_car);
-		add_func_handler ("cdr", op_cdr);
+		escm_add_func_handler (e, "list", op_list);
+		escm_add_func_handler (e, "cons", op_cons);
+		escm_add_func_handler (e, "car", op_car);
+		escm_add_func_handler (e, "cdr", op_cdr);
 
 		//types
-		add_func_handler ("null?", op_null_p);
-		add_func_handler ("atom?", op_atom_p);
-		add_func_handler ("pair?", op_pair_p);
-		add_func_handler ("number?", op_number_p);
-		add_func_handler ("character?", op_character_p);
-		add_func_handler ("boolean?", op_boolean_p);
-		add_func_handler ("string?", op_string_p);
-		add_func_handler ("symbol?", op_symbol_p);
-		add_func_handler ("lambda?", op_lambda_p);
-		add_func_handler ("syntax?", op_syntax_p);
-		add_func_handler ("continuation?", op_continuation_p);
+		escm_add_func_handler (e, "null?", op_null_p);
+		escm_add_func_handler (e, "atom?", op_atom_p);
+		escm_add_func_handler (e, "pair?", op_pair_p);
+		escm_add_func_handler (e, "number?", op_number_p);
+		escm_add_func_handler (e, "character?", op_character_p);
+		escm_add_func_handler (e, "boolean?", op_boolean_p);
+		escm_add_func_handler (e, "string?", op_string_p);
+		escm_add_func_handler (e, "symbol?", op_symbol_p);
+		escm_add_func_handler (e, "lambda?", op_lambda_p);
+		escm_add_func_handler (e, "syntax?", op_syntax_p);
+		escm_add_func_handler (e, "continuation?", op_continuation_p);
 
 		//booleans
-		add_func_handler ("true?", op_true_p);
-		add_func_handler ("false?", op_false_p);
-		add_func_handler ("not", op_false_p);
+		escm_add_func_handler (e, "true?", op_true_p);
+		escm_add_func_handler (e, "false?", op_false_p);
+		escm_add_func_handler (e, "not", op_false_p);
 
 		//I/O
-		add_func_handler ("display", op_display);
-		add_func_handler ("newline", op_newline);
+		escm_add_func_handler (e, "display", op_display);
+		escm_add_func_handler (e, "newline", op_newline);
 
 		//errors
-		add_func_handler ("error", op_error);
+		escm_add_func_handler (e, "error", op_error);
 	} catch (scm*) {
 		return false;
 	}

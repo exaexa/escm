@@ -175,6 +175,8 @@ public:
 		return cont ? true : false;
 	}
 
+	void add_global (const char*name, scm*data);
+
 	scm* protected_exception;
 
 	inline bool eval_step()

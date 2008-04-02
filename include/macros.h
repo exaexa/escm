@@ -36,10 +36,10 @@ var=dynamic_cast<type>(escm_arglist); escm_arglist=0;
 
 
 #define escm_add_syntax_handler(e,name,h)\
-escm_add_global(e,name,new_scm(e,extern_syntax,h))
+(e)->add_global((name),new_scm((e),extern_syntax,(h)))
 
 #define escm_add_func_handler(e,name,h)\
-escm_add_global(e,name,new_scm(e,extern_func,h))
+(e)->add_global((name),new_scm((e),extern_func,(h)))
 
 #endif
 
