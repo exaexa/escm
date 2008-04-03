@@ -23,16 +23,16 @@ void name (scm_env* escm_environment, scm* escm_arglist)
 #define has_arg (pair_p(escm_arglist)?true:false)
 #define has_tail_arg (escm_arglist&&(!pair_p(escm_arglist)))
 
-#define pop_arg(var) \
-var=((pair*)escm_arglist)->a; escm_arglist=((pair*)escm_arglist)->d;
-#define pop_tail_arg(var) \
-var=escm_arglist; escm_arglist=0;
+#define pop_arg() \
+({scm* var=((pair*)escm_arglist)->a; escm_arglist=((pair*)escm_arglist)->d;var;})
+#define pop_tail_arg() \
+({scm* var=escm_arglist; escm_arglist=0;var;})
 
-#define pop_arg_type(var,type) \
-var=dynamic_cast<type>(((pair*)escm_arglist)->a);\
-escm_arglist=((pair*)escm_arglist)->d;
-#define pop_tail_arg_type(var,type) \
-var=dynamic_cast<type>(escm_arglist); escm_arglist=0;
+#define pop_arg_type(type) \
+({type* var=dynamic_cast<type*>(((pair*)escm_arglist)->a);\
+escm_arglist=((pair*)escm_arglist)->d;var;})
+#define pop_tail_arg_type(type) \
+({type* var=dynamic_cast<type*>(escm_arglist); escm_arglist=0;var;})
 
 
 #define escm_add_syntax_handler(e,name,h)\
