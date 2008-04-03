@@ -188,7 +188,7 @@ public:
 			protected_exception = e;
 			cont = 0;
 			try {
-				if (globget (t_errorhook) ) if (lambda_p (val) )
+				if (lexget (t_errorhook) ) if (lambda_p (val) )
 						( (lambda*) val)->apply (this, e);
 
 				protected_exception = 0;
@@ -198,6 +198,7 @@ public:
 				 * what about passing info to the caller?
 				 * or could he set error hook himself?
 				 */
+				printf("It has gone terribly wrong here.\n");
 				cont = 0;
 				return false;
 			}
