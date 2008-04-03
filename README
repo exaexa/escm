@@ -8,8 +8,11 @@ Minimalistic, lightweight scheme machine written in C++. Primarily focused for
 use as embedded scripting language in any application, extensible to any level
 of scheme impossibility.
 
-Before any work with this program, please see the license in LICENSE file which
-should always be in the same package.
+Before any work with this program, please see the license in LICENSE file.
+If you didn't receive your copy of LICENSE, please download it from web:
+
+http://www.gnu.org/licenses/gpl-3.0.txt
+
 
 ESCM was written by Mirek [exa] Kratochvil for some higher purposes of computer
 science in 2007-2008. You can contact me at <exa.exa@gmail.com>.
@@ -22,12 +25,13 @@ science in 2007-2008. You can contact me at <exa.exa@gmail.com>.
 
 
 Q: 
-	Is there any tutorial for embedding this in my application?
+	Is there any tutorial for embedding ESCM in my application?
 A: 
 	Look at `src/interp.cpp' in this package, there's an implementation of
 	complete interpreter using libreadline (which gives bash-like features).
 	It should come well-commented so that any experienced-enough programmer
 	understands it.
+
 
 Q:
 	How can I add functions and/or variables to my ESCM environment?
@@ -75,6 +79,7 @@ A:
 	in a result, scheme will evaluate correctly:
 
 		(* variable 2) => 10
+
 
 Q:
 	How can I guess which environment was my C++ function called from?
@@ -264,6 +269,7 @@ A:
 
 		};
 
+
 Q:
 	How do I get data from/to a functions?
 	How do I get function arguments which were passed to C++ code?
@@ -302,6 +308,7 @@ A:
 	return_scm macro, but do not try to return any other value. (because you
 	would most probably cause the next function in call-stack to return that
 	value, which could bring not-really-interesting results)
+
 
 Q:
 	How do I use macros?
@@ -372,8 +379,9 @@ A:
 				return_scm (((pair*)(code->d))->a);
 		}
 
+
 Q:
-	How can I what error occured?
+	How can I see what error occured?
 A:
 	ESCM has classical scheme error mechanism. You may define *error-hook*
 	to set desired error-handling behavior.
