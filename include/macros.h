@@ -18,6 +18,9 @@ void escm_add_global (scm_env*e, const char*name, scm*data);
 #define escm_func_handler(name) \
 void name (scm_env* escm_environment, scm* escm_arglist)
 
+#define escm_macro_handler(name,code) \
+void name (scm_env* escm_environment, pair* code)
+
 #define arg_count (pair_p(escm_arglist)?((pair*)escm_arglist)->list_length():0)
 
 #define has_arg (pair_p(escm_arglist)?true:false)
@@ -33,6 +36,9 @@ void name (scm_env* escm_environment, scm* escm_arglist)
 escm_arglist=((pair*)escm_arglist)->d;var;})
 #define pop_tail_arg_type(type) \
 ({type* var=dynamic_cast<type*>(escm_arglist); escm_arglist=0;var;})
+
+#define return_scm(x) escm_environment->ret(x)
+#define return_macro_code(x) (escm_environment->val=(x))
 
 
 #define escm_add_syntax_handler(e,name,h)\

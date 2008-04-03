@@ -15,15 +15,15 @@ class scm_env;
  */
 
 #ifdef __i386__
-# define scm_no_more_children (scm*)0xFfffFfff
+# define escm_no_more_children (scm*)0xFfffFfff
 #endif
 
 #ifdef __x86_64__
-# define scm_no_more_children (scm*)0xFfffFfffFfffFfff
+# define escm_no_more_children (scm*)0xFfffFfffFfffFfff
 #endif
 
-#ifndef scm_no_more_children //last chance, compute it haxor-way!
-# define scm_no_more_children (scm*)(~(unsigned long)0)
+#ifndef escm_no_more_children //last chance, compute it haxor-way!
+# define escm_no_more_children (scm*)(~(unsigned long)0)
 #endif
 
 #define scmf_nocollect 0x01
@@ -54,7 +54,7 @@ public:
 
 	virtual scm* get_child (int i)
 	{
-		return scm_no_more_children;
+		return escm_no_more_children;
 	}
 
 	virtual ~scm()
@@ -111,7 +111,7 @@ public:
 	virtual scm *get_child (int i)
 	{
 		if (!i) return a ;
-		if (i > 1) return scm_no_more_children;
+		if (i > 1) return escm_no_more_children;
 		return d;
 	}
 
@@ -230,7 +230,7 @@ public:
 
 	virtual scm* get_child (int i)
 	{
-		if (i) return scm_no_more_children ;
+		if (i) return escm_no_more_children ;
 		else return d;
 	}
 
@@ -318,7 +318,7 @@ public:
 		case 1:
 			return content;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 };
@@ -346,7 +346,7 @@ public:
 		case 2:
 			return next;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 };
@@ -443,7 +443,7 @@ public:
 		case 2:
 			return env;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 
@@ -521,7 +521,7 @@ public:
 		case 1:
 			return code;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 

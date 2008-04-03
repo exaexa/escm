@@ -133,8 +133,7 @@ void op_exp (scm_env*e, scm*params)
 
 static void op_quote (scm_env*e, pair*code)
 {
-	if (pair_p (code->d) ) e->val = pair_p (code->d)->a;
-	e->pop_cont();
+	if (pair_p (code->d) ) e->ret ( ( (pair*) (code->d) )->a );
 }
 
 static void op_eval (scm_env*e, scm*args)
@@ -224,6 +223,7 @@ void op_macro (scm_env*e, pair*code)
 	symbol*argname = 0;
 	pair*macro_code = 0;
 	code = pair_p (code->d);
+	if (!code) goto error;
 	macro_code = pair_p (code->d);
 	if (pair_p (code->a) ) {
 		code = (pair*) (code->a);
@@ -242,8 +242,11 @@ void op_macro (scm_env*e, pair*code)
 			} else {
 				e->ret (m->collectable<scm>() );
 			}
-		}
+		} else goto error;
 	}
+	return;
+error:
+	e->throw_string_exception ("bad macro syntax");
 }
 
 /*
@@ -415,7 +418,7 @@ public:
 		case 4:
 			return env;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 

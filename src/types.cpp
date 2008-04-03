@@ -28,7 +28,7 @@ void scm::mark_collectable()
 		if (v) if (is_scm_protected (v) ) {
 				mark_scm_collectable (v);
 				for (i = 0; (t = v->get_child (i++) )
-						!= scm_no_more_children;)
+						!= escm_no_more_children;)
 					if (t) q.push (t);
 			}
 	}
@@ -195,7 +195,7 @@ scm* vector::get_child (int i)
 {
 	if (i < (int) size) return ref (i);
 	if (i == (int) size) return d;
-	return scm_no_more_children;
+	return escm_no_more_children;
 }
 
 /*
@@ -297,7 +297,7 @@ scm* hashed_frame::get_child (int i)
 		return ( (chained_frame_entry**) dataof (table) ) [i];
 	if (i == hash_table_size) return table;
 	if (i == hash_table_size + 1) return parent;
-	return scm_no_more_children;
+	return escm_no_more_children;
 }
 
 /*
@@ -365,7 +365,7 @@ scm* local_frame::get_child (int i)
 		return ( (scm**) dataof (table) ) [i];
 	if ( (unsigned int) i == used*2) return table;
 	if ( (unsigned int) i == 1 + (used*2) ) return parent;
-	return scm_no_more_children;
+	return escm_no_more_children;
 }
 
 scm* local_frame::define (scm_env*e, symbol*name, scm*content)

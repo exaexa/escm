@@ -221,7 +221,7 @@ void scm_env::collect_garbage ()
 			active.insert (v);
 
 			for (a = 0; (t = v->get_child (a++) )
-					!= scm_no_more_children ;) {
+					!= escm_no_more_children ;) {
 				if (t) processing.push (t);
 			}
 		}

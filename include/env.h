@@ -3,7 +3,7 @@
 #ifndef _ESCM_ENV_
 #define _ESCM_ENV_
 
-#define ESCM_VERSION_STR "pre-0"
+#define ESCM_VERSION_STR "0.0.1"
 
 #include "debug.h"
 

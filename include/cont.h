@@ -26,7 +26,7 @@ public:
 		case 2:
 			return env;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 
@@ -54,7 +54,7 @@ public:
 		case 2:
 			return env;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 
@@ -90,7 +90,7 @@ public:
 		case 2:
 			return env;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 
@@ -123,7 +123,7 @@ public:
 		case 3:
 			return env;
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 
@@ -184,7 +184,7 @@ public:
 			/*NOTE - no need to mark *evaluated_args_d */
 
 		default:
-			return scm_no_more_children;
+			return escm_no_more_children;
 		}
 	}
 
