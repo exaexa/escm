@@ -4,7 +4,6 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#define byte uint8_t
 
 #include <queue>
 using std::queue;
@@ -19,7 +18,7 @@ bool scm_env::init (scm_parser*par, size_t heap_size, size_t alignment)
 	{
 		gc_heap_entry h;
 		h.size = heap_size;
-		h.start = 0;
+		h.start = heap;
 		free_space.insert (h);
 	}
 
@@ -80,12 +79,13 @@ void * scm_env::new_heap_object (size_t size)
 			free_space.erase (i);
 
 			//calculate the pointer
-			t = (byte*) heap + he.start;
+			t = he.start;
 
 			//decrease free space size
 			he.size -= size;
 			if (he.size) { //if something remains
-				he.start += size; //move it and push it back
+				he.start = (char*)(he.start) + size; 
+					//move it and push it back
 				free_space.insert (he);
 			}
 
@@ -110,8 +110,7 @@ void * scm_env::allocate (size_t size)
 void scm_env::deallocate (void* p)
 {
 	set<gc_heap_entry>::iterator i;
-	i = allocated_space.find
-	    (gc_heap_entry ( (byte*) p - (byte*) heap, 0) );
+	i = allocated_space.find (gc_heap_entry (p, 0) );
 	if (i != allocated_space.end() ) {
 		free_space.insert (*i);
 		allocated_space.erase (i);
@@ -147,10 +146,11 @@ void scm_env::sort_out_free_space()
 
 		//if the space touches the following, join them
 		//(we also count overlapping, but this should never happen.
-		if ( (i->start + i->size) >= (j->start) ) {
+		if ( ((char*)(i->start) + i->size) >= (j->start) ) {
 			eh = *i; //compute a new field
 			eh.start = i->start;
-			eh.size = j->start + j->size - i->start;
+			eh.size = (char*)(j->start) + j->size 
+				- (char*)(i->start);
 			free_space.erase (i); //erase old
 			free_space.erase (j);
 			i = free_space.insert (eh).first; //insert the new one

@@ -41,7 +41,7 @@ public:
 	class gc_heap_entry
 	{
 	public:
-		size_t start;
+		void* start;
 		size_t size;
 		inline bool operator< (const gc_heap_entry& a) const
 		{
@@ -56,7 +56,7 @@ public:
 			start = 0;
 			size = 0;
 		}
-		inline gc_heap_entry (size_t st, size_t si)
+		inline gc_heap_entry (void* st, size_t si)
 		{
 			start = st;
 			size = si;
