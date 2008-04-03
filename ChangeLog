@@ -1,6 +1,11 @@
 
 ESCM ChangeLog
 
+working three	***
+
+	- several things moved where they belong.
+	- fatal error resolved by using callback.
+
 0.0.1		first alpha			2008-04-03
 
 pre-0		pre-version

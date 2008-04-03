@@ -28,6 +28,7 @@ class scm_env;
 
 typedef continuation* (*scm_eval_cont_factory) (scm_env*, scm*);
 typedef continuation* (*scm_code_cont_factory) (scm_env*, pair*);
+typedef void (*scm_fatal_error_callback) ();
 
 class scm_env
 {
@@ -140,6 +141,7 @@ public:
 
 	scm_eval_cont_factory eval_cont_factory;
 	scm_code_cont_factory codevector_cont_factory;
+	scm_fatal_error_callback fatal_error;
 
 	/*
 	 * "general-purpose" frontends
@@ -198,8 +200,8 @@ public:
 				 * what about passing info to the caller?
 				 * or could he set error hook himself?
 				 */
-				printf("It has gone terribly wrong here.\n");
 				cont = 0;
+				if(fatal_error)fatal_error();
 			}
 		}
 		return cont ? true : false;
