@@ -1,0 +1,402 @@
+
+ .-----.-----.----.--------.
+ |  -__|__ --|  __|        |
+ |_____|_____|____|__|__|__|   [exa] embeddable scheme
+
+
+Minimalistic, lightweight scheme machine written in C++. Primarily focused for
+use as embedded scripting language in any application, extensible to any level
+of scheme impossibility.
+
+Before any work with this program, please see the license in LICENSE file which
+should always be in the same package.
+
+ESCM was written by Mirek [exa] Kratochvil for some higher purposes of computer
+science in 2007-2008. You can contact me at <exa.exa@gmail.com>.
+
+   ___              
+ .'  _|.---.-.-----.
+ |   _||  _  |  _  |
+ |__|  |___._|__   |  frequently answered questions
+                |__|
+
+
+Q: 
+	Is there any tutorial for embedding this in my application?
+A: 
+	Look at `src/interp.cpp' in this package, there's an implementation of
+	complete interpreter using libreadline (which gives bash-like features).
+	It should come well-commented so that any experienced-enough programmer
+	understands it.
+
+Q:
+	How can I add functions and/or variables to my ESCM environment?
+A:
+	Look at `include/macros.h', there are some macros that could possibly
+	help you. File `src/builtins.cpp' contains all the scheme internals
+	implemented, so you can gain inspiration there. Basically, writing a
+	lambda is a very simple process:
+
+	You want to call it this way:
+
+		(write-teh-numz)
+
+	So you write the function, with use of one macro:
+		
+		#include "path_to_escm/macros.h"
+
+		static escm_func_handler(thenums) {
+			for(int i=0;i<1000;++i)printf("%d\n",i);
+			return_scm(NULL);
+		}
+
+	return_scm(NULL) means that you don't return anything, in scheme that
+	will be seen as returning the () empty list. `static' keyword is not
+	necessary here, but it can be usuable when writing larger projects.
+
+	Then, if you have your environment
+		
+		scm_env* e;
+		//....
+	
+	you have to "register" the function, or, put the reference to the global
+	variable frame.
+
+		escm_add_func_handler(e,"write-teh-numz",thenums);
+
+	...and then you can use it!
+
+	Any other object can be added to environment using the add_global method
+	of scm_env:
+
+		e->add_global("variable",new_scm(e,number,5)
+				->collectable<scm>())
+	
+	in a result, scheme will evaluate correctly:
+
+		(* variable 2) => 10
+
+Q:
+	How can I guess which environment was my C++ function called from?
+A:
+	Every function declared with escm_func_handler macro has the caller
+	environment accesible via escm_environment local variable. This can be
+	used for memory allocation (which you will most probably need.)
+
+	This is an example of function that always returns #t:
+
+		escm_func_handler(foo) {
+			return new_scm(escm_environment,boolean,true)
+				->collectable<scm>();
+		}
+
+	When writing larger handlers, this will most probably help:
+		
+		#define e escm_environment   // :D
+
+
+Q: 	
+	How do I manipulate internal scheme data?
+	How do I create scheme data type of my own?
+A:
+	Every scheme-related data in escm is represented as a class derived from
+	the very basic scm class. Generally, the data is created this way:
+
+		scm_env*e; 
+		//...
+
+		scm*a=new_scm(e,string,"foobar!");
+
+	This creates new object on scheme heap, with a type of string, filled
+	with foobar. As all scheme objects are garbage-collected, this object is
+	initially protected, so it doesn't get deleted accidentally before you
+	bind it somewhere, so the garbage collector can "reach" it (and
+	therefore decide that it won't be deleted).
+
+	You may want to mark the object as collectable after you set some
+	assignment to it:
+		
+		e->add_global("aaa",a); 
+		/*now, that the object is referenced by the global frame,
+		  it is reachable for the collector and won't be deleted by
+		  accident. */
+
+		a->mark_collectable();
+		/* If the string gets out somehow, gc can delete it. */
+
+	For user convenience, expression-like collectable-marking was added:
+		
+		return a->collectable<string>();
+
+	or you can combine it even like this:
+		
+		return new_scm(e,string,"returned string") ->
+						collectable<string>();
+
+	Please note that collectable-marking is recursive, so when you possibly
+	had scheme object like this:
+
+		(1 . (2 . (3 . (4 . 0))))
+	
+	You don't have to mark all 4 pairs, but only the first one (with '1'),
+	and other get marked properly because they're children of the first
+	pair.
+	
+	In ESCM we have several such string- and pair-like "basic" types:
+		
+		-- C++ class	-- scheme expression
+
+		number		123
+		string		"hello"
+		character	#\a
+		boolean		#t #f
+		pair		(1 . 2) (1 2 3 4)
+		closure		(lambda (foo) foo)
+		NULL		()
+	
+	Please note that we work only with pointers to these classes, never
+	directly. There are several more classes to handle scheme internals,
+	those include class frame, continuation, lambda, macro, and derivees.
+
+	NOTE: we will describe work with macros later.
+
+	You may work with classes through pointers, you can see file 
+	`include/types.h' to see what every class contains. You can work with
+	number class this way:
+		
+		number *a;
+		//.....
+		a->n=23;
+	
+	Constructors of the classes are closely related to the new_scm macro we
+	have seen earlier. For example using
+
+		new_scm(e,type,foo,bar)
+	
+	will allocate the memory for `type' in heap that belongs to scm_env e, 
+	and then will call a constructor:
+		
+		type(foo,bar)
+
+	Destructors are properly called, too, but the time of object deletion is
+	rather unpredictable - so for example having some `printf's in ~type
+	destructor will make the program throw the lines on garbage collection,
+	which can be years after the objects were really used. On the other
+	hand, this can be interesting to observe. (measure how many % of your
+	objects get redundant, or just to do some statistics)
+
+
+	Please note that because of principle of garbage collection, when your
+	custom scheme object refers to another garbage-collected scheme objects,
+	it has to be able to mark those objects as it's children. This is done
+	with the scm* get_child(int) function. Every scheme object has to have
+	one, and every such function has to behave in this way:
+
+	1] if it's called with a number n, it returns pointer to n-th child.
+	2] if it's called with a higher number, it returns constant
+	   escm_no_more_children.
+	
+	Usually the function gets called sequentially with values increasing
+	from zero. You must not return any pointers that point on anything other
+	than the class scm's derivee, but you can return NULL.
+
+	You can see some examples of get_child() functions in `include/types.h'
+	file.
+
+	If you need some memory allocation in the scheme machine, you can use
+	classical C/C++ memory allocation methods, and if you need the data on
+	the escm's heap (so it can get stored to a file or something), you can
+	use the data scheme this way:
+
+		a=new_data_scm(scm_env_pointer,size)
+
+	and access allocated data with dataof() macro, for example:
+
+		memcpy(dataof(a),pointer,size);
+
+
+	With all of this in mind, creating a garbage-collectable class is pretty
+	simple. Look, for example, at header of class for letters.
+
+		class character: public scm
+		{
+		public:
+			char c;
+			inline character (scm_env*e, char a) : scm (e)
+			{
+				c = a;
+			}
+
+			virtual std::string display_internal (int style);
+		};
+
+	scm_env*e is passed to the constructor because of need for more
+	construct-time allocations.
+	
+	Notice the display_internal() function - it formats an object to some
+	human-readable form and returns it in std::string from STL. When style
+	is 0, then it's formatted like scheme source code, otherwise it's
+	formated for standart output. For example:
+
+		 style --	-- type		-- output string
+		
+			0	character	#\a
+			0	string		\"oh hai"
+			1	character	a
+			1	string		oh hai
+	
+	To get garbage-collection working well, you have to code correct
+	get_child function. For example, class pair could look like this:
+
+		class pair : public scm {
+		public:
+			scm *a, *d;
+
+			virtual scm* get_child(int i) {
+				switch (i) {
+				case 0: return a;
+				case 1: return d;
+				default: return escm_no_more_children;
+				}
+			}
+			
+			// ...
+
+		};
+
+Q:
+	How do I get data from/to a functions?
+	How do I get function arguments which were passed to C++ code?
+	How do I return value from a C++ function to scheme?
+A:
+	Arguments which the function was called with can be retrieved with
+	macros defined in `include/macros.h'. Those are:
+
+		-- macro		-- usage
+
+		arg_count		count of arguments, without tail 
+					argument
+
+		has_arg			true if there's one or more "classical"
+					argument available
+		
+		pop_arg()		pops that argument
+
+		has_tail_arg		true if the next argument is "tail"
+
+		pop_tail_arg()		pops it
+
+		pop_arg_type(T)		pops the corresponding argument, but
+		pop_tail_arg_type(T)	returns NULL if it's not of type T.
+
+	Note, classical and tail arguments mean roughly this in scheme:
+
+		(function classical-arg classical-arg . tail-arg)
+	
+
+	To return a value from the function, use return_scm macro:
+
+		return_scm(new_scm(e,boolean,true));
+
+	This is not a "real return", function code may continue even below the
+	return_scm macro, but do not try to return any other value. (because you
+	would most probably cause the next function in call-stack to return that
+	value, which could bring not-really-interesting results)
+
+Q:
+	How do I use macros?
+A:
+	Macros differ from functions in some ways:
+
+	1] when you call a macro, the arguments don't get evaluated.
+	2] macro gets the arguments in one list, does something with them,
+	   evaluates to a value, and this value is then evaluated again.
+	
+	Simple explanation for non-schemers: Macro is a code generator. It gets
+	something, creates a scheme code, and that code then gets evaluated.
+
+	In ESCM, the code can be generated by another scheme code, or by some
+	C++ function.
+
+	Macro in scheme code looks like this:
+
+		(macro (a form) (cdr form))
+		(a + 1 2 3) => 6
+
+		; this is equivalent definition:
+
+		(define a (macro (form) (cdr form)))
+
+	Note that macro is called with its whole syntax, so this would create an
+	endless loop:
+		
+		(macro (a form) form)
+		(a)
+
+		; => (a) => (a) => (a) => ...
+
+	
+	In C++, macro can be defined just like the function. We can implement
+	macro from above:
+
+		escm_macro_handler(a,code)
+		{
+			return_macro_code(code->d);
+		}
+
+	You might NOT want the interpreter to evaluate things you created, and
+	use it as a result of whole operation - then you need to play with the
+	continuations a little. There are several macros defined that way:
+
+		#define e escm_environment
+
+		escm_macro_handler(lambda,code)
+		{
+			pair* c = pair_p (code->d);
+			if (!c) e->throw_exception (code);
+			return_scm (new_scm (e, closure,
+				c->a, pair_p (c->d), e->cont->env)
+				->collectable<scm>() );
+		}
+
+		escm_macro_handler(begin,code)
+		{
+			e->replace_cont (new_scm 
+				(e, codevector_continuation, pair_p (code->d) )
+					 ->collectable<continuation>() );
+		}
+
+		escm_macro_handler(quote,code)
+		{
+			if(pair_p (code->d) ) 
+				return_scm (((pair*)(code->d))->a);
+		}
+
+Q:
+	How can I what error occured?
+A:
+	ESCM has classical scheme error mechanism. You may define *error-hook*
+	to set desired error-handling behavior.
+
+	For example, when using the interpreter:
+
+		> (macro)
+		 => ()
+
+		> (define (*error-hook* . x)
+		 | (display "error: ")
+		 | (display x)
+		 | (newline))
+		 => *ERROR-HOOK*
+
+		> (macro)
+		error: bad macro syntax
+		 => ()
+
+		> (define 123 4356)
+		error: ("invalid define symbol format" 123)
+		 => ()
+
+	R5RS scheme features like catch/throw and error stack should be defined
+	in scheme initialization file.
+
