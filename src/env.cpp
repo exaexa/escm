@@ -10,19 +10,6 @@
 using std::queue;
 
 
-static continuation* default_eval_factory (scm_env*e, scm*s)
-{
-	return new_scm (e, eval_continuation, s)
-	       ->collectable<eval_continuation>();
-}
-
-static continuation* default_cv_factory (scm_env*e, pair*s)
-{
-	return new_scm (e, codevector_continuation, s)
-	       ->collectable<codevector_continuation>();
-}
-
-
 bool scm_env::init (scm_parser*par, size_t heap_size, size_t alignment)
 {
 	heap = malloc (heap_size);
@@ -39,8 +26,8 @@ bool scm_env::init (scm_parser*par, size_t heap_size, size_t alignment)
 	val = 0;
 	cont = 0;
 
-	eval_cont_factory = default_eval_factory;
-	codevector_cont_factory = default_cv_factory;
+	eval_cont_factory = 0;
+	codevector_cont_factory = 0;
 
 	protected_exception = 0;
 

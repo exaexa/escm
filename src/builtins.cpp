@@ -474,11 +474,30 @@ static void op_error (scm_env*e, scm*arglist)
 }
 
 /*
+ * CONT factories for env
+ */
+
+static continuation* default_eval_factory (scm_env*e, scm*s)
+{
+	return new_scm (e, eval_continuation, s)
+	       ->collectable<eval_continuation>();
+}
+
+static continuation* default_cv_factory (scm_env*e, pair*s)
+{
+	return new_scm (e, codevector_continuation, s)
+	       ->collectable<codevector_continuation>();
+}
+
+/*
  * General add-all-the-shaite function
  */
 
 bool escm_add_scheme_builtins (scm_env*e)
 {
+	e->eval_cont_factory = default_eval_factory;
+	e->codevector_cont_factory = default_cv_factory;
+	
 	//arithmetics
 	try {
 		escm_add_func_handler (e, "+", op_add);

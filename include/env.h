@@ -188,7 +188,7 @@ public:
 			protected_exception = e;
 			cont = 0;
 			try {
-				if (lexget (t_errorhook) ) if (lambda_p (val) )
+				if (globget (t_errorhook) ) if (lambda_p (val) )
 						( (lambda*) val)->apply (this, e);
 
 				protected_exception = 0;
@@ -200,7 +200,6 @@ public:
 				 */
 				printf("It has gone terribly wrong here.\n");
 				cont = 0;
-				return false;
 			}
 		}
 		return cont ? true : false;
