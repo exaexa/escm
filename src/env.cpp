@@ -11,16 +11,8 @@ using std::queue;
 
 bool scm_env::init (scm_parser*par, size_t heap_size, size_t alignment)
 {
-	heap = malloc (heap_size);
-	hs = heap_size;
+	min_heap_part_size=heap_size;
 	align = alignment;
-
-	{
-		gc_heap_entry h;
-		h.size = heap_size;
-		h.start = heap;
-		free_space.insert (h);
-	}
 
 	val = 0;
 	cont = 0;
@@ -32,6 +24,11 @@ bool scm_env::init (scm_parser*par, size_t heap_size, size_t alignment)
 
 	if (par) parser = par;
 	else parser = new scm_classical_parser (this);
+	
+	global_frame=0;
+	t_true=t_false=0;
+	t_errorhook=0;
+	t_memoryerror=0;
 
 	try {
 		global_frame = new_scm (this, hashed_frame)->collectable<frame>();
@@ -51,8 +48,43 @@ void scm_env::release()
 {
 	if (!is_init) return;
 	if (parser) free (parser);
-	if (heap) free (heap);
+	for(set<gc_heap_entry>::iterator i=allocated_heap.begin();
+		i!=allocated_heap.end();++i) free(i->start);
+	allocated_heap.clear();
 	is_init = false;
+}
+
+void scm_env::add_heap_part(size_t minsize)
+{
+	size_t s=(minsize>min_heap_part_size)?minsize:min_heap_part_size;
+	printf("allocating part size %lu\n",s);
+	void*t=malloc(s);
+	printf("pointer returned %p\n",t);
+	if(!t)return;
+	gc_heap_entry he(t,s);
+	allocated_heap.insert(he);
+	free_space.insert(he);
+}
+
+void scm_env::free_heap_parts()
+{
+	set<gc_heap_entry>::iterator i,j;
+	queue<gc_heap_entry> to_delete;
+
+	for(i=allocated_heap.begin();
+		i!=allocated_heap.end(); ++i)
+	{
+		j=free_space.find(*i);
+		if(j==free_space.end()) continue;
+		if(i->size==j->size) to_delete.push(*i);
+	}
+
+	while(!to_delete.empty()){
+		free(to_delete.front().start);
+		allocated_heap.erase(to_delete.front());
+		free_space.erase(to_delete.front());
+		to_delete.pop();
+	}
 }
 
 void * scm_env::new_heap_object (size_t size)
@@ -101,6 +133,9 @@ void * scm_env::allocate (size_t size)
 	d = new_heap_object (size);
 	if (d) return d;
 	collect_garbage();
+	d = new_heap_object (size);
+	if (d) return d;
+	add_heap_part(size);
 	d = new_heap_object (size);
 	if (d) return d;
 	throw_exception (t_memoryerror);
@@ -190,12 +225,8 @@ void scm_env::collect_garbage ()
 	processing.push (protected_exception);
 
 	for (k = collector.begin();k != collector.end();++k)
-		if ( is_scm_protected (*k) ) {
+		if ( is_scm_protected (*k) )
 			processing.push (*k);
-			printf ("gc-protected scm at %p: ", *k);
-			printf ( (*k)->display().c_str() );
-			printf ("\n");
-		}
 
 	while (!processing.empty() ) {
 
@@ -233,6 +264,7 @@ void scm_env::collect_garbage ()
 	collector_queue.clear();
 
 	sort_out_free_space();
+	free_heap_parts();
 }
 
 

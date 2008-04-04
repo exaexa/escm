@@ -10,9 +10,6 @@
 
 ] come up with some reasonable hash function for hashed_frame.
 
-] make collector heap dynamic 
-	(at least growable to some defined extent, possibly non-continuous)
-
 ] About exception implementation:
 	Use standart C++ exception throw/catch, it's quite good, usuable
 	for (error) and for extension programmers too.

@@ -130,6 +130,7 @@ text::text (scm_env*e, const char*c, int len) : scm (e)
 {
 	char*p;
 	int datasize = (len < 0) ? (strlen (c) + 1) : (len + 1);
+	d = 0;
 	d = new_data_scm (e, datasize);
 
 	if (!d) return;
@@ -150,6 +151,7 @@ text::text (scm_env*e, const char*c, int len) : scm (e)
 
 bool vector::alloc (scm_env*e, size_t size)
 {
+	d = 0;
 	d = new_data_scm (e, sizeof (scm*) * size);
 	if (!d) {
 		this->size = 0;
@@ -227,9 +229,10 @@ hashed_frame::hashed_frame (scm_env*e) : frame (e)
 	int i;
 	chained_frame_entry**t;
 
+	table = 0;
+
 	table = new_data_scm (e,
 			      sizeof (chained_frame_entry*) * hash_table_size);
-	if (!table) return;
 
 	t = (chained_frame_entry**) dataof (table);
 
@@ -293,10 +296,12 @@ scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
 
 scm* hashed_frame::get_child (int i)
 {
-	if (i < hash_table_size)
-		return ( (chained_frame_entry**) dataof (table) ) [i];
-	if (i == hash_table_size) return table;
-	if (i == hash_table_size + 1) return parent;
+	if(table){
+		if (i < hash_table_size)
+			return ( (chained_frame_entry**) dataof (table) ) [i];
+		if (i == hash_table_size) return table;
+		if (i == hash_table_size + 1) return parent;
+	} else if(!i)return parent;
 	return escm_no_more_children;
 }
 
@@ -320,7 +325,7 @@ local_frame::local_frame (scm_env*e, size_t s) : frame (e)
 	parent = 0;
 	table = 0; //just be sure. It might get collected NOW:
 
-	table = new_data_scm (e, 2 * sizeof (scm*) * s)
+	if(s) table = new_data_scm (e, 2 * sizeof (scm*) * s)
 		->collectable<data_placeholder>();
 	size = s;
 }
@@ -450,16 +455,17 @@ closure::closure (scm_env*e, scm*Arglist,
 
 void closure::apply (scm_env*e, scm*args)
 {
-	continuation*cont = new_scm (e, codevector_continuation, ip);
 	e->val = args;
+	continuation*cont = new_scm (e, codevector_continuation, ip);
+
 	/*
 	 * ...so it doesn't get collected, 'cause its continuation
 	 * is gonna get replaced here:
 	 */
 
 	e->replace_cont (cont);
-	cont->mark_collectable();
 	e->cont->env = env;
+	cont->mark_collectable();
 
 	frame*f = e->push_frame (paramsize);
 	if (!f) return;

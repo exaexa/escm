@@ -38,7 +38,7 @@ std::string symbol::display_internal (int style)
 	return (const char*) (*this);
 }
 
-std::string text::display_internal (int style)
+std::string string::display_internal (int style)
 {
 	if (!style) return std::string ("\"") + (const char*) (*this) + "\"";
 	return (const char*) (*this);

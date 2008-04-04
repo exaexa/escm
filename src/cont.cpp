@@ -30,7 +30,7 @@ void codevector_continuation::eval_step (scm_env*e)
 		e->pop_cont();
 	}
 
-	eval_continuation*c;
+	eval_continuation*c=0;
 
 	if (pair_p (ip) ) {
 		c = new_scm (e, eval_continuation, ip->a)

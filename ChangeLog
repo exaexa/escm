@@ -3,6 +3,8 @@ ESCM ChangeLog
 
 working three	***
 
+	* collector heap is dynamic now, theoretically no more OOM.
+
 	- several things moved where they belong.
 	- fatal error resolved by using callback.
 

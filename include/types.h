@@ -238,10 +238,9 @@ public:
 
 	inline operator const char* ()
 	{
-		return (const char*) dataof (d);
+		if(d) return (const char*) dataof (d);
+		return "";
 	}
-
-	virtual std::string display_internal (int style);
 };
 
 class string : public text
@@ -249,6 +248,8 @@ class string : public text
 public:
 	string (scm_env*e, const char*c, int length = -1) : text (e, c, length)
 	{}
+
+	virtual std::string display_internal (int style);
 };
 
 class symbol : public text
@@ -297,7 +298,7 @@ public:
 	virtual scm* get_child (int) = 0;
 };
 
-//normal binding pair
+//normal binding pair - not really used.
 class frame_entry : public scm
 {
 public:
@@ -310,17 +311,7 @@ public:
 		content = c;
 	}
 
-	virtual scm* get_child (int i)
-	{
-		switch (i) {
-		case 0:
-			return name;
-		case 1:
-			return content;
-		default:
-			return escm_no_more_children;
-		}
-	}
+	virtual scm* get_child (int i) = 0;
 };
 
 //for hash tables, with a pointer to

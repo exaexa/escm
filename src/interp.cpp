@@ -15,7 +15,7 @@
 int run_interpreter (int argc, char**argv)
 {
 	scm_env e;
-	e.init (0, 32768, 4);
+	e.init ();
 
 	if (!escm_add_scheme_builtins (&e) ) return 1;
 

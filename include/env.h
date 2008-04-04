@@ -63,8 +63,7 @@ public:
 		}
 	};
 
-	void* heap;
-	size_t hs, align;
+	size_t align;
 
 	/*
 	 * NOTE. (quite important)
@@ -76,6 +75,12 @@ public:
 	set<gc_heap_entry> free_space;
 	set<scm*> collector;
 	list<scm*> collector_queue;
+
+	set<gc_heap_entry> allocated_heap;
+	size_t min_heap_part_size;
+
+	void add_heap_part(size_t minsize=0);
+	void free_heap_parts();
 
 	void* new_heap_object (size_t size);
 
