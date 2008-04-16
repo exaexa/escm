@@ -61,9 +61,10 @@ void eval_continuation::eval_step (scm_env*e)
 
 		return;
 	}
-	if (symbol_p (object) )
-		e->lexget ( (symbol*) object);
-	else //tis just an atom.
+	if (symbol_p (object) ) {
+		if(! e->lexget ( (symbol*) object))
+			e->throw_desc_exception("unbound variable",object);
+	} else //tis just an atom.
 		e->val = object;
 	e->pop_cont();
 }
@@ -96,12 +97,7 @@ void pair_continuation::eval_step (scm_env*e)
 			 */
 			else
 				e->val = list->d; //just rest of list
-		} else {
-			//error, bad selector.
-			//TODO trigger an error, now we just ignore it
-			e->val = 0;
-			e->pop_cont();
-		}
+		} else e->throw_desc_exception("bad selector",selector);
 	} else {
 		e->push_cont (new_scm (e, eval_continuation, list->a)
 			      ->collectable<continuation>() );

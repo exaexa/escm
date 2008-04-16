@@ -57,9 +57,7 @@ void scm_env::release()
 void scm_env::add_heap_part(size_t minsize)
 {
 	size_t s=(minsize>min_heap_part_size)?minsize:min_heap_part_size;
-	printf("allocating part size %lu\n",s);
 	void*t=malloc(s);
-	printf("pointer returned %p\n",t);
 	if(!t)return;
 	gc_heap_entry he(t,s);
 	allocated_heap.insert(he);

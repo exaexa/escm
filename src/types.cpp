@@ -106,7 +106,6 @@ int pair::list_size()
 symbol::symbol (scm_env* e, const char* c, int len) : text (e, c, len)
 {
 	char*p;
-	if (!d) return;
 	p = (char*) dataof (d);
 	while (*p) {
 		if ( (*p >= 'a') && (*p <= 'z') ) *p -= 0x20;
@@ -132,8 +131,6 @@ text::text (scm_env*e, const char*c, int len) : scm (e)
 	int datasize = (len < 0) ? (strlen (c) + 1) : (len + 1);
 	d = 0;
 	d = new_data_scm (e, datasize);
-
-	if (!d) return;
 
 	p = (char*) dataof (d);
 
@@ -316,14 +313,14 @@ scm* hashed_frame::get_child (int i)
  * memory (so it runs better later), bad thing is that we should know how
  * much of it we shall use. Maybe add some destructor-triggered statistic
  * collector of "ooh how many free positions/overflows we had this time"
- * and compute the value after it. Algorithmization is unknown yet:D
+ * and compute the value after it. Algorithmization is unknown yet:D TODO
  */
 
 local_frame::local_frame (scm_env*e, size_t s) : frame (e)
 {
 	used = size = 0;
 	parent = 0;
-	table = 0; //just be sure. It might get collected NOW:
+	table = 0;
 
 	if(s) table = new_data_scm (e, 2 * sizeof (scm*) * s)
 		->collectable<data_placeholder>();
@@ -343,9 +340,7 @@ int local_frame::get_index (symbol*name)
 		} else if (t < 0) e = i;
 		else s = i + 1;
 	}
-	if (s == e) return - (s + 1);
-	//bad lookup, throw error!
-	return -1;
+	return - (s + 1); //assert: s==e now!
 }
 
 bool local_frame::lookup (symbol*name, scm**result)
@@ -386,7 +381,7 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 
 	if (used >= size) { //chain the frames
 
-		size_t new_size = size + 1; //compute new frame size
+		size_t new_size = 2*size + 1; //compute new frame size
 
 		local_frame* f = new_scm (e, local_frame, new_size)
 				 ->collectable<local_frame>();
@@ -457,18 +452,15 @@ void closure::apply (scm_env*e, scm*args)
 {
 	e->val = args;
 	continuation*cont = new_scm (e, codevector_continuation, ip);
-
 	/*
-	 * ...so it doesn't get collected, 'cause its continuation
-	 * is gonna get replaced here:
+	 * ...so it doesn't get collected, because its continuation
+	 * is gonna get replaced here now:
 	 */
-
 	e->replace_cont (cont);
 	e->cont->env = env;
 	cont->mark_collectable();
 
 	frame*f = e->push_frame (paramsize);
-	if (!f) return;
 
 	pair *argdata = (pair*) args, *argname = (pair*) arglist;
 	while (1) {
@@ -477,23 +469,23 @@ void closure::apply (scm_env*e, scm*args)
 				if (pair_p (argdata) )
 					f->define (e, (symbol*) (argname->a),
 						   argdata->a);
-				else break; //not enough args!
-			} else break; //something weird in args!
+				else goto not_enough_args;
+			} else goto bad_argname;
 		} else if (symbol_p (argname) ) { //rest argument name
 			f->define (e, (symbol*) argname, argdata);
 			return;
 		} else if (!argname) { //end of arguments
-			if (argdata) break; //too many arguments passed!
+			if (argdata) goto too_many_args;
 			else return;
-		} else  //terrible creeping death!
-			break; //illegal thing in arglist
+		} else goto bad_argname;
 		argname = (pair*) (argname->d);
 		argdata = (pair*) (argdata->d);
 	}
 
-	//error here
-	e->pop_cont();
-	return;
+	bad_argname: e->throw_desc_exception("bad argument name",argname);
+	not_enough_args: e->throw_string_exception("not enough arguments");
+	too_many_args: e->throw_string_exception("too many arguments");
+
 }
 
 /*
