@@ -143,6 +143,20 @@ static void op_eval (scm_env*e, scm*args)
 			  ( (pair*) args)->a)->collectable<continuation>() );
 }
 
+static void op_apply (scm_env*e, scm*args)
+{
+	scm* func;
+	if(pair_p (args) ) {
+		func=((pair*)args)->a;
+		args=((pair*)args)->d;
+		if(func && pair_p (args)){
+			if(lambda_p(func)) ((lambda*)func)->
+				apply(e,((pair*)args)->a);
+			return;
+		}
+	}
+	e->throw_string_exception ("bad apply syntax");
+}
 
 /*
  * DEFINEs, SETs
@@ -513,6 +527,7 @@ bool escm_add_scheme_builtins (scm_env*e)
 		//basic scheme
 		escm_add_syntax_handler (e, "quote", op_quote);
 		escm_add_func_handler (e, "eval", op_eval);
+		escm_add_func_handler (e, "apply", op_apply);
 
 		escm_add_func_handler (e, "*do-define*", op_actual_define);
 		escm_add_syntax_handler (e, "define", op_define);
