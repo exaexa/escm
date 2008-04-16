@@ -10,29 +10,6 @@
 
 ] come up with some reasonable hash function for hashed_frame.
 
-] About exception implementation:
-	Use standart C++ exception throw/catch, it's quite good, usuable
-	for (error) and for extension programmers too.
-
-	if we catch an exception, we should reset the continuation and pass
-	it to *error-hook*, which is some kind of lambda. If it's NULL, use
-	some builtin error catcher.
-	
-	Out-of-memory error should be quite OK, because when we reset a cont
-	we actually free a lot of memory (read: nearly all memory, except
-	global objects). Then we classically call *error-hook*. If it cannot be
-	called because of another memory shortage, let's assume that:
-	a] program defined error stack shortens, and then we come to point
-		where we have memory, OR builtin error-hook kills it all.
-	b] program defined error stack makes a cycle, then we usually die in
-		an infinite loop. But let's pretend that's a desired behavior.
-
-] As we replace continuations, we come to problem that they might be still
-	running when are already garbage collected. No need to say what would
-	happen when we wrote in the corresponding class instance after that.
-	We could add some optical solution which solves it (e.g. returning
-	some kind of functor which pushes the thing when it's safe)
-
 ] Invent some good usage of call/cc. Something no one else can even imagine.
 	...2] ??? 3] PROFIT!
 
