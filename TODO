@@ -13,3 +13,6 @@
 ] Invent some good usage of call/cc. Something no one else can even imagine.
 	...2] ??? 3] PROFIT!
 
+] BETA milestone: run the init.scm code OK
+] BETA2 milestone: use libgmp correctly
+
