@@ -2,7 +2,7 @@
 /*
  * This is here because we need a simple method how to create
  * C++ selectors/lambdas. Basic problems are:
- * 1] evaluation of parameters. Repeating code, should be standartized
+ * 1] evaluation of parameters. Repeating code should be standartized
  * 	in the best possible way (here)
  * 2] storing/retrieving global variables, adding functions to scheme machine
  * 3] some simple way to check argument types. Most people just want it.
@@ -27,19 +27,28 @@ void name (scm_env* escm_environment, pair* code)
 #define has_tail_arg (escm_arglist&&(!pair_p(escm_arglist)))
 
 #define pop_arg() \
-({scm* var=((pair*)escm_arglist)->a; escm_arglist=((pair*)escm_arglist)->d;var;})
+({scm* var=escm_arglist?((pair*)escm_arglist)->a:0; if(escm_arglist) escm_arglist=((pair*)escm_arglist)->d;var;})
 #define pop_tail_arg() \
 ({scm* var=escm_arglist; escm_arglist=0;var;})
 
 #define pop_arg_type(type) \
-({type* var=dynamic_cast<type*>(((pair*)escm_arglist)->a);\
+({type* var=escm_arglist?dynamic_cast<type*>(((pair*)escm_arglist)->a):0;\
 escm_arglist=((pair*)escm_arglist)->d;var;})
 #define pop_tail_arg_type(type) \
-({type* var=dynamic_cast<type*>(escm_arglist); escm_arglist=0;var;})
+({type* var=escm_arglist?dynamic_cast<type*>(escm_arglist):0;\
+escm_arglist=0;var;})
 
 #define return_scm(x) escm_environment->ret(x)
 #define return_macro_code(x) (escm_environment->val=(x))
 
+#define set_return(x) (escm_environment->val=(x))
+#define do_return escm_environment->pop_cont()
+
+#define throw_scm(x) escm_environment->throw_exception(x)
+#define throw_string(x) escm_environment->throw_string_exception(x)
+#define throw_str_scm(st,sc) escm_environment->throw_desc_exception(st,sc)
+
+#define create_scm(type,params...) new_scm(escm_environment,type,##params)
 
 #define escm_add_syntax_handler(e,name,h)\
 (e)->add_global((name),new_scm((e),extern_syntax,(h)))
