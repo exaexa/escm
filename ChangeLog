@@ -2,6 +2,12 @@
 ESCM ChangeLog
 
 working three	***
+	
+	* much work on macros and builtins
+	* added number comparsion functions, so now we can compute
+		the famous (fact).
+
+0.0.2		clean alpha
 
 	* collector heap is dynamic now, theoretically no more OOM.
 

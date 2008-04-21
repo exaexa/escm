@@ -24,6 +24,19 @@ science in 2007-2008. You can contact me at <exa.exa@gmail.com>.
                 |__|
 
 
+Q:
+	Why should I use Scheme as my scripting language, and why should I use
+	ESCM interpreter for that?
+A:
+	Scheme is a wonderful scrpiting language, to observe it, learn it.
+	You can look up a very good scheme tutorial called "Teach yourself
+	scheme in fixnum days" by Dorai Sitaram.
+
+	ESCM aims to be the best scheme that can be used for embedding and
+	scripting, with cleanly and readably written internals and rich
+	programmer/user interface.
+
+
 Q: 
 	Is there any tutorial for embedding ESCM in my application?
 A: 
