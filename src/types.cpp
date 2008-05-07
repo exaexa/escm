@@ -113,7 +113,7 @@ symbol::symbol (scm_env* e, const char* c, int len) : text (e, c, len)
 	}
 }
 
-int symbol::cmp (symbol* s)
+int text::cmp (text* s)
 {
 	const char*a, *b;
 	a = (const char*) dataof (d);

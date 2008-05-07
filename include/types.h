@@ -241,6 +241,8 @@ public:
 		if(d) return (const char*) dataof (d);
 		return "";
 	}
+
+	int cmp (text*);
 };
 
 class string : public text
@@ -256,8 +258,6 @@ class symbol : public text
 {
 public:
 	symbol (scm_env*, const char*, int length = -1);
-
-	int cmp (symbol*);
 
 	virtual std::string display_internal (int style);
 };

@@ -428,24 +428,62 @@ create_predicate_function (continuation)
  * BOOLEAN OPERATIONS
  */
 
-void op_true_p(scm_env*e, scm*arglist)
+static escm_func_handler(op_true_p)
 {
-	if (!pair_p (arglist) ) e->ret (0);
-	else if (!boolean_p ( ( (pair*) arglist)->a) ) e->ret (0);
-	else if ( ( (boolean*) ( ( (pair*) arglist)->a) )->b)
-		e->ret (e->t_true);
-	else e->ret (e->t_false);
+	boolean*b=(boolean*)pop_arg();
+	if(!boolean_p(b)) throw_str_scm("not a boolean",b);
+	if(b->b) return_scm(escm_environment->t_true);
+	else return_scm(escm_environment->t_false);
 }
 
-void op_false_p(scm_env*e, scm*arglist)
+static escm_func_handler(op_false_p)
 {
-	if (!pair_p (arglist) ) e->ret (0);
-	else if (!boolean_p ( ( (pair*) arglist)->a) ) e->ret (0);
-	else if ( ( (boolean*) ( ( (pair*) arglist)->a) )->b)
-		e->ret (e->t_false);
-	else e->ret (e->t_true);
+	boolean*b=(boolean*)pop_arg();
+	if(!boolean_p(b)) throw_str_scm("not a boolean",b);
+	if(b->b) return_scm(escm_environment->t_false);
+	else return_scm(escm_environment->t_true);
 }
 
+static escm_func_handler(op_and_hard)
+{
+	boolean*a;
+	while(has_arg) {
+		a=(boolean*)pop_arg();
+		if(!boolean_p(a))throw_str_scm("not a boolean",a);
+		if(!(a->b)){
+			return_scm(escm_environment->t_false);
+			return;
+		}
+	}
+	return_scm(escm_environment->t_true);
+}
+
+static escm_func_handler(op_or_hard)
+{
+	boolean*a;
+	while(has_arg) {
+		a=(boolean*)pop_arg();
+		if(!boolean_p(a))throw_str_scm("not a boolean",a);
+		if(a->b){
+			return_scm(escm_environment->t_true);
+			return;
+		}
+	}
+	return_scm(escm_environment->t_false);
+}
+
+static escm_func_handler(op_xor)
+{
+	boolean*a;
+	bool result=false;
+	while(has_arg) {
+		a=(boolean*)pop_arg();
+		if(!boolean_p(a))throw_str_scm("not a boolean",a);
+		if(a->b) result=!result;
+	}
+	return_scm(result?
+		(escm_environment->t_true):(escm_environment->t_false));
+}
 
 /*
  * PROGRAM FLOW CONTROL
@@ -567,6 +605,19 @@ static continuation* default_cv_factory (scm_env*e, pair*s)
 }
 
 /*
+ * strings
+ */
+
+static escm_func_handler(op_str_compare)
+{
+	text*a,*b;
+	a=pop_arg_type(text);
+	b=pop_arg_type(text);
+	if(a&&b) return_scm(create_scm(number,a->cmp(b))->collectable<scm>());
+	else throw_string("need 2 text args to compare");
+}
+
+/*
  * file loader
  */
 
@@ -667,10 +718,17 @@ bool escm_add_scheme_builtins (scm_env*e)
 		escm_add_func_handler (e, "true?", op_true_p);
 		escm_add_func_handler (e, "false?", op_false_p);
 		escm_add_func_handler (e, "not", op_false_p);
+		escm_add_func_handler (e, "and!", op_and_hard);
+		escm_add_func_handler (e, "or!", op_or_hard);
+		escm_add_func_handler (e, "xor", op_xor);
 
 		//I/O
 		escm_add_func_handler (e, "display", op_display);
 		escm_add_func_handler (e, "newline", op_newline);
+
+		//Strings
+		escm_add_func_handler (e, "str-cmp", op_str_compare);
+		escm_add_func_handler (e, "sym-cmp", op_str_compare);
 
 		//errors
 		escm_add_func_handler (e, "error", op_error);
