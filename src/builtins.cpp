@@ -567,8 +567,43 @@ static continuation* default_cv_factory (scm_env*e, pair*s)
 }
 
 /*
+ * file loader
+ */
+
+#include <stdio.h>
+
+static bool load_file(const char* fn, scm_env*e)
+{
+	FILE*f=fopen(fn,"r");
+	if(!f) return false;
+	char buf[65];
+	int l;
+	while((l=fread(buf,1,64,f))) {
+		buf[l]=0;
+		if(e->parser->parse_string(buf)) {
+			fclose(f);
+			return false;
+		}
+	}
+	fclose(f);
+	pair*code = e->parser->get_result(false);
+	if(code)e->eval_code(code->collectable<pair>());
+	e->run_eval_loop();
+	return true;
+}
+
+/*
  * General add-all-the-shaite function
  */
+
+static bool load_init_file(scm_env*e)
+{
+	char buffer[1024];
+	strcpy(buffer,getenv("HOME"));
+	strcat(buffer,"/.escm-init");
+	if(load_file(buffer,e))return true;
+	return load_file("/etc/escm-init",e);
+}
 
 bool escm_add_scheme_builtins (scm_env*e)
 {
@@ -639,6 +674,9 @@ bool escm_add_scheme_builtins (scm_env*e)
 
 		//errors
 		escm_add_func_handler (e, "error", op_error);
+
+		//init file
+		load_init_file(e);
 	} catch (scm*) {
 		return false;
 	}

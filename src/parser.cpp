@@ -315,6 +315,7 @@ static bool is_white (char c)
 	if (c == ' ') return true;
 	if (c == '\t') return true;
 	if (c == '\n') return true;
+	if (c == -1) return true;
 	return false;
 }
 
