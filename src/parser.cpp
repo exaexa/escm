@@ -311,6 +311,7 @@ void scm_classical_parser::process_token (int type, const String* tok)
 
 static bool is_white (char c)
 {
+	if (!c) return true;
 	if (c == ' ') return true;
 	if (c == '\t') return true;
 	if (c == '\n') return true;

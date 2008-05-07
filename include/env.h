@@ -166,7 +166,7 @@ public:
 
 	void eval_code (pair*);
 	void eval_expr (scm*);
-	int eval_string (const char* str);
+	int eval_string (const char* str,char term_char=0);
 
 	inline void run_eval_loop()
 	{

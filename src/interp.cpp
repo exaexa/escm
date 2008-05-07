@@ -39,13 +39,12 @@ int run_interpreter (int argc, char**argv)
 
 			add_history (c);
 
-			err = e.eval_string (c);
+			err = e.eval_string (c,'\n');
 			if (err) {
 				printf ("** parse error: %s\n",
 					e.parser->get_parse_error (err) );
 				break;
 			}
-			e.eval_string ("\n"); //because it's really typed
 
 		} while (!e.evaluating() ) ;
 

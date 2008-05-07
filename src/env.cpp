@@ -357,15 +357,15 @@ void scm_env::eval_expr (scm*s)
 
 #include "parser.h"
 
-int scm_env::eval_string (const char*s)
+int scm_env::eval_string (const char*s,char term_char)
 {
 	int err = parser->parse_string (s);
 	if (err) return err;
-
-	/*
-	 * what to do on errors?? seems like this function should not
-	 * be used at all. Marked as future subject of removal.
-	 */
+	if(term_char) {
+		char str[2] = {term_char,0};
+		err=parser->parse_string(str);
+		if(err) return err;
+	}
 
 	pair*code = parser->get_result (false);
 	if (code) eval_code (code->collectable<pair>() );
