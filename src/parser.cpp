@@ -174,7 +174,7 @@ static int guess_token_type (const String& s)
 {
 	//first, check if we have a prefix
 	int i, len = s.length();
-	bool (*digit_check) (char);
+	bool (*digit_check) (char) = 0;
 	if ( (len > 2) && (s[0] == '#') ) {
 
 		switch (s[1]) {
@@ -190,8 +190,6 @@ static int guess_token_type (const String& s)
 		case 'x':
 			digit_check = is_hex_digit;
 			break;
-		default:
-			digit_check = 0;
 		}
 	}
 
