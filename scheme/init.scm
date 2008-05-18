@@ -63,11 +63,12 @@
  (cars vars)(cdddr form))))(cons name(cadrs vars))))(begin(define vars(cadr
  form))(cons(cons 'lambda(cons(cars vars)(cddr form)))(cadrs vars)))))
 
-(macro(cond form)(if(null?(cdr form))()(let((a(car form))(c(caadr form))
- (p(cdadr form))(r(cddr form)))(if(and(symbol? c)(sym-eq? c 'else))(cons 
- 'begin p)(list 'if c(cons begin p)(cons a r))))))
+;;TODO redefine, so the macro is not recursive.
+(macro(cond form) (if(null?(cdr form)) () (let ((a(car form)) (c(caadr form)) (p(cdadr form)) (r(cddr form))) (if(pair? c) (list 'if c(cons begin p)(cons a r)) (cons 'begin p)))))
 
 (define (equal? x y) (cond ((null? x) (null? y)) ((number? x) (and (number? y) (= x y))) ((string? x) (and (string? y) (str-eq? x y))) ((symbol? x) (and (symbol? y) (sym-eq? x y))) ((pair? x) (and (pair? y) (equal? (car x) (car y)) (equal? (cdr x) (cdr y)))) (else (error "unsupported type of args" x y))))
+
+;(define (equal? x y) (if (null? x) (null? y) (if (pair? x) (and (pair? y) (equal? (car x) (car y)) (equal? (cdr x) (cdr y))) (if (number? x) (and (number? y) (= x y)) (if (string? x) (and (string? y) (str-eq? x y)) #f ))))) 
 
 (macro (case form) (if(null?(cddr form))() (if(and(symbol?(caaddr form))(sym-eq? 'else (caaddr form))) (cons 'begin (cdaddr form)) (list 'if (list 'equal? (cadr form) (caaaddr form)) (cons 'begin (cdaddr form)) (cons 'case (cons (cadr form) (cdddr form)))))))
 
