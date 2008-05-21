@@ -30,7 +30,7 @@ void codevector_continuation::eval_step (scm_env*e)
 		e->pop_cont();
 	}
 
-	eval_continuation*c=0;
+	eval_continuation*c = 0;
 
 	if (pair_p (ip) ) {
 		c = new_scm (e, eval_continuation, ip->a)
@@ -62,8 +62,8 @@ void eval_continuation::eval_step (scm_env*e)
 		return;
 	}
 	if (symbol_p (object) ) {
-		if(! e->lexget ( (symbol*) object))
-			e->throw_desc_exception("unbound variable",object);
+		if (! e->lexget ( (symbol*) object) )
+			e->throw_desc_exception ("unbound variable", object);
 	} else //tis just an atom.
 		e->val = object;
 	e->pop_cont();
@@ -97,7 +97,7 @@ void pair_continuation::eval_step (scm_env*e)
 			 */
 			else
 				e->val = list->d; //just rest of list
-		} else e->throw_desc_exception("bad selector",selector);
+		} else e->throw_desc_exception ("bad selector", selector);
 	} else {
 		e->push_cont (new_scm (e, eval_continuation, list->a)
 			      ->collectable<continuation>() );

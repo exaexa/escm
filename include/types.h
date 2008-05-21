@@ -238,7 +238,7 @@ public:
 
 	inline operator const char* ()
 	{
-		if(d) return (const char*) dataof (d);
+		if (d) return (const char*) dataof (d);
 		return "";
 	}
 

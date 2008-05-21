@@ -293,12 +293,12 @@ scm* hashed_frame::define (scm_env*e, symbol*s, scm*d)
 
 scm* hashed_frame::get_child (int i)
 {
-	if(table){
+	if (table) {
 		if (i < hash_table_size)
 			return ( (chained_frame_entry**) dataof (table) ) [i];
 		if (i == hash_table_size) return table;
 		if (i == hash_table_size + 1) return parent;
-	} else if(!i)return parent;
+	} else if (!i) return parent;
 	return escm_no_more_children;
 }
 
@@ -322,8 +322,8 @@ local_frame::local_frame (scm_env*e, size_t s) : frame (e)
 	parent = 0;
 	table = 0;
 
-	if(s) table = new_data_scm (e, 2 * sizeof (scm*) * s)
-		->collectable<data_placeholder>();
+	if (s) table = new_data_scm (e, 2 * sizeof (scm*) * s)
+			       ->collectable<data_placeholder>();
 	size = s;
 }
 
@@ -381,7 +381,7 @@ scm* local_frame::define (scm_env*e, symbol*name, scm*content)
 
 	if (used >= size) { //chain the frames
 
-		size_t new_size = 2*size + 1; //compute new frame size
+		size_t new_size = 2 * size + 1; //compute new frame size
 
 		local_frame* f = new_scm (e, local_frame, new_size)
 				 ->collectable<local_frame>();
@@ -482,9 +482,12 @@ void closure::apply (scm_env*e, scm*args)
 		argdata = (pair*) (argdata->d);
 	}
 
-	bad_argname: e->throw_desc_exception("bad argument name",argname);
-	not_enough_args: e->throw_string_exception("not enough arguments");
-	too_many_args: e->throw_string_exception("too many arguments");
+bad_argname:
+	e->throw_desc_exception ("bad argument name", argname);
+not_enough_args:
+	e->throw_string_exception ("not enough arguments");
+too_many_args:
+	e->throw_string_exception ("too many arguments");
 
 }
 

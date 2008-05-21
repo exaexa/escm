@@ -5,180 +5,180 @@
  * NUMBER FUNCTIONS
  */
 
-escm_func_handler(op_add)
+escm_func_handler (op_add)
 {
 	scm*t;
 	number*res = create_scm (number, 0);
-	set_return (res->collectable<number>());
+	set_return (res->collectable<number>() );
 	while (has_arg) {
-		t=pop_arg();
-		if (number_p(t)) res->add ((number*)t);
-		else throw_str_scm("not a number", t);
+		t = pop_arg();
+		if (number_p (t) ) res->add ( (number*) t);
+		else throw_str_scm ("not a number", t);
 	}
 	do_return;
 }
 
-escm_func_handler(op_sub)
+escm_func_handler (op_sub)
 {
 	scm*t;
 	number*res = create_scm (number, 0);
-	set_return(res->collectable<number>());
+	set_return (res->collectable<number>() );
 
-	if(has_arg) {
-		t=pop_arg();
-		if(!number_p(t)) throw_str_scm("not a number",t);
-		else res->set((number*)t);
+	if (has_arg) {
+		t = pop_arg();
+		if (!number_p (t) ) throw_str_scm ("not a number", t);
+		else res->set ( (number*) t);
 	}
 
-	if(!has_arg) {
+	if (!has_arg) {
 		res->neg();
 		do_return;
 		return;
 	}
-	
-	while(has_arg) {
-		t=pop_arg();
-		if(!number_p(t)) throw_str_scm("not a number",t);
-		else res->sub((number*)t);
-	}
 
-	do_return;
-}
-
-escm_func_handler(op_mul)
-{
-	scm*t;
-	number*res = create_scm (number, 1);
-	set_return(res->collectable<number>());
 	while (has_arg) {
-		t=pop_arg();
-		if(number_p(t)) res->mul ((number*)t);
-		else throw_str_scm("not a number",t);
+		t = pop_arg();
+		if (!number_p (t) ) throw_str_scm ("not a number", t);
+		else res->sub ( (number*) t);
+	}
+
+	do_return;
+}
+
+escm_func_handler (op_mul)
+{
+	scm*t;
+	number*res = create_scm (number, 1);
+	set_return (res->collectable<number>() );
+	while (has_arg) {
+		t = pop_arg();
+		if (number_p (t) ) res->mul ( (number*) t);
+		else throw_str_scm ("not a number", t);
 	}
 	do_return;
 }
 
-escm_func_handler(op_div)
+escm_func_handler (op_div)
 {
 	number*res = create_scm (number, 1);
-	set_return(res->collectable<number>());
+	set_return (res->collectable<number>() );
 	scm*t;
-	
-	if(!has_arg) throw_string("invalid division");
-	t=pop_arg();
-	if(!number_p(t))throw_str_scm("not a number",t);
-	if(!has_arg) {
-		res->div((number*)t);
+
+	if (!has_arg) throw_string ("invalid division");
+	t = pop_arg();
+	if (!number_p (t) ) throw_str_scm ("not a number", t);
+	if (!has_arg) {
+		res->div ( (number*) t);
 		do_return;
 		return;
 	}
-	res->set((number*)t);
-	while(has_arg) {
-		t=pop_arg();
-		if(number_p(t)) res->div((number*)t);
-		else throw_str_scm("not a number",t);
+	res->set ( (number*) t);
+	while (has_arg) {
+		t = pop_arg();
+		if (number_p (t) ) res->div ( (number*) t);
+		else throw_str_scm ("not a number", t);
 	}
 
 	do_return;
 }
 
-escm_func_handler(op_mod)
+escm_func_handler (op_mod)
 {
 	number*res = create_scm (number, 0);
-	set_return(res->collectable<number>());
+	set_return (res->collectable<number>() );
 
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
 
-	if(a&&b){
-		res->set(a);
-		res->mod(b);
-	} else throw_string("invalid mod params");
+	if (a && b) {
+		res->set (a);
+		res->mod (b);
+	} else throw_string ("invalid mod params");
 
 	do_return;
 }
 
-escm_func_handler(op_pow)
+escm_func_handler (op_pow)
 {
 	number*res = create_scm (number, 0);
-	set_return(res->collectable<number>());
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
-	if(a&&b){
-		res->set(a);
-		res->pow(b);
-	} else throw_string("invalid pow params");
+	set_return (res->collectable<number>() );
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
+	if (a && b) {
+		res->set (a);
+		res->pow (b);
+	} else throw_string ("invalid pow params");
 
 	do_return;
 }
 
-escm_func_handler(op_less)
+escm_func_handler (op_less)
 {
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
-	if(a&&b)
-		return_scm(a->is_less(b)?
-			escm_environment->t_true:escm_environment->t_false);
-	else throw_string("can't compare");
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
+	if (a && b)
+		return_scm (a->is_less (b) ?
+			    escm_environment->t_true : escm_environment->t_false);
+	else throw_string ("can't compare");
 }
 
-escm_func_handler(op_greater)
+escm_func_handler (op_greater)
 {
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
-	if(a&&b)
-		return_scm(a->is_greater(b)?
-			escm_environment->t_true:escm_environment->t_false);
-	else throw_string("can't compare");
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
+	if (a && b)
+		return_scm (a->is_greater (b) ?
+			    escm_environment->t_true : escm_environment->t_false);
+	else throw_string ("can't compare");
 }
 
-escm_func_handler(op_equal)
+escm_func_handler (op_equal)
 {
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
-	if(a&&b)
-		return_scm(a->is_equal(b)?
-			escm_environment->t_true:escm_environment->t_false);
-	else throw_string("can't compare");
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
+	if (a && b)
+		return_scm (a->is_equal (b) ?
+			    escm_environment->t_true : escm_environment->t_false);
+	else throw_string ("can't compare");
 }
 
-escm_func_handler(op_not_less)
+escm_func_handler (op_not_less)
 {
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
-	if(a&&b)
-		return_scm(a->is_less(b)?
-			escm_environment->t_false:escm_environment->t_true);
-	else throw_string("can't compare");
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
+	if (a && b)
+		return_scm (a->is_less (b) ?
+			    escm_environment->t_false : escm_environment->t_true);
+	else throw_string ("can't compare");
 }
 
-escm_func_handler(op_not_greater)
+escm_func_handler (op_not_greater)
 {
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
-	if(a&&b)
-		return_scm(a->is_greater(b)?
-			escm_environment->t_false:escm_environment->t_true);
-	else throw_string("can't compare");
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
+	if (a && b)
+		return_scm (a->is_greater (b) ?
+			    escm_environment->t_false : escm_environment->t_true);
+	else throw_string ("can't compare");
 }
 
-escm_func_handler(op_not_equal)
+escm_func_handler (op_not_equal)
 {
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
-	if(a&&b)
-		return_scm(a->is_equal(b)?
-			escm_environment->t_false:escm_environment->t_true);
-	else throw_string("can't compare");
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
+	if (a && b)
+		return_scm (a->is_equal (b) ?
+			    escm_environment->t_false : escm_environment->t_true);
+	else throw_string ("can't compare");
 }
 
-escm_func_handler(op_log)
+escm_func_handler (op_log)
 {
 	number*res = create_scm (number, 0);
-	set_return (res->collectable<number>());
-	
-	number*a=pop_arg_type(number);
-	number*b=pop_arg_type(number);
+	set_return (res->collectable<number>() );
+
+	number*a = pop_arg_type (number);
+	number*b = pop_arg_type (number);
 
 	if (a && b) {
 		res->set (a);
@@ -186,18 +186,18 @@ escm_func_handler(op_log)
 	} else if (a) {
 		res->set (a);
 		res->log (0);
-	} else throw_string("invalid log params");
+	} else throw_string ("invalid log params");
 	do_return;
 }
 
-escm_func_handler(op_exp)
+escm_func_handler (op_exp)
 {
 	number*res = create_scm (number, 1);
-	set_return (res->collectable<number>());
+	set_return (res->collectable<number>() );
 
 	scm*a = pop_arg();
-	if(number_p(a))res->set((number*)a);
-	else throw_str_scm("not a number",a);
+	if (number_p (a) ) res->set ( (number*) a);
+	else throw_str_scm ("not a number", a);
 	res->exp();
 
 	do_return;
@@ -222,12 +222,12 @@ void op_eval (scm_env*e, scm*args)
 void op_apply (scm_env*e, scm*args)
 {
 	scm* func;
-	if(pair_p (args) ) {
-		func=((pair*)args)->a;
-		args=((pair*)args)->d;
-		if(func && pair_p (args)){
-			if(lambda_p(func)) ((lambda*)func)->
-				apply(e,((pair*)args)->a);
+	if (pair_p (args) ) {
+		func = ( (pair*) args)->a;
+		args = ( (pair*) args)->d;
+		if (func && pair_p (args) ) {
+			if (lambda_p (func) ) ( (lambda*) func)->
+				apply (e, ( (pair*) args)->a);
 			return;
 		}
 	}
@@ -238,14 +238,14 @@ void op_apply (scm_env*e, scm*args)
  * DEFINEs, SETs
  */
 
-escm_func_handler(op_actual_define)
+escm_func_handler (op_actual_define)
 {
-	scm*params=escm_arglist;
-	symbol*name=pop_arg_type(symbol);
-	if(!(name&&has_arg)) goto except;
+	scm*params = escm_arglist;
+	symbol*name = pop_arg_type (symbol);
+	if (! (name && has_arg) ) goto except;
 	escm_environment->val = pop_arg();
 	escm_environment->lexdef (name);
-	return_scm(name);
+	return_scm (name);
 	return;
 except:
 	throw_str_scm ("bad define:", params);
@@ -338,50 +338,50 @@ error:
  * LISTs
  */
 
-escm_func_handler(op_list)
+escm_func_handler (op_list)
 {
 	return_scm (escm_arglist);
 }
 
-escm_func_handler(op_car)
+escm_func_handler (op_car)
 {
-	scm*p=pop_arg();
-	if(!pair_p(p))return throw_str_scm("not a pair", p);
-	return_scm (((pair*)p)->a);
+	scm*p = pop_arg();
+	if (!pair_p (p) ) return throw_str_scm ("not a pair", p);
+	return_scm ( ( (pair*) p)->a);
 }
 
-escm_func_handler(op_cdr)
+escm_func_handler (op_cdr)
 {
-	scm*p=pop_arg();
-	if(!pair_p(p))return throw_str_scm("not a pair", p);
-	return_scm (((pair*)p)->d);
+	scm*p = pop_arg();
+	if (!pair_p (p) ) return throw_str_scm ("not a pair", p);
+	return_scm ( ( (pair*) p)->d);
 }
 
-escm_func_handler(op_cons)
+escm_func_handler (op_cons)
 {
-	scm*a,*d;
-	if(!has_arg) goto error;
-	a=pop_arg();
-	if(!has_arg) goto error;
-	d=pop_arg();
-	if(has_arg)goto error;
+	scm*a, *d;
+	if (!has_arg) goto error;
+	a = pop_arg();
+	if (!has_arg) goto error;
+	d = pop_arg();
+	if (has_arg) goto error;
 	return_scm (create_scm (pair, a, d)->collectable<pair>() );
 	return;
 error:
-	throw_string("cons needs 2 arguments");
+	throw_string ("cons needs 2 arguments");
 }
 
 /*
  * DISPLAY (subject to remove or change brutally)
  */
 
-escm_func_handler(op_display)
+escm_func_handler (op_display)
 {
 	printf ( pop_arg()->display (1).c_str() );
-	return_scm(0);
+	return_scm (0);
 }
 
-escm_func_handler(op_newline)
+escm_func_handler (op_newline)
 {
 	printf ("\n");
 	return_scm (0);
@@ -391,7 +391,7 @@ escm_func_handler(op_newline)
  * TYPE PREDICATES
  */
 
-void op_null_p(scm_env*e, scm*arglist)
+void op_null_p (scm_env*e, scm*arglist)
 {
 	if (!pair_p (arglist) ) e->ret (0);
 	else if ( ( (pair*) arglist)->a) e->ret (e->t_false);
@@ -428,61 +428,61 @@ create_predicate_function (continuation)
  * BOOLEAN OPERATIONS
  */
 
-static escm_func_handler(op_true_p)
+static escm_func_handler (op_true_p)
 {
-	boolean*b=(boolean*)pop_arg();
-	if(!boolean_p(b)) throw_str_scm("not a boolean",b);
-	if(b->b) return_scm(escm_environment->t_true);
-	else return_scm(escm_environment->t_false);
+	boolean*b = (boolean*) pop_arg();
+	if (!boolean_p (b) ) throw_str_scm ("not a boolean", b);
+	if (b->b) return_scm (escm_environment->t_true);
+	else return_scm (escm_environment->t_false);
 }
 
-static escm_func_handler(op_false_p)
+static escm_func_handler (op_false_p)
 {
-	boolean*b=(boolean*)pop_arg();
-	if(!boolean_p(b)) throw_str_scm("not a boolean",b);
-	if(b->b) return_scm(escm_environment->t_false);
-	else return_scm(escm_environment->t_true);
+	boolean*b = (boolean*) pop_arg();
+	if (!boolean_p (b) ) throw_str_scm ("not a boolean", b);
+	if (b->b) return_scm (escm_environment->t_false);
+	else return_scm (escm_environment->t_true);
 }
 
-static escm_func_handler(op_and_hard)
+static escm_func_handler (op_and_hard)
 {
 	boolean*a;
-	while(has_arg) {
-		a=(boolean*)pop_arg();
-		if(!boolean_p(a))throw_str_scm("not a boolean",a);
-		if(!(a->b)){
-			return_scm(escm_environment->t_false);
+	while (has_arg) {
+		a = (boolean*) pop_arg();
+		if (!boolean_p (a) ) throw_str_scm ("not a boolean", a);
+		if (! (a->b) ) {
+			return_scm (escm_environment->t_false);
 			return;
 		}
 	}
-	return_scm(escm_environment->t_true);
+	return_scm (escm_environment->t_true);
 }
 
-static escm_func_handler(op_or_hard)
+static escm_func_handler (op_or_hard)
 {
 	boolean*a;
-	while(has_arg) {
-		a=(boolean*)pop_arg();
-		if(!boolean_p(a))throw_str_scm("not a boolean",a);
-		if(a->b){
-			return_scm(escm_environment->t_true);
+	while (has_arg) {
+		a = (boolean*) pop_arg();
+		if (!boolean_p (a) ) throw_str_scm ("not a boolean", a);
+		if (a->b) {
+			return_scm (escm_environment->t_true);
 			return;
 		}
 	}
-	return_scm(escm_environment->t_false);
+	return_scm (escm_environment->t_false);
 }
 
-static escm_func_handler(op_xor)
+static escm_func_handler (op_xor)
 {
 	boolean*a;
-	bool result=false;
-	while(has_arg) {
-		a=(boolean*)pop_arg();
-		if(!boolean_p(a))throw_str_scm("not a boolean",a);
-		if(a->b) result=!result;
+	bool result = false;
+	while (has_arg) {
+		a = (boolean*) pop_arg();
+		if (!boolean_p (a) ) throw_str_scm ("not a boolean", a);
+		if (a->b) result = !result;
 	}
-	return_scm(result?
-		(escm_environment->t_true):(escm_environment->t_false));
+	return_scm (result ?
+		    (escm_environment->t_true) : (escm_environment->t_false) );
 }
 
 /*
@@ -583,7 +583,7 @@ void op_if (scm_env*e, pair*code)
  * not rly moar?
  */
 
-escm_func_handler(op_error)
+escm_func_handler (op_error)
 {
 	throw_scm (escm_arglist);
 }
@@ -608,13 +608,13 @@ static continuation* default_cv_factory (scm_env*e, pair*s)
  * strings
  */
 
-static escm_func_handler(op_str_compare)
+static escm_func_handler (op_str_compare)
 {
-	text*a,*b;
-	a=pop_arg_type(text);
-	b=pop_arg_type(text);
-	if(a&&b) return_scm(create_scm(number,a->cmp(b))->collectable<scm>());
-	else throw_string("need 2 text args to compare");
+	text*a, *b;
+	a = pop_arg_type (text);
+	b = pop_arg_type (text);
+	if (a && b) return_scm (create_scm (number, a->cmp (b) )->collectable<scm>() );
+	else throw_string ("need 2 text args to compare");
 }
 
 /*
@@ -623,22 +623,22 @@ static escm_func_handler(op_str_compare)
 
 #include <stdio.h>
 
-static bool load_file(const char* fn, scm_env*e)
+static bool load_file (const char* fn, scm_env*e)
 {
-	FILE*f=fopen(fn,"r");
-	if(!f) return false;
+	FILE*f = fopen (fn, "r");
+	if (!f) return false;
 	char buf[65];
 	int l;
-	while((l=fread(buf,1,64,f))) {
-		buf[l]=0;
-		if(e->parser->parse_string(buf)) {
-			fclose(f);
+	while ( (l = fread (buf, 1, 64, f) ) ) {
+		buf[l] = 0;
+		if (e->parser->parse_string (buf) ) {
+			fclose (f);
 			return false;
 		}
 	}
-	fclose(f);
-	pair*code = e->parser->get_result(false);
-	if(code)e->eval_code(code->collectable<pair>());
+	fclose (f);
+	pair*code = e->parser->get_result (false);
+	if (code) e->eval_code (code->collectable<pair>() );
 	e->run_eval_loop();
 	return true;
 }
@@ -647,20 +647,20 @@ static bool load_file(const char* fn, scm_env*e)
  * General add-all-the-shaite function
  */
 
-static bool load_init_file(scm_env*e)
+static bool load_init_file (scm_env*e)
 {
 	char buffer[1024];
-	strcpy(buffer,getenv("HOME"));
-	strcat(buffer,"/.escm-init");
-	if(load_file(buffer,e))return true;
-	return load_file("/etc/escm-init",e);
+	strcpy (buffer, getenv ("HOME") );
+	strcat (buffer, "/.escm-init");
+	if (load_file (buffer, e) ) return true;
+	return load_file ("/etc/escm-init", e);
 }
 
 bool escm_add_scheme_builtins (scm_env*e)
 {
 	e->eval_cont_factory = default_eval_factory;
 	e->codevector_cont_factory = default_cv_factory;
-	
+
 	//arithmetics
 	try {
 		escm_add_func_handler (e, "+", op_add);
@@ -734,7 +734,7 @@ bool escm_add_scheme_builtins (scm_env*e)
 		escm_add_func_handler (e, "error", op_error);
 
 		//init file
-		load_init_file(e);
+		load_init_file (e);
 	} catch (scm*) {
 		return false;
 	}
