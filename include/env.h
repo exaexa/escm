@@ -28,7 +28,7 @@ class scm_env;
 
 typedef continuation* (*scm_eval_cont_factory) (scm_env*, scm*);
 typedef continuation* (*scm_code_cont_factory) (scm_env*, pair*);
-typedef void (*scm_fatal_error_callback) ();
+typedef void (*scm_fatal_error_callback) (scm_env*, scm*);
 
 class scm_env
 {
@@ -79,7 +79,7 @@ public:
 	set<gc_heap_entry> allocated_heap;
 	size_t min_heap_part_size;
 
-	void add_heap_part(size_t minsize=0);
+	void add_heap_part (size_t minsize = 0);
 	void free_heap_parts();
 
 	void* new_heap_object (size_t size);
@@ -166,7 +166,7 @@ public:
 
 	void eval_code (pair*);
 	void eval_expr (scm*);
-	int eval_string (const char* str,char term_char=0);
+	int eval_string (const char* str, char term_char = 0);
 
 	inline void run_eval_loop()
 	{
@@ -190,11 +190,15 @@ public:
 		} catch (scm* e) {
 			protected_exception = e;
 			cont = 0;
+			val = 0;
 			try {
-				if (globget (t_errorhook) ) if (lambda_p (val) )
-						( (lambda*) val)->apply (this, e);
+				globget (t_errorhook);
+				if (!val) throw e;
+				if (!lambda_p (val) )
+					throw_desc_exception ("invalid *error-hook*", e);
 
-				protected_exception = 0;
+				( (lambda*) val)->apply (this, e);
+
 			} catch (scm* e) {
 				/*
 				 * if even this goes wrong, let's die terribly.
@@ -202,8 +206,10 @@ public:
 				 * or could he set error hook himself?
 				 */
 				cont = 0;
-				if(fatal_error)fatal_error();
+				val = 0;
+				if (fatal_error) fatal_error (this, e);
 			}
+			protected_exception = 0;
 		}
 		return cont ? true : false;
 	}

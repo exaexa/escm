@@ -8,10 +8,9 @@
 #include <queue>
 using std::queue;
 
-
 bool scm_env::init (scm_parser*par, size_t heap_size, size_t alignment)
 {
-	min_heap_part_size=heap_size;
+	min_heap_part_size = heap_size;
 	align = alignment;
 
 	val = 0;
@@ -22,13 +21,15 @@ bool scm_env::init (scm_parser*par, size_t heap_size, size_t alignment)
 
 	protected_exception = 0;
 
+	fatal_error = 0;
+
 	if (par) parser = par;
 	else parser = new scm_classical_parser (this);
-	
-	global_frame=0;
-	t_true=t_false=0;
-	t_errorhook=0;
-	t_memoryerror=0;
+
+	global_frame = 0;
+	t_true = t_false = 0;
+	t_errorhook = 0;
+	t_memoryerror = 0;
 
 	try {
 		global_frame = new_scm (this, hashed_frame)->collectable<frame>();
@@ -48,39 +49,38 @@ void scm_env::release()
 {
 	if (!is_init) return;
 	if (parser) free (parser);
-	for(set<gc_heap_entry>::iterator i=allocated_heap.begin();
-		i!=allocated_heap.end();++i) free(i->start);
+	for (set<gc_heap_entry>::iterator i = allocated_heap.begin();
+			i != allocated_heap.end();++i) free (i->start);
 	allocated_heap.clear();
 	is_init = false;
 }
 
-void scm_env::add_heap_part(size_t minsize)
+void scm_env::add_heap_part (size_t minsize)
 {
-	size_t s=(minsize>min_heap_part_size)?minsize:min_heap_part_size;
-	void*t=malloc(s);
-	if(!t)return;
-	gc_heap_entry he(t,s);
-	allocated_heap.insert(he);
-	free_space.insert(he);
+	size_t s = (minsize > min_heap_part_size) ? minsize : min_heap_part_size;
+	void*t = malloc (s);
+	if (!t) return;
+	gc_heap_entry he (t, s);
+	allocated_heap.insert (he);
+	free_space.insert (he);
 }
 
 void scm_env::free_heap_parts()
 {
-	set<gc_heap_entry>::iterator i,j;
+	set<gc_heap_entry>::iterator i, j;
 	queue<gc_heap_entry> to_delete;
 
-	for(i=allocated_heap.begin();
-		i!=allocated_heap.end(); ++i)
-	{
-		j=free_space.find(*i);
-		if(j==free_space.end()) continue;
-		if(i->size==j->size) to_delete.push(*i);
+	for (i = allocated_heap.begin();
+			i != allocated_heap.end(); ++i) {
+		j = free_space.find (*i);
+		if (j == free_space.end() ) continue;
+		if (i->size == j->size) to_delete.push (*i);
 	}
 
-	while(!to_delete.empty()){
-		free(to_delete.front().start);
-		allocated_heap.erase(to_delete.front());
-		free_space.erase(to_delete.front());
+	while (!to_delete.empty() ) {
+		free (to_delete.front().start);
+		allocated_heap.erase (to_delete.front() );
+		free_space.erase (to_delete.front() );
 		to_delete.pop();
 	}
 }
@@ -114,8 +114,8 @@ void * scm_env::new_heap_object (size_t size)
 			//decrease free space size
 			he.size -= size;
 			if (he.size) { //if something remains
-				he.start = (char*)(he.start) + size; 
-					//move it and push it back
+				he.start = (char*) (he.start) + size;
+				//move it and push it back
 				free_space.insert (he);
 			}
 
@@ -133,7 +133,7 @@ void * scm_env::allocate (size_t size)
 	collect_garbage();
 	d = new_heap_object (size);
 	if (d) return d;
-	add_heap_part(size);
+	add_heap_part (size);
 	d = new_heap_object (size);
 	if (d) return d;
 	throw_exception (t_memoryerror);
@@ -179,11 +179,11 @@ void scm_env::sort_out_free_space()
 
 		//if the space touches the following, join them
 		//(we also count overlapping, but this should never happen.
-		if ( ((char*)(i->start) + i->size) >= (j->start) ) {
+		if ( ( (char*) (i->start) + i->size) >= (j->start) ) {
 			eh = *i; //compute a new field
 			eh.start = i->start;
-			eh.size = (char*)(j->start) + j->size 
-				- (char*)(i->start);
+			eh.size = (char*) (j->start) + j->size
+				  - (char*) (i->start);
 			free_space.erase (i); //erase old
 			free_space.erase (j);
 			i = free_space.insert (eh).first; //insert the new one
@@ -357,14 +357,14 @@ void scm_env::eval_expr (scm*s)
 
 #include "parser.h"
 
-int scm_env::eval_string (const char*s,char term_char)
+int scm_env::eval_string (const char*s, char term_char)
 {
 	int err = parser->parse_string (s);
 	if (err) return err;
-	if(term_char) {
-		char str[2] = {term_char,0};
-		err=parser->parse_string(str);
-		if(err) return err;
+	if (term_char) {
+		char str[2] = {term_char, 0};
+		err = parser->parse_string (str);
+		if (err) return err;
 	}
 
 	pair*code = parser->get_result (false);
