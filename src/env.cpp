@@ -316,10 +316,13 @@ bool scm_env::lexset (symbol*scm, int d)
 		--d;
 	}
 	while (i) {
-		if (i->set (scm, val) ) return true;
+		if (i->set (scm, val) ) {
+			val = scm;
+			return true;
+		}
 		i = i->parent;
 	}
-	return global_frame->set (scm, val);
+	return false;
 }
 
 bool scm_env::lexget (symbol*sym, int d)

@@ -7,9 +7,7 @@
 
 	general escm todo
 
-] define needs rewriting AND support of set! as they are mostly similar
-  operations. Therefore add define-continuation, that way it's gonna be
-  multifast ;)
+] new allocator (pool)
 
 ] come up with some reasonable hash function for hashed_frame.
 

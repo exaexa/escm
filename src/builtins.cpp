@@ -1,6 +1,8 @@
 #include "builtins.h"
 #include "macros.h"
 
+#include <stdio.h>
+
 /*
  * NUMBER FUNCTIONS
  */
@@ -238,52 +240,107 @@ void op_apply (scm_env*e, scm*args)
  * DEFINEs, SETs
  */
 
-escm_func_handler (op_actual_define)
+class define_continuation : public continuation
 {
-	scm*params = escm_arglist;
-	symbol*name = pop_arg_type (symbol);
-	if (! (name && has_arg) ) goto except;
-	escm_environment->val = pop_arg();
-	escm_environment->lexdef (name);
-	return_scm (name);
-	return;
-except:
-	throw_str_scm ("bad define:", params);
+public:
+	enum {type_define, type_set};
+	int type;
+	scm* data;
+	bool evaluated;
+
+	define_continuation (scm_env*e, scm*d, int t) : continuation (e)
+	{
+		data = d;
+		type = t;
+		evaluated = false;
+	}
+
+	virtual scm* get_child (int i)
+	{
+		switch (i) {
+		case 0:
+			return data;
+		case 1:
+			return parent;
+		case 2:
+			return env;
+		default:
+			return escm_no_more_children;
+		}
+	}
+
+	void eval_step (scm_env*e);
+};
+
+#include <stdio.h>
+
+void define_continuation::eval_step (scm_env*e)
+{
+	if (evaluated) { //second stage, after eval.
+		switch (type) {
+		case type_define:
+			e->lexdef ( (symbol*) data);
+			break;
+		case type_set:
+			e->lexset ( (symbol*) data);
+			break;
+		default:
+			e->throw_string_exception
+				("internal error in define-cont");
+			break;
+		}
+		e->val = data;
+		e->pop_cont();
+	} else { //first stage
+		scm*name = 0;
+
+		if (!pair_p (data) )
+			e->throw_desc_exception ("invalid definition", data);
+
+		name = ( (pair*) data)->a;
+		data = ( (pair*) data)->d;
+
+		if (symbol_p (name) ) { // (define symbol wut)
+
+			if (!pair_p (data) )
+				e->throw_desc_exception
+				("invalid definition", data);
+
+			e->push_cont (new_scm (e, eval_continuation,
+			       ( (pair*) data)->a)
+			       ->collectable<continuation>() );
+
+			evaluated = true;
+			data = name;
+
+		} else if (pair_p (name) ) { // (define (sym lambda) wut wut wut)
+
+			if (!symbol_p ( ( (pair*) name)->a) )
+				e->throw_desc_exception
+				("invalid definition", name);
+
+			e->val = new_scm (e, closure, ( (pair*) name)->d,
+				 pair_p (data), env)->collectable<closure>();
+			data = ((pair*)name)->a;
+			evaluated = true;
+
+		} else e->throw_desc_exception
+			("invalid definition target", name);
+	}
 }
 
 void op_define (scm_env*e, pair*code)
 {
-	code = pair_p (code->d);
-	symbol*name;
-	scm*def;
-	if (!code) e->throw_string_exception ("invalid define");
-	if (pair_p (code->a) ) { //defining a lambda, shortened syntax
-		pair*l = (pair*) code->a;
-		name = symbol_p (l->a);
-		scm*lam = new_scm (e, symbol, "LAMBDA");
-		scm*temp = new_scm (e, pair, l->d, code->d);
-		def = new_scm (e, pair, lam, temp);
-		//generates (lambda params . code)
-	} else {
-		name = symbol_p (code->a);
-		if (pair_p (code->d) ) def = pair_p (code->d)->a;
-		else def = code->d;
-	}
+	e->replace_cont (new_scm (e, define_continuation, code->d,
+				  define_continuation::type_define)
+			 ->collectable<continuation>() );
+}
 
-	if (!name) e->throw_desc_exception
-		("invalid define symbol format", code->a);
-
-	//generates (#<op_actual_define> (QUOTE name) def)
-	lambda*func = new_scm (e, extern_func, op_actual_define);
-	scm*quoted_name = new_scm (e, pair, name, 0);
-	scm*quote = new_scm (e, symbol, "QUOTE");
-	quoted_name = new_scm (e, pair, quote, quoted_name);
-	pair*params = new_scm (e, pair, def, 0);
-	params = new_scm (e, pair, quoted_name, params);
-	continuation*cont = new_scm (e, lambda_continuation,
-				     func, params, false);
-	e->replace_cont (cont);
-	cont->mark_collectable();
+void op_set (scm_env*e, pair*code)
+{
+	e->replace_cont (new_scm (e, define_continuation, code->d,
+				  define_continuation::type_set)
+			 ->collectable<continuation>() );
 }
 
 /*
@@ -293,7 +350,6 @@ void op_define (scm_env*e, pair*code)
 void op_lambda (scm_env*e, pair*code)
 {
 	pair* c = pair_p (code->d);
-	if (!c) e->throw_exception (code);
 	e->ret (new_scm (e, closure, c->a, pair_p (c->d), e->cont->env)
 		->collectable<scm>() );
 }
@@ -495,6 +551,12 @@ void op_begin (scm_env*e, pair*code)
 			 ->collectable<continuation>() );
 }
 
+/* note to (begin)
+ * if you (define a 1) (begin (define a 2)) then a is 2,
+ * although it doesn't seem very logical. All major schemes
+ * work this way. not a bug.
+ */
+
 /*
  * IF CONTINUATION
  * works this way:
@@ -516,7 +578,6 @@ public:
 		t = T;
 		f = F;
 		c = cond;
-		e->val = 0;
 	}
 
 	virtual scm*get_child (int i)
@@ -539,8 +600,6 @@ public:
 
 	virtual void eval_step (scm_env*e);
 };
-
-#include <stdio.h>
 
 void if_continuation::eval_step (scm_env*e)
 {
@@ -621,8 +680,6 @@ static escm_func_handler (op_str_compare)
  * file loader
  */
 
-#include <stdio.h>
-
 static bool load_file (const char* fn, scm_env*e)
 {
 	FILE*f = fopen (fn, "r");
@@ -685,8 +742,8 @@ bool escm_add_scheme_builtins (scm_env*e)
 		escm_add_func_handler (e, "eval", op_eval);
 		escm_add_func_handler (e, "apply", op_apply);
 
-		escm_add_func_handler (e, "*do-define*", op_actual_define);
 		escm_add_syntax_handler (e, "define", op_define);
+		escm_add_syntax_handler (e, "set!", op_set);
 
 		escm_add_syntax_handler (e, "lambda", op_lambda);
 		escm_add_syntax_handler (e, "macro", op_macro);
