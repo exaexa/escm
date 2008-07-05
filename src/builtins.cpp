@@ -677,6 +677,16 @@ static escm_func_handler (op_str_compare)
 }
 
 /*
+ * internals
+ */
+
+static escm_func_handler (op_gc)
+{
+	escm_environment->collect_garbage();
+	return_scm (0);
+}
+
+/*
  * file loader
  */
 
@@ -789,6 +799,9 @@ bool escm_add_scheme_builtins (scm_env*e)
 
 		//errors
 		escm_add_func_handler (e, "error", op_error);
+
+		//internals
+		escm_add_func_handler (e, "gc", op_gc);
 
 		//init file
 		load_init_file (e);
