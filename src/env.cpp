@@ -58,6 +58,9 @@ void * scm_env::allocate (size_t size)
 	void*d;
 	d = malloc (size);
 	if (d) return d;
+	collect_garbage();
+	d = malloc (size);
+	if (d) return d;
 	throw_exception (t_memoryerror);
 	return 0;
 }
@@ -67,9 +70,11 @@ void scm_env::deallocate (void* p)
 	free (p);
 }
 
+#include <stdio.h>
+
 void scm_env::collect_garbage ()
 {
-	set<scm*> active;
+	set<scm*> blacklist;
 	queue<scm*> processing;
 	list<scm*>::iterator i;
 	set<scm*>::iterator k, l;
@@ -84,6 +89,8 @@ void scm_env::collect_garbage ()
 		collector.insert (*i);
 
 	collector_queue.clear();
+
+	blacklist = collector;
 
 	processing.push (val);
 	processing.push (global_frame);
@@ -105,8 +112,8 @@ void scm_env::collect_garbage ()
 
 		if (!v) continue;
 
-		if (active.find (v) == active.end() ) {
-			active.insert (v);
+		if ( (l = blacklist.find (v) ) == blacklist.end() ) {
+			blacklist.erase (l);
 
 			for (a = 0; (t = v->get_child (a++) )
 					!= escm_no_more_children ;) {
@@ -115,23 +122,11 @@ void scm_env::collect_garbage ()
 		}
 	}
 
-	k = active.begin();
-	l = collector.begin();
-	while (l != collector.end() ) {
-		while ( (*k) > (*l) ) {
-			if ( !is_scm_protected (*l) )
-				collector_queue.push_front (*l);
-			++l;
+	for (k = blacklist.begin();k != blacklist.end();++k)
+		if (!is_scm_protected (*k) ) {
+			deallocate (*k);
+			collector.erase (*k);
 		}
-		++k;
-		++l;
-	}
-
-	for (i = collector_queue.begin();i != collector_queue.end();++i) {
-		deallocate (*i);
-		collector.erase (*i);
-	}
-	collector_queue.clear();
 }
 
 
