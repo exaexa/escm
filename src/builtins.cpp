@@ -286,7 +286,7 @@ void define_continuation::eval_step (scm_env*e)
 			break;
 		default:
 			e->throw_string_exception
-				("internal error in define-cont");
+			("internal error in define-cont");
 			break;
 		}
 		e->val = data;
@@ -307,8 +307,8 @@ void define_continuation::eval_step (scm_env*e)
 				("invalid definition", data);
 
 			e->push_cont (new_scm (e, eval_continuation,
-			       ( (pair*) data)->a)
-			       ->collectable<continuation>() );
+					       ( (pair*) data)->a)
+				      ->collectable<continuation>() );
 
 			evaluated = true;
 			data = name;
@@ -320,8 +320,8 @@ void define_continuation::eval_step (scm_env*e)
 				("invalid definition", name);
 
 			e->val = new_scm (e, closure, ( (pair*) name)->d,
-				 pair_p (data), env)->collectable<closure>();
-			data = ((pair*)name)->a;
+					  pair_p (data), env)->collectable<closure>();
+			data = ( (pair*) name)->a;
 			evaluated = true;
 
 		} else e->throw_desc_exception

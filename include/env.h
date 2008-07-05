@@ -35,63 +35,14 @@ class scm_env
 public:
 
 	/*
-	 * memory allocator
-	 */
-
-	class gc_heap_entry
-	{
-	public:
-		void* start;
-		size_t size;
-		inline bool operator< (const gc_heap_entry& a) const
-		{
-			return start < a.start;
-		}
-		inline bool operator== (const gc_heap_entry& a) const
-		{
-			return start == a.start;
-		}
-		inline gc_heap_entry()
-		{
-			start = 0;
-			size = 0;
-		}
-		inline gc_heap_entry (void* st, size_t si)
-		{
-			start = st;
-			size = si;
-		}
-	};
-
-	size_t align;
-
-	/*
-	 * NOTE. (quite important)
-	 * align shouldn't be non-power of 2, but also should not be higher
-	 * that sizeof(scm) - this could lead to significant memory overhead.
-	 */
-
-	set<gc_heap_entry> allocated_space;
-	set<gc_heap_entry> free_space;
-	set<scm*> collector;
-	list<scm*> collector_queue;
-
-	set<gc_heap_entry> allocated_heap;
-	size_t min_heap_part_size;
-
-	void add_heap_part (size_t minsize = 0);
-	void free_heap_parts();
-
-	void* new_heap_object (size_t size);
-
-	/*
 	 * memory management
 	 */
 
+	set<scm*> collector;
+	list<scm*> collector_queue;
+
 	void* allocate (size_t size);
 	void deallocate (void*);
-
-	void sort_out_free_space();
 
 	void collect_garbage ();
 
