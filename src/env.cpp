@@ -54,7 +54,11 @@ void scm_env::release()
 
 void * scm_env::allocate (size_t size)
 {
-	//Try to Allocate, then try to sweep and allocate, then die.
+	static int counter = 0;
+	if((counter++)>1000){
+		counter = 0;
+		collect_garbage();
+	}
 	void*d;
 	d = malloc (size);
 	if (d) return d;
@@ -112,7 +116,7 @@ void scm_env::collect_garbage ()
 
 		if (!v) continue;
 
-		if ( (l = blacklist.find (v) ) == blacklist.end() ) {
+		if ( (l = blacklist.find (v) ) != blacklist.end() ) {
 			blacklist.erase (l);
 
 			for (a = 0; (t = v->get_child (a++) )
