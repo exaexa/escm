@@ -1,18 +1,19 @@
 
 ESCM ChangeLog
 
-working three	***
+working tree	***
 	
+	* stupid old allocator removed, new pool allocator shall appear
+	* define and set! moved to continuation
 	* much work on macros and builtins
 	* added number comparsion functions, so now we can compute
 		the famous (fact).
 
-0.0.2		clean alpha
+0.0.2		clean alpha			2008-04-16
 
 	* collector heap is dynamic now, theoretically no more OOM.
-
-	- several things moved where they belong.
-	- fatal error resolved by using callback.
+	* several things moved where they belong.
+	* fatal error resolved by using callback.
 
 0.0.1		first alpha			2008-04-03
 
