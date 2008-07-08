@@ -58,7 +58,7 @@ std::string character::display_internal (int style)
 std::string extern_func::display_internal (int style)
 {
 	std::ostringstream os;
-	os << "#<extern_func@" << handler << ">";
+	os << "#<extern_func@" << (void*)handler << ">";
 	return os.str();
 }
 
@@ -77,7 +77,7 @@ std::string closure::display_internal (int style)
 std::string extern_syntax::display_internal (int style)
 {
 	std::ostringstream os;
-	os << "#<extern_syntax h=" << handler << ">";
+	os << "#<extern_syntax@" << (void*)handler << ">";
 	return os.str();
 }
 
@@ -107,7 +107,7 @@ std::string vector::display_internal (int style)
 std::string scm::display_internal (int style)
 {
 	std::ostringstream os;
-	os << "#<scm " << typeid (*this).name() << "@" << this << ">";
+	os << "#<scm " << typeid (*this).name() << "@" << (void*)this << ">";
 	return os.str();
 }
 
