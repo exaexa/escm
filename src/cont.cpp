@@ -121,18 +121,19 @@ void syntax_continuation::eval_step (scm_env*e)
 
 	/*
 	 * NOTE to self. (just to be damn sure)
-	 * Some macros don't even vant the second phase to occur
+	 * Some macros don't even want the second phase to occur
 	 * (e.g. quote, which we mentioned elsewhere). Then apply
 	 * doesn't push the evaluation, but uses pop_cont 
 	 * (or replace. or whatever.)
 	 */
 }
 
+#include <stdio.h>
+
 void lambda_continuation::eval_step (scm_env*e)
 {
 	switch (arglist_pos) {
 	case 1: //we have evaluated list arg
-		arglist = (pair*) (arglist->d);
 		* (pair**) evaluated_args_d = new_scm (e, pair, e->val, 0)
 					      ->collectable<pair>();
 		{
@@ -144,6 +145,7 @@ void lambda_continuation::eval_step (scm_env*e)
 			arglist_pos = 1;
 			e->push_cont (new_scm (e, eval_continuation, arglist->a)
 				      ->collectable<continuation>() );
+			arglist = (pair*) (arglist->d);
 		} else if (arglist) {
 			arglist_pos = 2;
 			e->push_cont (new_scm (e, eval_continuation, arglist)

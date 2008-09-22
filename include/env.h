@@ -64,13 +64,13 @@ public:
 		throw s;
 	}
 
-	inline void throw_string_exception (char* c)
+	inline void throw_string_exception (const char* c)
 	{
 		throw_exception (new_scm (this, string, c)
 				 ->collectable<scm>() );
 	}
 
-	inline void throw_desc_exception (char*c, scm*s)
+	inline void throw_desc_exception (const char*c, scm*s)
 	{
 		scm*t = new_scm (this, string, c);
 		scm*t2 = new_scm (this, pair, s, 0);

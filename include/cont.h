@@ -191,15 +191,5 @@ public:
 	virtual void eval_step (scm_env*);
 };
 
-/*
- * TODO, specific continuations for all 'special forms':
- * define set!
- * if cond case and or
- * map foreach do
- * let let* letrec
- *
- * (lambda is a syntax!)
- */
-
 #endif
 

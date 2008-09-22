@@ -62,6 +62,7 @@ public:
 
 	friend class scm_env;
 	void mark_collectable();
+	inline void gc_protect(){flags+=scmf_nocollect;}
 
 	template<class ret_scm> inline ret_scm* collectable()
 	{

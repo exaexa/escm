@@ -7,7 +7,7 @@ env['CPPPATH']=['#include/']
 env.SetOption("num_jobs",2);
 
 # debug
-env['CCFLAGS']+=' -DDEBUG=1 -g '
+env['CCFLAGS']+=' -DDEBUG=1 -g3'
 
 # we want to build an interpreter, not lib. Otherwise comment this out.:
 env['CCFLAGS']+=' -Drun_interpreter=main '

@@ -450,12 +450,12 @@ closure::closure (scm_env*e, scm*Arglist,
 
 void closure::apply (scm_env*e, scm*args)
 {
-	e->val = args;
-	continuation*cont = new_scm (e, codevector_continuation, ip);
+	args->gc_protect();
 	/*
 	 * ...so it doesn't get collected, because its continuation
 	 * is gonna get replaced here now:
 	 */
+	continuation*cont = new_scm (e, codevector_continuation, ip);
 	e->replace_cont (cont);
 	e->cont->env = env;
 	cont->mark_collectable();
@@ -464,7 +464,10 @@ void closure::apply (scm_env*e, scm*args)
 
 	pair *argdata = (pair*) args, *argname = (pair*) arglist;
 	while (1) {
-		if (pair_p (argname) ) { //argument name in a list
+		if (!argname) { //end of arguments
+			if (argdata) goto too_many_args;
+			else return;
+		} else if (pair_p (argname) ) { //argument name in a list
 			if (symbol_p (argname->a) ) {
 				if (pair_p (argdata) )
 					f->define (e, (symbol*) (argname->a),
@@ -474,19 +477,19 @@ void closure::apply (scm_env*e, scm*args)
 		} else if (symbol_p (argname) ) { //rest argument name
 			f->define (e, (symbol*) argname, argdata);
 			return;
-		} else if (!argname) { //end of arguments
-			if (argdata) goto too_many_args;
-			else return;
 		} else goto bad_argname;
 		argname = (pair*) (argname->d);
 		argdata = (pair*) (argdata->d);
 	}
 
 bad_argname:
+	args->mark_collectable();
 	e->throw_desc_exception ("bad argument name", argname);
 not_enough_args:
+	args->mark_collectable();
 	e->throw_string_exception ("not enough arguments");
 too_many_args:
+	args->mark_collectable();
 	e->throw_string_exception ("too many arguments");
 
 }

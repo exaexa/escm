@@ -15,6 +15,9 @@
 (define(cdrs x)(if(null? x)()(cons(cdr(car x))(cdrs(cdr x)))))
 (define(map f . x)(if(null?(car x))()(cons(apply f(cars x))
  (apply map(cons f(cdrs x))))))
+(define(foreach f . x)(if(null?(car x))()(begin(apply f(cars x))
+ (apply foreach(cons f(cdrs x))))))
+
 
 (define(zero? x)(= x 0))
 (define(sym-eq? x y)(zero?(sym-cmp x y)))
@@ -63,7 +66,6 @@
  (cars vars)(cdddr form))))(cons name(cadrs vars))))(begin(define vars(cadr
  form))(cons(cons 'lambda(cons(cars vars)(cddr form)))(cadrs vars)))))
 
-;;TODO redefine, so the macro is not recursive.
 (macro(cond form) (if(null?(cdr form)) () (let ((a(car form)) (c(caadr form)) (p(cdadr form)) (r(cddr form))) (if(pair? c) (list 'if c(cons begin p)(cons a r)) (cons 'begin p)))))
 
 (define (equal? x y) (cond ((null? x) (null? y)) ((number? x) (and (number? y) (= x y))) ((string? x) (and (string? y) (str-eq? x y))) ((symbol? x) (and (symbol? y) (sym-eq? x y))) ((pair? x) (and (pair? y) (equal? (car x) (car y)) (equal? (cdr x) (cdr y)))) (else (error "unsupported type of args" x y))))
