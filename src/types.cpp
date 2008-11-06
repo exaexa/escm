@@ -456,8 +456,8 @@ void closure::apply (scm_env*e, scm*args)
 	 * is gonna get replaced here now:
 	 */
 	continuation*cont = new_scm (e, codevector_continuation, ip);
+	cont->env = env;
 	e->replace_cont (cont);
-	e->cont->env = env;
 	cont->mark_collectable();
 
 	frame*f = e->push_frame (paramsize);

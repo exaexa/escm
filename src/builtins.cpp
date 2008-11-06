@@ -350,7 +350,7 @@ void op_set (scm_env*e, pair*code)
 void op_lambda (scm_env*e, pair*code)
 {
 	pair* c = pair_p (code->d);
-	e->ret (new_scm (e, closure, c->a, pair_p (c->d), e->cont->env)
+	e->ret (new_scm (e, closure, c->a, (pair*)(c->d), e->cont->env)
 		->collectable<scm>() );
 }
 
@@ -686,6 +686,16 @@ static escm_func_handler (op_gc)
 	return_scm (0);
 }
 
+static escm_func_handler (op_cc)
+{
+	return_scm(escm_environment->cont);
+}
+
+static escm_func_handler (op_env)
+{
+	return_scm(escm_environment->cont->env);
+}
+
 /*
  * file loader
  */
@@ -802,6 +812,8 @@ bool escm_add_scheme_builtins (scm_env*e)
 
 		//internals
 		escm_add_func_handler (e, "gc", op_gc);
+		escm_add_func_handler (e, "cc", op_cc);
+		escm_add_func_handler (e, "env", op_env);
 
 		//init file
 		load_init_file (e);
@@ -810,14 +822,4 @@ bool escm_add_scheme_builtins (scm_env*e)
 	}
 	return true;
 }
-
-/*
- * TODO, specific continuations for all 'special forms':
- * define set!
- * if cond case (and,or)
- * map foreach do
- * let let* letrec
- *
- * (lambda is a syntax!)
- */
 
