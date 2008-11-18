@@ -547,7 +547,7 @@ static escm_func_handler (op_xor)
 
 void op_begin (scm_env*e, pair*code)
 {
-	e->replace_cont (new_scm (e, codevector_continuation, pair_p (code->d) )
+	e->replace_cont (new_scm (e, codevector_continuation, (pair*)(code->d) )
 			 ->collectable<continuation>() );
 }
 
@@ -696,6 +696,13 @@ static escm_func_handler (op_env)
 	return_scm(escm_environment->cont->env);
 }
 
+static escm_func_handler (op_gcn)
+{
+	return_scm(create_scm(number,(int)
+		(escm_environment->collector.size() +
+		escm_environment->collector_queue.size())));
+}
+
 /*
  * file loader
  */
@@ -812,6 +819,7 @@ bool escm_add_scheme_builtins (scm_env*e)
 
 		//internals
 		escm_add_func_handler (e, "gc", op_gc);
+		escm_add_func_handler (e, "gcn", op_gcn);
 		escm_add_func_handler (e, "cc", op_cc);
 		escm_add_func_handler (e, "env", op_env);
 

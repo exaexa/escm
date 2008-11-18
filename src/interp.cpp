@@ -1,10 +1,18 @@
 
+#include <iostream>
+#include <fstream>
+using std::ofstream;
+
 #include "env.h"
 #include "builtins.h"
 
 #include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
+scm_env*g_env;
 
 static void fatal_err_handler (scm_env*e, scm*err)
 {
@@ -19,9 +27,50 @@ static void fatal_err_handler (scm_env*e, scm*err)
  * Maybe just don't compile this file at all.
  */
 
+static void sigsegv_handler(int s, siginfo_t*info, void*d)
+{
+	printf("\n -- escm caught SIGSEGV --\n");
+	printf("signo %d errno %d code %d pid %d uid %d status %d\n",
+		info->si_signo, info->si_errno, info->si_code,
+		info->si_pid, info->si_uid, info->si_status);
+	printf("posix %d %p memory %p fd %d\n",
+		info->si_int, info->si_ptr,
+		info->si_addr, info->si_fd);
+	
+	printf("Scheme Heap is in ./faillog.txt\n");
+	scm*t;
+	ofstream f("./faillog.txt");
+	for(set<scm*>::iterator i=g_env->collector.begin();
+		i!=g_env->collector.end();i++) {
+		t=dynamic_cast<scm*>(*i);
+
+		f	<<(void*)*i
+			<<"\t"
+			<<(t?(t->display().c_str()):"*** CORRUPTED ***")
+			<<std::endl;
+	}
+
+	f.close();
+	
+	_exit(1);
+}
+
+static void setup_sigsegv_handler()
+{
+	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags=SA_SIGINFO;
+	sa.sa_sigaction=sigsegv_handler;
+	sigaction(SIGSEGV,&sa,0);
+}
+
 int run_interpreter (int argc, char**argv)
 {
 	scm_env e;
+
+	g_env=&e;
+	setup_sigsegv_handler();
+
 	e.init ();
 
 	if (!escm_add_scheme_builtins (&e) ) return 1;
